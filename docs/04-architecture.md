@@ -23,7 +23,7 @@ SpriteX32 (a public 32×32 text-to-sprite model; doc 02) uses a frozen CLIP text
 ## Components
 
 ### [T] Tokenizer (in-sheet, portable)
-Lowercase; strip punctuation with a fixed `SUBSTITUTE` chain (must include `* ? ~`, which are `MATCH` wildcards); split into at most `L = 16` words with the `MID/SUBSTITUTE/REPT/TRIM` trick; `MATCH(word, Vocab, 0)`, with `IFERROR` → `<unk>` and padding with `<pad>`. A simple suffix rule is optional (strip a trailing "s" when the word isn't in the vocabulary), with the *same* rule in Python. `tokenizer.py` must match the formulas exactly (gate A1). See doc 05.
+Lowercase; strip punctuation with a fixed `SUBSTITUTE` chain (must include `* ? ~`, which are `MATCH` wildcards); split into at most `L = 12` words with a per-word `MID/SUBSTITUTE/REPT/TRIM` "first token + remainder" split (D-30); `MATCH(word, Vocab, 0)`, with `IFERROR` → `<unk>` and padding with `<pad>`. A simple suffix rule is optional (strip a trailing "s" when the word isn't in the vocabulary), with the *same* rule in Python. `tokenizer.py` must match the formulas exactly (gate A1). See doc 05.
 
 ### [W] CLIP word table (offline distillation, frozen)
 - **Vocabulary V ≈ 8–20k words:** every word in training captions and concept synonyms, plus common English words taken from CLIP's own BPE vocabulary (whole-word tokens, alphabetic, by merge rank). This gives an open vocabulary at no licence cost (MIT).
@@ -35,7 +35,7 @@ Lowercase; strip punctuation with a fixed `SUBSTITUTE` chain (must include `* ? 
 Word vectors (frozen) + learned positional embedding → 1–2 transformer layers (d = 64, 2 heads, ReLU MLP, no LayerNorm or a simple formula-friendly one) → masked mean-pool → condition vector `c`. Softmax is always `EXP(x − MAX)`. Every op used must exist in both `reference.py` and the Pixcell emitter.
 
 ### [Z] Seeded style / noise latent
-- **Style id:** if the prompt names a style ("3d", "twemoji", "pixel art"), the encoder's style head picks it. Otherwise the in-sheet **MINSTD LCG** (`x ← MOD(48271·x, 2147483647)`, exact below 2^53) samples from the style prior. Style embedding → concatenated into the decoder input. This replaces the blurry average of 7 drawings with a crisp choice.
+- **Style id:** if the prompt names a style ("3d", "twemoji", "pixel art"), the encoder's style head picks it. Otherwise the in-sheet **MINSTD LCG** (`x ← MOD(48271·x, 2147483647)`, exact below 2^53; two steps from the sanitised seed, D-31) samples from the style prior. Style embedding → concatenated into the decoder input. This replaces the blurry average of 7 drawings with a crisp choice.
 - Optional small noise vector `z` (uniforms from the same LCG) for within-style variety. Use it only if it measurably helps PixelGPT-style samples; log the decision.
 - The rule ("named" threshold, tie direction) is implemented bit-for-bit in `reference.py`.
 
@@ -54,6 +54,32 @@ The display tab is N×N **square cells**: `updateDimensionProperties` sets the s
 ## Workbook layout (one spreadsheet per resolution: `SpriteSheet-32`, `-48`, `-64`)
 `Prompt` (input, seed, rendered sprite) · `Vocab` · `WordVec` · `Tokens` · `Encoder*` · `Latent` · `Dec0`…`DecN` · `Logits` · `Pixels` · `Palette` · `W_*` (weights, values only) · `About` (model hash, compiler version, parity results, data attribution).
 Colour-scaled activation tabs make zoomed-out "the model is visible" screenshots.
+
+**As emitted by Pixcell** (`src/spritesheet/pixcell/emit.py`; one scalar formula per cell; weight matrices are stored
+transposed with the bias as an extra last column, so every linear unit is `SUMPRODUCT(x_row, W_row) + bias`):
+
+| Tab | Contents (1-based) |
+| --- | --- |
+| `Prompt` | A2/B2 prompt (text), A3/B3 seed, B4 = sampled style. 32×32 display at C6:AH37, square 12 px cells, gridlines hidden; each cell `=SPARKLINE(1,{"charttype","bar";"max",1;"color1",Hex!…})` (Sheets build only; the local oracles compile with `render=False`). |
+| `Vocab`, `WordVec` | A1:A{V} words as TEXT (row 1 `<pad>`, row 2 `<unk>`); V×d word vectors. |
+| `Tokens` | A1 clean; rows 1..L: B rest_i, C word_i, D id_i, E mask_i; F1 = MAX(1, Σmask); H1:H32 punctuation characters as TEXT (D-32). |
+| `W_pos`, `X` | X[t,k] = `INDEX(WordVec,id_t,k)` + pos[t,k] (L×d). |
+| `W_q/k/v`, `Q`, `K`, `VT` | Q, K as L×d; V stored transposed (d×L) so every reduction is row·row. |
+| `Scores` | S[t,u] = `SUMPRODUCT(Q_t,K_u)*scale + (1-mask_u)*-10000`; scale in Scores!N1. |
+| `Softmax` | P in cols 1..L, row max col L+2, row sum col L+3, `EXP(S−max)` cols L+5… |
+| `Ctx`, `W_o`, `Resid` | O = P·V; A = X + O·Wo + bo. |
+| `W_1`, `MLP`, `W_2`, `H` | hidden = MAX(0, A·W1+b1); H = A + hidden·W2 + b2. |
+| `Latent` | row 1 c (masked mean) · row 2 style logits · A3 max, B3 sum · row 4 exp · row 5 p · row 6 cum (cum_i = cum_{i−1}+p_i) · A7 s0, B7 s1, C7 u, D7 style · row 8 z = [c, INDEX(W_emb, style, ·)]. |
+| `W_d`, `Dense` | G0 as 4 × (4·C0), channels interleaved: cell (y, x·C+c). |
+| `W_f{i}`, `FiLM` | FiLM!row i = c·F_i + bc_i per output channel (one shift per channel, referenced by every conv cell). |
+| `Up_{i}` | nearest ×2 of the previous grid as cell references, inside a zero border: (2H+2) × ((2H+2)·Cin). |
+| `W_c{i}`, `Conv_{i}` | W_c{i} rows 3o+1..3o+3 = the 3×(3·Cin) kernel of output channel o; `Conv_{i}` cell (y, x·Cout+o) = `MAX(0, SUMPRODUCT(Up_i 3×(3·Cin) window, kernel block) + FiLM)`. |
+| `W_out`, `Logits` | N × (N·(K+1)); 1×1 conv = `SUMPRODUCT(Conv_3 Cin-row segment, W_out row k) + b`. |
+| `Pixels`, `Palette`, `Hex` | class = `MATCH(MAX(r),r,0)-1` (0 = background); Palette A1 = `#f6f4ef`, A2.. = palette; Hex = `INDEX(Palette, class+1)`. |
+| `About` | compiler version, model hash (B2), config, vocab size. |
+
+Size at the v32 shape (V=5000, d=32, h=64, S=8, e=8, C=64/48/32/24, K=32): 405,683 cells, 127,057 formulas,
+4.76M formula characters (`artifacts/metrics/spikes.json`).
 
 ## Training (CPU/MPS on the M4; a GPU is not needed at this size)
 - The data stream is generated on the fly by `synth.py` (doc 03), with a balanced mix: emoji base and variations, and PixelGPT.

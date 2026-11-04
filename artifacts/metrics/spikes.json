@@ -1,0 +1,201 @@
+{
+ "when": "2026-11-04T00:45:03-0500",
+ "runs": [
+  {
+   "config_name": "half",
+   "config": {
+    "N": 32,
+    "L": 12,
+    "V": 5000,
+    "d": 32,
+    "h": 64,
+    "S": 8,
+    "e": 8,
+    "C0": 32,
+    "C1": 24,
+    "C2": 16,
+    "C3": 12,
+    "K": 32,
+    "attn_scale": 0.176776695296637
+   },
+   "cells": 298335,
+   "formulas": 83997,
+   "formula_chars": 3396230,
+   "errors": [],
+   "upload": {
+    "tabs": 45,
+    "value_requests": 7,
+    "tabs_s": 10.429604053497314,
+    "values_s": 29.248574018478394,
+    "upload_s": 46.902403116226196,
+    "requests": 13,
+    "retries": 0,
+    "bytes_sent": 7882733,
+    "format": {
+     "requested_px": 12,
+     "row_px": [
+      12,
+      12
+     ],
+     "col_px": [
+      12,
+      12
+     ]
+    }
+   },
+   "latency": [
+    {
+     "prompt": "a red apple",
+     "seed": 1,
+     "elapsed_s": 8.123547792434692,
+     "write_s": 0.2665259838104248,
+     "first_consistent_s": 4.304827928543091,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 4,
+     "style_ref": 4
+    },
+    {
+     "prompt": "a tiny blue rocket facing left",
+     "seed": 2,
+     "elapsed_s": 10.061378955841064,
+     "write_s": 0.271014928817749,
+     "first_consistent_s": 6.431092977523804,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 1,
+     "style_ref": 1
+    },
+    {
+     "prompt": "green cat with a hat",
+     "seed": 3,
+     "elapsed_s": 11.05721402168274,
+     "write_s": 0.2155599594116211,
+     "first_consistent_s": 7.561332941055298,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 4,
+     "style_ref": 4
+    }
+   ],
+   "r3": {
+    "sparkline_cells": 1024,
+    "error_cells": 0,
+    "error_examples": [],
+    "hex_ok": true,
+    "sample_formula": "=SPARKLINE(1,{\"charttype\",\"bar\";\"max\",1;\"color1\",Hex!A1})",
+    "pixel": {
+     "requested_px": 12,
+     "row_px": [
+      12,
+      12
+     ],
+     "col_px": [
+      12,
+      12
+     ]
+    }
+   },
+   "requests_total": 25,
+   "retries_total": 0
+  },
+  {
+   "config_name": "full",
+   "config": {
+    "N": 32,
+    "L": 12,
+    "V": 5000,
+    "d": 32,
+    "h": 64,
+    "S": 8,
+    "e": 8,
+    "C0": 64,
+    "C1": 48,
+    "C2": 32,
+    "C3": 24,
+    "K": 32,
+    "attn_scale": 0.176776695296637
+   },
+   "cells": 405683,
+   "formulas": 127057,
+   "formula_chars": 4764841,
+   "errors": [],
+   "upload": {
+    "tabs": 45,
+    "value_requests": 9,
+    "tabs_s": 27.878644943237305,
+    "values_s": 51.71462392807007,
+    "upload_s": 87.90776181221008,
+    "requests": 15,
+    "retries": 0,
+    "bytes_sent": 10652625,
+    "format": {
+     "requested_px": 12,
+     "row_px": [
+      12,
+      12
+     ],
+     "col_px": [
+      12,
+      12
+     ]
+    }
+   },
+   "latency": [
+    {
+     "prompt": "a red apple",
+     "seed": 1,
+     "elapsed_s": 11.185058832168579,
+     "write_s": 0.1807849407196045,
+     "first_consistent_s": 6.2999279499053955,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 4,
+     "style_ref": 4
+    },
+    {
+     "prompt": "a tiny blue rocket facing left",
+     "seed": 2,
+     "elapsed_s": 16.73671317100525,
+     "write_s": 0.33101511001586914,
+     "first_consistent_s": 12.358824968338013,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 1,
+     "style_ref": 1
+    },
+    {
+     "prompt": "green cat with a hat",
+     "seed": 3,
+     "elapsed_s": 18.14036226272583,
+     "write_s": 0.21398615837097168,
+     "first_consistent_s": 13.838630199432373,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 4,
+     "style_ref": 4
+    }
+   ],
+   "r3": {
+    "sparkline_cells": 1024,
+    "error_cells": 0,
+    "error_examples": [],
+    "hex_ok": true,
+    "sample_formula": "=SPARKLINE(1,{\"charttype\",\"bar\";\"max\",1;\"color1\",Hex!A1})",
+    "pixel": {
+     "requested_px": 12,
+     "row_px": [
+      12,
+      12
+     ],
+     "col_px": [
+      12,
+      12
+     ]
+    }
+   },
+   "requests_total": 27,
+   "retries_total": 0
+  }
+ ]
+}

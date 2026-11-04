@@ -1,0 +1,283 @@
+{
+ "gate": "A4",
+ "model": {
+  "source": "random",
+  "model_dir": "/Users/junzhang/Projects/spritesheet/artifacts/model/v32",
+  "weights_seed": 0
+ },
+ "model_hash": "4a1a540cdb6162b6",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "V": 5000,
+  "d": 32,
+  "h": 64,
+  "S": 8,
+  "e": 8,
+  "C0": 64,
+  "C1": 48,
+  "C2": 32,
+  "C3": 24,
+  "K": 32,
+  "attn_scale": 0.176776695296637
+ },
+ "cells": 405685,
+ "formulas": 127057,
+ "when": "2026-11-04T00:50:08-0500",
+ "upload": {
+  "tabs": 45,
+  "value_requests": 9,
+  "tabs_s": 48.12709093093872,
+  "values_s": 50.80293798446655,
+  "upload_s": 106.02228665351868,
+  "requests": 15,
+  "retries": 0,
+  "bytes_sent": 10652669,
+  "format": {
+   "requested_px": 12,
+   "row_px": [
+    12,
+    12
+   ],
+   "col_px": [
+    12,
+    12
+   ]
+  }
+ },
+ "cases": 20,
+ "pixels_mismatch": 0,
+ "style_mismatch": 0,
+ "max_rel": 3.419486915845482e-14,
+ "latency_s": {
+  "median": 11.399211287498474,
+  "max": 12.135082006454468,
+  "min": 3.592188835144043
+ },
+ "min_margin": 3.518965106918959e-05,
+ "rows": [
+  {
+   "prompt": "the 1gtp26 26k8gix16 with a yx5e66vgn",
+   "seed": 1,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.2545520178264269e-14,
+   "c_max_rel": 9.04430342477131e-16,
+   "latency_s": 11.740677118301392,
+   "stable_s": 15.221554040908813,
+   "min_margin": 7.178132670482285e-05
+  },
+  {
+   "prompt": "AMUK28E Ih41u3f3!!",
+   "seed": 880753,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.5487611193520934e-14,
+   "c_max_rel": 1.5543122344752192e-15,
+   "latency_s": 11.583438873291016,
+   "stable_s": 15.671665906906128,
+   "min_margin": 0.0015866471792200798
+  },
+  {
+   "prompt": "afg1w2v",
+   "seed": 412357,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.3314683517128287e-14,
+   "c_max_rel": 4.884981308350689e-15,
+   "latency_s": 11.440898180007935,
+   "stable_s": 15.625421047210693,
+   "min_margin": 0.0016020380151005043
+  },
+  {
+   "prompt": "a hgjcl475 e2qgrkixy",
+   "seed": 388521,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.0317081350640365e-14,
+   "c_max_rel": 1.7763568394002505e-15,
+   "latency_s": 12.135082006454468,
+   "stable_s": 16.0315420627594,
+   "min_margin": 0.002742551333572152
+  },
+  {
+   "prompt": "cd",
+   "seed": 513480,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.55351295663786e-14,
+   "c_max_rel": 3.1086244689504383e-15,
+   "latency_s": 11.396753311157227,
+   "stable_s": 15.763231039047241,
+   "min_margin": 0.00766211681768425
+  },
+  {
+   "prompt": "a tiny rvvx zkt, facing left",
+   "seed": 768360,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.2287477032137204e-14,
+   "c_max_rel": 1.5265566588595902e-15,
+   "latency_s": 11.48100996017456,
+   "stable_s": 14.800246953964233,
+   "min_margin": 0.00013735394998271033
+  },
+  {
+   "prompt": "a irj 2xc",
+   "seed": 31011,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.0927887475119618e-14,
+   "c_max_rel": 1.4432899320127035e-15,
+   "latency_s": 11.667176961898804,
+   "stable_s": 15.601209878921509,
+   "min_margin": 0.002626536242981814
+  },
+  {
+   "prompt": "a tiny 6k5xf 6rdsp6, facing left",
+   "seed": 492117,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.1213252548714081e-14,
+   "c_max_rel": 1.3600232051658168e-15,
+   "latency_s": 11.718196868896484,
+   "stable_s": 15.714262962341309,
+   "min_margin": 0.0016654215780249615
+  },
+  {
+   "prompt": "NH N5np!!",
+   "seed": 45599,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 3.419486915845482e-14,
+   "c_max_rel": 1.3322676295501878e-15,
+   "latency_s": 11.437334060668945,
+   "stable_s": 15.276187181472778,
+   "min_margin": 0.0007529058142701217
+  },
+  {
+   "prompt": "887asspj",
+   "seed": 323516,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 3.241851231905457e-14,
+   "c_max_rel": 2.372673686942958e-15,
+   "latency_s": 10.09687089920044,
+   "stable_s": 14.49545407295227,
+   "min_margin": 0.05098491897146573
+  },
+  {
+   "prompt": "a tiny egvepaov v7dym, facing left",
+   "seed": 737549,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.2406742300186124e-14,
+   "c_max_rel": 7.771561172376096e-16,
+   "latency_s": 11.401669263839722,
+   "stable_s": 14.910943269729614,
+   "min_margin": 0.0011698368521582125
+  },
+  {
+   "prompt": "two r2vdh h6c82ti3us",
+   "seed": 889508,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.3211653993039363e-14,
+   "c_max_rel": 1.1102230246251565e-15,
+   "latency_s": 10.789411783218384,
+   "stable_s": 15.116149663925171,
+   "min_margin": 0.0010907689092416462
+  },
+  {
+   "prompt": "a rpaa 7bzyj",
+   "seed": 644675,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.19824158875781e-14,
+   "c_max_rel": 1.079768736272464e-15,
+   "latency_s": 11.622309684753418,
+   "stable_s": 15.074437856674194,
+   "min_margin": 0.0024895439529899477
+  },
+  {
+   "prompt": "the uu760vp 49eleol with a 17b",
+   "seed": 621998,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.6264767310758543e-14,
+   "c_max_rel": 1.3322676295501878e-15,
+   "latency_s": 9.285079717636108,
+   "stable_s": 12.926552772521973,
+   "min_margin": 0.0007122003503141627
+  },
+  {
+   "prompt": "LCO Uzx!!",
+   "seed": 606261,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.9984014443252818e-14,
+   "c_max_rel": 1.7763568394002505e-15,
+   "latency_s": 10.034268140792847,
+   "stable_s": 13.83299708366394,
+   "min_margin": 0.0008343575412599336
+  },
+  {
+   "prompt": "",
+   "seed": 412719,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 8.881784197001252e-16,
+   "c_max_rel": 0.0,
+   "latency_s": 10.137936115264893,
+   "stable_s": 13.780627965927124,
+   "min_margin": 0.0006082066605801462
+  },
+  {
+   "prompt": " ",
+   "seed": 678592,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 8.881784197001252e-16,
+   "c_max_rel": 0.0,
+   "latency_s": 9.808838129043579,
+   "stable_s": 12.916575908660889,
+   "min_margin": 0.0017572509176687623
+  },
+  {
+   "prompt": "     ",
+   "seed": 178624,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 9.298117831235686e-16,
+   "c_max_rel": 0.0,
+   "latency_s": 8.8662588596344,
+   "stable_s": 12.72107195854187,
+   "min_margin": 3.518965106918959e-05
+  },
+  {
+   "prompt": "a red apple",
+   "seed": 176783,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.504352198367087e-14,
+   "c_max_rel": 1.2212453270876722e-15,
+   "latency_s": 11.094773054122925,
+   "stable_s": 14.318335056304932,
+   "min_margin": 0.033059213153833866
+  },
+  {
+   "prompt": "A RED APPLE",
+   "seed": 526635,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.504352198367087e-14,
+   "c_max_rel": 1.2212453270876722e-15,
+   "latency_s": 3.592188835144043,
+   "stable_s": 6.520833969116211,
+   "min_margin": 0.033059213153833866
+  }
+ ],
+ "requests": 95,
+ "retries": 0,
+ "pass": true
+}

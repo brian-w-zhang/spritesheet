@@ -1,0 +1,35 @@
+{
+ "gate": "A1",
+ "prompts": 320,
+ "vocab": 400,
+ "engines": {
+  "hyperformula": {
+   "version": "HyperFormula 3.5.0",
+   "mismatches": 0,
+   "examples": [],
+   "error_cells": 0,
+   "timing": {
+    "build_s": 0.462,
+    "node_s": 0.5903561115264893,
+    "per_run_eval_s": [
+     0
+    ],
+    "wall_s": 0.5982646942138672
+   }
+  },
+  "libreoffice": {
+   "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+   "mismatches": 0,
+   "examples": [],
+   "error_cells": 0,
+   "timing": {
+    "xlsx_s": 0.06445598602294922,
+    "variants_s": 0.011529922485351562,
+    "convert_s": 1.5958569049835205,
+    "read_s": 0.03654193878173828,
+    "wall_s": 1.9280481338500977
+   }
+  }
+ },
+ "pass": true
+}

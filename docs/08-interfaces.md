@@ -35,7 +35,7 @@ Wout [C3, K+1] bout [K+1]                   # 1x1 conv to logits
 2. Q = X Wq + bq, K = X Wk + bk, V = X Wv + bv. S[t,u] = (Q_t·K_u)·attn_scale + (m_u ? 0 : −1e4). P = softmax over u (subtract the row max). O = P V. A = X + O Wo + bo.
 3. H = A + relu(A W1 + b1) W2 + b2.
 4. c = Σ_t m_t H_t / Σ_t m_t (masked mean).
-5. style logits = c Ws + bs → p = softmax; u = LCG(seed) (s0 = MOD(INT(ABS(seed)), 2147483646) + 1; u = MOD(48271·s0, 2147483647)/2147483647). The cumulative sum is sequential: cum_i = cum_{i−1} + p_i. style = 1 + #{i : cum_i < u}, clamped to S. **A style word in the prompt is handled by the model itself (peaked p).**
+5. style logits = c Ws + bs → p = softmax; u = LCG(seed) (s0 = MOD(INT(ABS(seed)), 2147483646) + 1; s1 = MOD(48271·s0, 2147483647); u = MOD(48271·s1, 2147483647)/2147483647; D-31). The cumulative sum is sequential: cum_i = cum_{i−1} + p_i. style = 1 + #{i : cum_i < u}, clamped to S. **A style word in the prompt is handled by the model itself (peaked p).**
 6. z = [c, style_emb[style]] → dense → G0 [4,4,C0] (no activation, then ReLU).
 7. For i in 1..3: up = nearest ×2; conv3×3 (zero pad 1) + bc_i + (c · F_i) → ReLU.
 8. logits = G3 Wout + bout [N,N,K+1]; class = argmax (first max).

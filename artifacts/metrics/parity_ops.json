@@ -1,0 +1,922 @@
+{
+ "gate": "A2",
+ "models": [
+  {
+   "cases": 10,
+   "engines": {
+    "hyperformula": {
+     "version": "HyperFormula 3.5.0",
+     "max_rel": 3.3306690738754696e-15,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 2.220446049250313e-16,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 3.76939169175733e-16,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 1.1102230246251565e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 2.2898349882893854e-16,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 3.899775658602184e-16,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 5.551115123125783e-16,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 1.0269562977782698e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 1.5543122344752192e-15,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 1.3322676295501878e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 1.0795976297810998e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 8.765740729440094e-16,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 4.087733430992327e-16,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 1.3322676295501878e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 1.7763568394002505e-15,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 1.2309262694341798e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 1.7763568394002505e-15,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 2.4424906541753444e-15,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 1.4988010832439613e-15,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 2.4424906541753444e-15,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 3.3306690738754696e-15,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 1.6653345369377348e-15,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 3.3306690738754696e-15,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 3.1086244689504383e-15,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 2.3314683517128287e-15,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "build_s": 0.645,
+      "node_s": 2.346312999725342,
+      "per_run_eval_s": [
+       0,
+       0.187,
+       0.179,
+       0.168,
+       0.161,
+       0.161,
+       0.162,
+       0.159,
+       0.161,
+       0.163
+      ],
+      "wall_s": 2.3697891235351562,
+      "batches": 1,
+      "runs": 10
+     }
+    },
+    "libreoffice": {
+     "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+     "max_rel": 6.050201724131473e-15,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 4.793370497808696e-15,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 5.100840905102543e-15,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 4.679059157742362e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 4.2548952767389096e-15,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 5.093044245646529e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 6.106226635438361e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 3.036736648429816e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 4.4249839842815746e-15,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.332168809754275e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 5.09918804779835e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 5.02227388385104e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 5.1433786759477444e-15,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 4.698090736626459e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 5.110047732723887e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 5.110047732723887e-15,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 4.768639272694909e-15,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 4.996003610813204e-16,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 4.698090736626459e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 5.560888139373974e-15,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 4.589021121762585e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 5.560888139373974e-15,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 5.708936482052754e-15,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 5.021164051382127e-15,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 5.708936482052754e-15,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 6.050201724131473e-15,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 4.925480960897033e-15,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 6.050201724131473e-15,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 5.741659816101002e-15,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 5.750918881768274e-15,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "xlsx_s": 0.4938042163848877,
+      "variants_s": 0.2991471290588379,
+      "convert_s": 9.782119274139404,
+      "read_s": 1.4684410095214844,
+      "wall_s": 12.061900854110718,
+      "batches": 2,
+      "runs": 10
+     }
+    }
+   },
+   "stats": {
+    "cells": 45521,
+    "formulas": 35213,
+    "formula_chars": 1358125,
+    "sheets": 45
+   },
+   "min_margin": 0.00010978068049527501,
+   "styles": [
+    1,
+    2,
+    3
+   ],
+   "lint_violations": 0,
+   "functions": {
+    "SUBSTITUTE": 55,
+    "LOWER": 1,
+    "TRIM": 24,
+    "MID": 24,
+    "REPT": 12,
+    "IF": 24,
+    "IFERROR": 12,
+    "MATCH": 1036,
+    "MAX": 12302,
+    "SUM": 14,
+    "INDEX": 1220,
+    "SUMPRODUCT": 21821,
+    "EXP": 148,
+    "MOD": 3,
+    "INT": 1,
+    "ABS": 1,
+    "MIN": 1
+   },
+   "pass": true,
+   "weights_seed": 0,
+   "scale": 0.3,
+   "config": {
+    "N": 32,
+    "L": 12,
+    "V": 60,
+    "d": 16,
+    "h": 32,
+    "S": 4,
+    "e": 4,
+    "C0": 8,
+    "C1": 8,
+    "C2": 8,
+    "C3": 8,
+    "K": 8,
+    "attn_scale": 0.25
+   }
+  },
+  {
+   "cases": 10,
+   "engines": {
+    "hyperformula": {
+     "version": "HyperFormula 3.5.0",
+     "max_rel": 3.801403636316536e-13,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 8.881784197001252e-16,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 1.1102230246251565e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 7.216449660063518e-16,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 2.3314683517128287e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 2.275957200481571e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 9.632821691665043e-16,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 1.5543122344752192e-15,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.222029635423295e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 4.716016798860705e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 8.132383655379272e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 2.6761021757699458e-14,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 9.159339953157541e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 6.218535808278551e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 4.366225989507762e-16,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 1.7829863679576676e-14,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 3.530509218307998e-14,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 8.992806499463768e-15,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 8.826273045769994e-15,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 9.159339953157541e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 2.886579864025407e-14,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 2.180412623558955e-14,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 2.886579864025407e-14,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 5.684341886080802e-14,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 1.840364551190042e-14,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 5.684341886080802e-14,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 7.105427357601002e-14,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 3.6415315207705135e-14,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 7.105427357601002e-14,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 3.552713678800501e-13,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 3.801403636316536e-13,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "build_s": 0.722,
+      "node_s": 2.590101957321167,
+      "per_run_eval_s": [
+       0.001,
+       0.173,
+       0.174,
+       0.176,
+       0.158,
+       0.178,
+       0.181,
+       0.17,
+       0.176,
+       0.204
+      ],
+      "wall_s": 2.6122360229492188,
+      "batches": 1,
+      "runs": 10
+     }
+    },
+    "libreoffice": {
+     "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+     "max_rel": 4.1587629498379983e-13,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 4.736876949807267e-15,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 4.733805719742792e-15,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 4.751212348634849e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 4.4439672916757614e-15,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 6.2617778171846305e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 4.913072441589631e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 4.204358936263027e-15,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 2.55351295663786e-15,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 7.105427357601002e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 7.882583474838611e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 1.1879386363489175e-14,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 2.4147350785597155e-14,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 7.216449660063518e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 7.648103241692817e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 2.43315890464463e-15,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 2.0170033287521115e-14,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 3.497202527569243e-14,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 9.43689570931383e-15,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 9.270362255620057e-15,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 4.996003610813204e-16,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 7.216449660063518e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 1.815214645262131e-14,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 2.248022317312721e-14,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 1.815214645262131e-14,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 4.929390229335695e-14,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 1.3655743202889425e-14,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 4.929390229335695e-14,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 9.237055564881302e-14,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 7.97884764707702e-15,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 9.237055564881302e-14,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 4.1587629498379983e-13,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 3.9548521028649727e-13,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "xlsx_s": 0.4647669792175293,
+      "variants_s": 0.419849157333374,
+      "convert_s": 10.780519962310791,
+      "read_s": 1.6314592361450195,
+      "wall_s": 13.316457033157349,
+      "batches": 2,
+      "runs": 10
+     }
+    }
+   },
+   "stats": {
+    "cells": 45521,
+    "formulas": 35213,
+    "formula_chars": 1358125,
+    "sheets": 45
+   },
+   "min_margin": 0.0004590312968968391,
+   "styles": [
+    2
+   ],
+   "lint_violations": 0,
+   "functions": {
+    "SUBSTITUTE": 55,
+    "LOWER": 1,
+    "TRIM": 24,
+    "MID": 24,
+    "REPT": 12,
+    "IF": 24,
+    "IFERROR": 12,
+    "MATCH": 1036,
+    "MAX": 12302,
+    "SUM": 14,
+    "INDEX": 1220,
+    "SUMPRODUCT": 21821,
+    "EXP": 148,
+    "MOD": 3,
+    "INT": 1,
+    "ABS": 1,
+    "MIN": 1
+   },
+   "pass": true,
+   "weights_seed": 1,
+   "scale": 0.6,
+   "config": {
+    "N": 32,
+    "L": 12,
+    "V": 60,
+    "d": 16,
+    "h": 32,
+    "S": 4,
+    "e": 4,
+    "C0": 8,
+    "C1": 8,
+    "C2": 8,
+    "C3": 8,
+    "K": 8,
+    "attn_scale": 0.25
+   }
+  }
+ ],
+ "pass": true
+}

@@ -48,9 +48,10 @@ Sheets-only functions (`SPARKLINE`, optionally `REGEXREPLACE`) are allowed **onl
 
 ### Portable tokenizer (no SPLIT/REGEX)
 1. `clean = LOWER(prompt)`, then a fixed chain of `SUBSTITUTE(…, ch, " ")` for each punctuation char in the allowed set. This must include `* ? ~`, because `MATCH(…,0)` treats them as wildcards in Sheets/Excel.
-2. Word *i* (1-based) = `TRIM(MID(SUBSTITUTE(TRIM(clean)," ",REPT(" ",100)), (i-1)*100+1, 100))`. This is the classic fixed-width split, using only portable functions.
+2. `rest_1 = TRIM(clean)`; word *i* = `TRIM(MID(SUBSTITUTE(MID(rest_i,1,100)," ",REPT(" ",100)),1,100))` (the first token, ≤ 100 chars); `rest_{i+1} = TRIM(SUBSTITUTE(rest_i, word_i, "", 1))`. Only portable functions. (The classic fixed-width split `MID(…,(i-1)*100+1,100)` is wrong once the first words add up to ≥ 100 characters: twelve 10-letter words lose word 11 in HyperFormula. D-30.)
 3. `id_i = IF(word_i="", PAD, IFERROR(MATCH(word_i, Vocab!$A$1:$A$V, 0), UNK))`
-4. **Spike this early** (A1): run all engines on adversarial prompts. Watch `TRIM` (it collapses internal spaces in all engines?) and `MATCH` case-insensitivity. The Python tokenizer must replicate whatever the formulas do, not the other way round.
+4. Punctuation characters live in TEXT cells (`Tokens!H1:H32`) and `SUBSTITUTE` references them: HyperFormula treats `\` as an escape inside string literals, so `"\"` does not parse there (D-32).
+5. Gate A1 (`tests/test_pixcell.py`, 320 adversarial prompts incl. `* ? ~`, space runs, digits, >12 words, empty, 100–250-char words): TRIM collapses inner spaces and MATCH is case-insensitive in HyperFormula and LibreOffice; 0 mismatches vs `tokenizer.encode`. The Python twin lower-cases vocab keys to mirror MATCH.
 
 ## Numerical rules
 - **Round every weight to 15 significant digits** (`float('%.15g' % w)`) *before* computing the numpy reference. openpyxl writes `%.16g`, which changed 43% of random float64 weights (e.g. `0.30000000000000004` → `0.3`). Pre-rounded values round-trip exactly. Use the same rounded values for the Sheets API upload.
@@ -70,6 +71,10 @@ Convert with: `soffice -env:UserInstallation=file://$PROFILE --headless --norest
 - **Google Sheets** (probe PASS 2026-11-04; EXP, TANH and the LCG came back bit-identical to Python): use the Sheets API directly with the service account, writing into Brian's shared spreadsheet (the service account cannot create spreadsheets). Add sheets, write weights as `values` (RAW, numbers) and formulas as `USER_ENTERED` strings in ≤2 MB batches at ≤1 req/s. For repeated formula patterns, use `batchUpdate` `repeatCell`/`copyPaste` with relative references, so you send one formula per block instead of thousands.
   - *Fallback:* Drive upload with conversion of the `.xlsx`. Unverified: how Sheets treats `t="array"` and `_xlfn.` prefixes, and whether a very large xlsx converts at all.
 - **Unverified until A4:** Sheets' recalc time at our size, whether its `SUMPRODUCT` summation order stays within 1e-12, and whether 15-digit numbers parse exactly. Run the cheap check first: one small compiled layer pushed and compared against numpy.
+
+## Measured with Pixcell (2026-11-04; `artifacts/metrics/spikes.json`, `parity_*.json`)
+- Local: the full random-weight v32 workbook (405,683 cells) matches numpy to 3.3e-14 (HyperFormula) / 2.5e-14 (LibreOffice) relative, 0 error and 0 stale cells; LibreOffice 26.8 handles the 1,088-column tabs (no 1,024-column limit).
+- Google Sheets: upload 88 s (15 requests, 10.7 MB); inputs visible in the recalculated sheet after 6–14 s, Pixels stable after 11–18 s, and the class grids equal the reference. Half-width channels (298k cells): 47 s upload, 4–8 s / 8–11 s.
 
 ## Rendering (Sheets only; verify in R3)
 `=SPARKLINE(1,{"charttype","bar";"max",1;"color1",<hex cell>})` per display cell. Fallback: conditional-format rules per class. Pixel-art rendering through conditional formatting has prior art (Doom.xlsx), so it is not a novelty claim.

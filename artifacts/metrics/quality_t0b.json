@@ -1,0 +1,109 @@
+{
+ "model": "artifacts/model/v32_t0b",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "C0": 96,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "K": 32,
+  "attn_scale": 0.125,
+  "V": 12119,
+  "tier": 0,
+  "steps": 15000,
+  "bow": false,
+  "learn_wordvec": false,
+  "mix": null,
+  "pixelgpt_n": null,
+  "train_seconds": 726.2,
+  "params": 253840
+ },
+ "sets": {
+  "train_sample": {
+   "n": 200,
+   "pixel_acc": 0.7376025390625,
+   "fg_pixel_acc": 0.5293459122231159,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.76,
+    "size": 0.9285714285714286,
+    "pos": 0.9285714285714286,
+    "count": 0.4444444444444444,
+    "bg": 1.0
+   },
+   "attribute_n": {
+    "hue": 200,
+    "size": 56,
+    "pos": 28,
+    "count": 9,
+    "bg": 20
+   },
+   "clip_score": 0.26271456480026245,
+   "clip_score_target": 0.2794934809207916,
+   "clip_score_rel": 0.9399666995264039,
+   "clip_concept_top1": 0.02500000037252903,
+   "clip_concept_top5": 0.05999999865889549,
+   "clip_concept_top1_target": 0.13500000536441803,
+   "clip_concept_top5_target": 0.27000001072883606
+  },
+  "heldout_combo": {
+   "n": 200,
+   "pixel_acc": 0.6879345703125,
+   "fg_pixel_acc": 0.5062589800618025,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.84,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 200,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.27006471157073975,
+   "clip_score_target": 0.28525859117507935,
+   "clip_score_rel": 0.9467364697352296,
+   "clip_concept_top1": 0.009999999776482582,
+   "clip_concept_top5": 0.05000000074505806,
+   "clip_concept_top1_target": 0.09000000357627869,
+   "clip_concept_top5_target": 0.2150000035762787
+  },
+  "unseen_words": {
+   "n": 200,
+   "pixel_acc": 0.4389892578125,
+   "fg_pixel_acc": 0.06537791158295041,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.325,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 200,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.24878786504268646,
+   "clip_score_target": 0.26721999049186707,
+   "clip_score_rel": 0.9310226550968252,
+   "clip_concept_top1": 0.0,
+   "clip_concept_top5": 0.02500000037252903,
+   "clip_concept_top1_target": 0.2750000059604645,
+   "clip_concept_top5_target": 0.42500001192092896
+  }
+ }
+}

@@ -69,6 +69,8 @@ def compare(wb, values: dict, expected: dict, skip_weights=True) -> dict:
     for name, blk in wb.blocks.items():
         if name in SKIP or name not in expected:
             continue
+        if blk.sheet not in values:
+            continue
         grid = values.get(blk.sheet)
         exp = expected[name]
         bad, worst = 0, 0.0

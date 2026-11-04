@@ -50,6 +50,19 @@ def f_id(word_ref: str, vocab_range: str) -> str:
 
 
 # ---------------------------------------------------------------- helpers
+def model_hash(w, cfg, vocab_words, palette_hex) -> str:
+    import hashlib
+    import json
+    h = hashlib.sha256()
+    for k in sorted(w):
+        h.update(k.encode())
+        h.update(np.ascontiguousarray(np.asarray(w[k], np.float64)).tobytes())
+    h.update(json.dumps(cfg, sort_keys=True).encode())
+    h.update("\n".join(vocab_words).encode())
+    h.update("\n".join(palette_hex).encode())
+    return h.hexdigest()[:16]
+
+
 def _wtab(wb: Workbook, name: str, M, bias=None) -> Block:
     """Weight tab with rows = M rows, plus an optional bias column at the end. Values only."""
     M = np.asarray(M, dtype=np.float64)
@@ -272,7 +285,10 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
 
     # ---- About
     ab = "About"
-    rows = [("compiler", VERSION), ("config", str({k: cfg[k] for k in sorted(cfg)})), ("vocab size", str(V)),
+    mh = model_hash(w, cfg, vocab_words, palette_hex)
+    wb.meta["model_hash"] = mh
+    rows = [("compiler", VERSION), ("model hash", mh), ("config", str({k: cfg[k] for k in sorted(cfg)})),
+            ("vocab size", str(V)),
             ("source", "github.com: SpriteSheet (Pixcell compiler); spec = src/spritesheet/reference.py")]
     for r, (k, v) in enumerate(rows, start=1):
         wb.set(ab, r, 1, Text(k))
