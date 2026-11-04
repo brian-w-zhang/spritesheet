@@ -1,0 +1,31 @@
+{
+ "N": 32,
+ "L": 12,
+ "d": 64,
+ "h": 128,
+ "S": 7,
+ "e": 8,
+ "K": 32,
+ "E": 24,
+ "C1": 24,
+ "C2": 48,
+ "C3": 96,
+ "T": 4,
+ "global_map": true,
+ "attn_scale": 0.125,
+ "tau": [
+  0.713014,
+  0.599997,
+  0.491705,
+  0.0
+ ],
+ "V": 12119,
+ "model": "mdm",
+ "tier": 1,
+ "steps": 60000,
+ "mix": "{\"pixelgpt\":0.70,\"emoji_var\":0.20,\"emoji_plain\":0.10}",
+ "train_seconds": 4833.0,
+ "params": 680824,
+ "bg_beta": 0.6,
+ "recalibrated_from": "v2_mdm_c_pgmajor"
+}

@@ -1,0 +1,71 @@
+{
+ "source": "trained",
+ "T": 4,
+ "formulas": 836342,
+ "upload_activate_s": 3630.850759744644,
+ "push": {
+  "tabs": 111,
+  "value_requests": 53,
+  "tabs_s": 256.56327772140503,
+  "values_s": 88.95951890945435,
+  "inert": true,
+  "activate_s": 3208.6744282245636,
+  "upload_s": 3630.8226878643036,
+  "requests": 176,
+  "retries": 8,
+  "bytes_sent": 73066754,
+  "format": {
+   "requested_px": 12,
+   "grids": 5,
+   "cf_rules": 34,
+   "row_px": [
+    12,
+    12
+   ],
+   "col_px": [
+    12,
+    12
+   ],
+   "last_grid_row_px": [
+    12,
+    12
+   ],
+   "last_grid_col_px": [
+    12,
+    12
+   ]
+  }
+ },
+ "renders": [
+  {
+   "prompt": "a mushroom",
+   "match": true,
+   "first_consistent_s": 163.47768807411194,
+   "stable_s": 191.70951390266418
+  },
+  {
+   "prompt": "a red apple",
+   "match": true,
+   "first_consistent_s": 140.52969813346863,
+   "stable_s": 169.80500197410583
+  },
+  {
+   "prompt": "a lighthouse",
+   "match": true,
+   "first_consistent_s": 123.13581895828247,
+   "stable_s": 146.14644694328308
+  },
+  {
+   "prompt": "a potion bottle",
+   "match": true,
+   "first_consistent_s": 118.66879224777222,
+   "stable_s": 147.01389002799988
+  },
+  {
+   "prompt": "a blue fox",
+   "match": true,
+   "first_consistent_s": 135.450012922287,
+   "stable_s": 162.95868110656738
+  }
+ ]
+}
