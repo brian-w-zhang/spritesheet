@@ -94,3 +94,17 @@ Brian asked whether PixelGPT was really useless. It wasn't shown to be. Two prob
 2. The other evidence came from **emoji-only test sets**, which naturally favour emoji-only training.
 
 **Fix:** generalisation is now measured with **CLIP R-precision** (does CLIP pick the image's own prompt out of the whole set?) on (a) 100 novel prompts from neither dataset and (b) PixelGPT test captions, with ground-truth PixelGPT sprites as an upper reference [generalization.json]. v2b was restarted *with* PixelGPT (30%), and a PixelGPT-majority v2c (70%) plus a matching one-shot ablation were added to test "more semantically diverse captions → better generalisation".
+
+**Generalisation results (CLIP R-precision; 100 novel prompts, chance R@1 = 0.01; 300 PixelGPT test captions, chance 0.003)** [generalization.json]
+
+| Model | novel R@1 | novel R@5 | PixelGPT R@1 |
+| --- | --- | --- | --- |
+| v1 main (40k steps, 30% PixelGPT) | 0.20 | 0.39 | 0.027 |
+| 8k all-sources (`abl_base`) | 0.13 | 0.35 | 0.010 |
+| 8k emoji-only | 0.14 | 0.29 | 0.007 |
+| 8k no CLIP table | 0.11 | 0.27 | 0.023 |
+| 8k bag-of-words | 0.10 | 0.36 | 0.007 |
+| v2a diffusion (emoji-only) | 0.08 | 0.20 | 0.003 |
+| *ground-truth PixelGPT sprites* | – | – | *0.147* |
+
+**Read:** (1) longer training dominates; (2) PixelGPT *helps* novel-prompt generalisation at R@5 (0.35 vs 0.29 emoji-only), which reverses the earlier call; (3) the CLIP word table helps (0.35 vs 0.27); (4) free-text captions are hard even for the real sprites. With n=100, differences under ~0.05 are noise.
