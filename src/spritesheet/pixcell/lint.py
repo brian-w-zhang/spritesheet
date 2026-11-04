@@ -1,5 +1,5 @@
 """Static checks on a compiled Workbook: only the allowed function subset (docs/05), MATCH always exact (…,0),
-SPARKLINE only in the Prompt display, no array literals outside it, sheet names that cannot be read as cell refs."""
+SPARKLINE only in the Prompt display, LN only in v2 S{t}_Score tabs, no array literals outside it, sheet names that cannot be read as cell refs."""
 import re
 
 from .workbook import is_formula
@@ -7,6 +7,8 @@ from .workbook import is_formula
 CORE = {"SUMPRODUCT", "INDEX", "MATCH", "MAX", "MIN", "SUM", "EXP", "IF", "IFERROR", "MOD", "INT", "ABS"}
 TOKENIZER = {"LOWER", "SUBSTITUTE", "TRIM", "MID", "REPT"}
 RENDER = {"SPARKLINE"}
+SAMPLING = {"LN"}                     # v2 Gumbel noise, only in S{t}_Score tabs (cfg temp > 0; parity D-43)
+_SCORE_TAB = re.compile(r"^S[0-9]+_Score$")
 _STR = re.compile(r'"(?:[^"]|"")*"')
 _FN = re.compile(r"([A-Za-z_][A-Za-z0-9_.]*)\(")
 _CELLISH = re.compile(r"^[A-Za-z]{1,3}[0-9]+$")
@@ -45,7 +47,7 @@ def lint(wb) -> dict:
             in_disp = any(sheet == b.sheet and b.r0 <= r < b.r0 + b.nrows and b.c0 <= c < b.c0 + b.ncols
                           for b in render_blocks)
             body = _STR.sub('""', v)
-            allowed = CORE | TOKENIZER | (RENDER if in_disp else set())
+            allowed = CORE | TOKENIZER | (RENDER if in_disp else set()) | (SAMPLING if _SCORE_TAB.match(sheet) else set())
             if "{" in body and not in_disp:
                 bad.append((sheet, (r, c), "array literal"))
             for m in _FN.finditer(body):

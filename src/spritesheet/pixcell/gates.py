@@ -12,8 +12,8 @@ from .. import tokenizer as T
 from ..oracles import hyperformula as HF
 from ..oracles import libreoffice as LO
 from ..oracles import scan_errors
-from . import emit, fixtures as F, lint
-from .trace import compare, trace
+from . import emit, emit_mdm, fixtures as F, lint
+from .trace import compare, trace, trace_mdm
 
 ENGINES = ("hyperformula", "libreoffice")
 TOL = 1e-12
@@ -84,11 +84,14 @@ def parity(wb, w, cfg, vocab, cases, engines=ENGINES, read=None, batch=None) -> 
     """Run cases [(prompt, seed)] on each engine; compare blocks to the reference trace.
     read: sheets to read back (None = all; blocks on unread sheets are skipped)."""
     vi = T.index_vocab(vocab)
-    traces = [trace(p, s, w, cfg, vi) for p, s in cases]
+    mdm = wb.meta.get("model") == "mdm"
+    traces = [(trace_mdm if mdm else trace)(p, s, w, cfg, vi) for p, s in cases]
     runs = [{"prompt": p, "seed": s, "read": read} for p, s in cases]
     out = {"cases": len(cases), "engines": {}, "stats": {k: v for k, v in wb.stats().items() if k != "per_sheet"}}
     out["min_margin"] = float(min(t["forward"]["min_margin"] for t in traces))
     out["styles"] = sorted({int(t["forward"]["style"]) for t in traces})
+    if mdm:
+        out["steps"] = step_margins(traces, cases, cfg)
     lt = lint.lint(wb)
     out["lint_violations"] = len(lt["violations"])
     out["functions"] = lt["functions"]
@@ -123,6 +126,23 @@ A2_CASES = [("a red apple", 1), ("Big blue CAT with a hat!!", 7), ("", 3), ("dog
             ("   pixel   art   sword  ", 2147483646), ("apple", 0), ("a", -4.7)]
 
 
+def step_margins(traces, cases, cfg) -> list:
+    """Per denoising step: closest |conf - tau| over still-masked pixels and the smallest top-1/top-2 logit margin
+    (over all cases), the case that attains each, and how many pixels were committed. A near-tie (< 1e-9) could flip
+    a discrete commit between engines, so these are reported with every v2 gate."""
+    rows = []
+    for t in range(cfg["T"]):
+        ms = [(tr["forward"]["margins"][t], c) for tr, c in zip(traces, cases) if tr["forward"]["margins"][t] is not None]
+        gs = [(tr["forward"]["tau_gaps"][t], c) for tr, c in zip(traces, cases) if tr["forward"]["tau_gaps"][t] is not None]
+        m = min(ms, default=(None, None))
+        g = min(gs, default=(None, None))
+        rows.append({"step": t + 1, "tau": cfg["tau"][t] if t < cfg["T"] - 1 else None,
+                     "min_top2_margin": m[0], "margin_case": m[1], "min_conf_tau_gap": g[0], "gap_case": g[1],
+                     "committed_mean": float(np.mean([tr["forward"]["committed"][t] for tr in traces])),
+                     "near_tie": bool((m[0] is not None and m[0] < 1e-9) or (g[0] is not None and g[0] < 1e-9))})
+    return rows
+
+
 def gate_a2(engines=ENGINES, cases=A2_CASES) -> dict:
     res = {"gate": "A2", "models": []}
     for wseed, scale in ((0, 0.3), (1, 0.6)):
@@ -137,6 +157,26 @@ def gate_a2(engines=ENGINES, cases=A2_CASES) -> dict:
     return res
 
 
+MDM_A2_MODELS = ((0, 3.0), (1, 12.0))  # (weights seed, logit scale): commits land at steps 2-3 and at all 3
+
+
+def gate_a2_mdm(engines=ENGINES, cases=A2_CASES, models=MDM_A2_MODELS, temp=0.0, global_map=False) -> dict:
+    """A2 for v2: every block of every denoising step, random-init MDMNet (small config, T=3, tau [0.6, 0.4]).
+    temp > 0 compiles the seeded Gumbel-max sampler (S{t}_Score tabs) instead of argmax."""
+    res = {"gate": "A2-mdm" + (f"-temp{temp:g}" if temp else "") + ("-gmap" if global_map else ""), "models": []}
+    for wseed, scale in models:
+        w, cfg = F.random_mdm(dict(F.MDM_SMALL, global_map=global_map), seed=wseed, logit_scale=scale)
+        if temp:
+            cfg["temp"] = float(temp)
+        vocab, pal = F.vocab_words(cfg["V"], wseed), F.palette(cfg["K"], wseed)
+        wb = emit_mdm.compile_mdm(w, cfg, vocab, pal)
+        r = parity(wb, w, cfg, vocab, cases, engines)
+        r.update({"weights_seed": wseed, "logit_scale": scale, "config": cfg})
+        res["models"].append(r)
+    res["pass"] = all(m["pass"] for m in res["models"])
+    return res
+
+
 def summarize(res) -> str:
     lines = []
     for m in res.get("models", [res]):
@@ -145,7 +185,15 @@ def summarize(res) -> str:
                          f"fail={e['n_fail']} errors={e['error_cells']} stale={e['stale_cells']} "
                          f"style_mismatch={e['style_mismatch']} pixel_mismatch={e['pixels_mismatch']} "
                          f"min_margin={m['min_margin']:.3g} styles={m['styles']}")
+        for st in m.get("steps", []):
+            lines.append(f"  step {st['step']}: tau={st['tau']} committed/case={st['committed_mean']:.1f} "
+                         f"min|conf-tau|={_g(st['min_conf_tau_gap'])} min top1-top2={_g(st['min_top2_margin'])}"
+                         + (" NEAR-TIE" if st["near_tie"] else ""))
     return "\n".join(lines)
+
+
+def _g(x):
+    return "n/a" if x is None else f"{x:.3g}"
 
 
 def np_default(o):
@@ -159,7 +207,45 @@ def np_default(o):
 
 
 # ------------------------------------------------------------------ model loading + A3
-def load_model(model_dir=None, random_base=None, seed=0):
+def is_mdm(cfg) -> bool:
+    return cfg.get("model") == "mdm"
+
+
+def model_type_of(model_dir, requested="auto") -> str:
+    """'mdm' or 'v1': the --model-type flag if given, else config.json "model" of the model dir (v1 if absent)."""
+    import json
+    import os
+    if requested in ("mdm", "v1"):
+        return requested
+    cp = os.path.join(model_dir or "", "config.json")
+    if model_dir and os.path.exists(cp):
+        return "mdm" if json.load(open(cp)).get("model") == "mdm" else "v1"
+    return "v1"
+
+
+def compile_any(w, cfg, vocab, pal, **kw):
+    """v1 (reference.forward) or v2 (mdm.ref_generate), auto-detected from cfg["model"]."""
+    return (emit_mdm.compile_mdm if is_mdm(cfg) else emit.compile_model)(w, cfg, vocab, pal, **kw)
+
+
+def random_mdm_full(cfg=None, seed=0, logit_scale=25.0):
+    """Full-size random-init v2 (mdm.MDM_CFG unless cfg given) on the real vocab + CLIP word table + palette.
+    logit_scale 25 makes random logits peaked enough that pixels commit at every step with tau 0.9..0.5."""
+    import json
+    import os
+    from .. import mdm as D
+    root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    vocab = [x.rstrip("\n") for x in open(os.path.join(root, "data/build/vocab.txt"), encoding="utf-8")]
+    wv = np.load(os.path.join(root, "data/build/wordvec.npy"))
+    pal = json.load(open(os.path.join(root, "data/build/palette.json")))["colors"]
+    cfg = dict(cfg or D.MDM_CFG)
+    cfg.setdefault("tau", [round(0.9 - 0.1 * i, 2) for i in range(cfg["T"] - 1)] + [0.0])
+    assert len(vocab) == wv.shape[0], (len(vocab), wv.shape)
+    w, cfg = F.random_mdm(cfg, seed=seed, wordvec=wv, logit_scale=logit_scale)
+    return w, cfg, vocab, pal
+
+
+def load_model(model_dir=None, random_base=None, seed=0, model_type=None):
     """Trained model dir (config.json + weights.npz [+ vocab.txt, palette.json]) or random weights.
 
     Vocab: <model_dir>/vocab.txt, else data/build/vocab.txt. Palette: <model_dir>/palette.json, else
@@ -177,7 +263,12 @@ def load_model(model_dir=None, random_base=None, seed=0):
         pp = next(p for p in (os.path.join(model_dir, "palette.json"), os.path.join(root, "data/build/palette.json"))
                   if os.path.exists(p))
         pal = json.load(open(pp))["colors"]
+        if model_type == "mdm":
+            cfg["model"] = "mdm"
         return w, cfg, vocab, pal, {"source": "trained", "model_dir": model_dir, "vocab": vp, "palette": pp}
+    if model_type == "mdm":
+        w, cfg, vocab, pal = random_mdm_full(random_base, seed)
+        return w, cfg, vocab, pal, {"source": "random", "model_dir": model_dir, "weights_seed": seed, "model": "mdm"}
     cfg = F.make_cfg(random_base or F.V32)
     w, vocab, pal = F.random_model(cfg, seed)
     return w, cfg, vocab, pal, {"source": "random", "model_dir": model_dir, "weights_seed": seed}
@@ -208,15 +299,35 @@ def e2e_cases(n, vocab, seeds=2, rng_seed=0):
 E2E_READ = ["Tokens", "Latent", "H", "FiLM", "Dense", "Conv_3", "Logits", "Pixels"]
 
 
-def gate_a3(model_dir=None, n_prompts=20, seeds=2, engines=ENGINES, lo_max=None, all_tabs=False, log=print):
-    w, cfg, vocab, pal, src = load_model(model_dir)
+def merge_steps(a, b):
+    out = []
+    for x, y in zip(a, b):
+        z = dict(x)
+        for k in ("min_top2_margin", "min_conf_tau_gap"):
+            vals = [v for v in (x[k], y[k]) if v is not None]
+            z[k] = min(vals) if vals else None
+        z["near_tie"] = x["near_tie"] or y["near_tie"]
+        out.append(z)
+    return out
+
+
+def e2e_read(cfg):
+    if not is_mdm(cfg):
+        return E2E_READ
+    return ["Tokens", "Latent", "H", "FiLM"] + (["GMap"] if cfg.get("global_map") else []) + [emit_mdm.step_sheet(t, p) for t in range(1, cfg["T"] + 1)
+                                                for p in ("Logits", "Conf", "Canvas")] + ["Pixels"]
+
+
+def gate_a3(model_dir=None, n_prompts=20, seeds=2, engines=ENGINES, lo_max=None, all_tabs=False, log=print,
+            model_type=None):
+    w, cfg, vocab, pal, src = load_model(model_dir, model_type=model_type)
     t0 = time.time()
-    wb = emit.compile_model(w, cfg, vocab, pal)
+    wb = compile_any(w, cfg, vocab, pal)
     t_compile = time.time() - t0
     cases = e2e_cases(n_prompts, vocab, seeds)
     res = {"gate": "A3", "model": src, "model_hash": wb.meta.get("model_hash"), "config": cfg, "compile_s": t_compile, "prompts": n_prompts, "seeds": seeds,
            "engines": {}}
-    read = None if all_tabs else E2E_READ
+    read = None if all_tabs else e2e_read(cfg)
     for eng in engines:
         cs = cases if (eng != "libreoffice" or not lo_max) else cases[: lo_max]
         log(f"[A3] {eng}: {len(cs)} cases ...")
@@ -224,8 +335,9 @@ def gate_a3(model_dir=None, n_prompts=20, seeds=2, engines=ENGINES, lo_max=None,
         e = r["engines"][eng]
         e["cases"] = len(cs)
         res["engines"][eng] = e
-        for k in ("stats", "min_margin", "styles", "lint_violations", "functions"):
-            res[k] = r[k]
+        for k in ("stats", "min_margin", "styles", "lint_violations", "functions", "steps"):
+            if k in r:
+                res[k] = r[k] if k != "steps" or k not in res else merge_steps(res[k], r[k])
         res.setdefault("cases", r["cases"])
     res["max_rel_per_tab"] = {}
     for eng, e in res["engines"].items():

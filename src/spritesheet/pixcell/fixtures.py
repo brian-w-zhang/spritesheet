@@ -83,3 +83,31 @@ def adversarial_prompts(n, vocab, seed=0, long_words=True):
             s = s.rstrip()
         out.append(s)
     return out[:n]
+
+
+# ---------------------------------------------------------------- v2 (masked discrete diffusion) random models
+MDM_SMALL = dict(N=32, L=T.L, V=60, d=16, h=32, S=4, e=4, K=8, E=8, C1=8, C2=8, C3=8, T=3, tau=[0.6, 0.4, 0.0])
+
+
+def random_mdm(cfg, seed=0, wordvec=None, logit_scale=1.0):
+    """Random-init mdm.MDMNet exported to reference layout (valid shapes, weights rounded to 15 digits).
+
+    cfg needs N, L, d, h, S, e, K, E, C1..C3, T, tau and V (when wordvec is None). logit_scale multiplies W_out /
+    b_out so that random logits are peaked enough for some pixels to pass tau before the last step.
+    Returns (w, cfg) with cfg["model"] = "mdm"."""
+    import numpy as np
+    import torch
+
+    from .. import mdm as D
+    torch.manual_seed(seed)
+    if wordvec is None:
+        wordvec = np.random.default_rng(seed).normal(0, 0.5, (cfg["V"], cfg["d"]))
+        wordvec[0] = 0.0
+    net = D.MDMNet(cfg, np.asarray(wordvec, np.float64))
+    w, c2 = net.export()
+    if logit_scale != 1.0:
+        w["Wout"] = R.round15(w["Wout"] * logit_scale)
+        w["bout"] = R.round15(w["bout"] * logit_scale)
+    c2["model"] = "mdm"
+    c2["tau"] = [float(x) for x in cfg["tau"]]
+    return w, c2

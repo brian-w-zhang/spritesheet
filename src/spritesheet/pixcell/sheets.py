@@ -16,8 +16,9 @@ KEY = os.path.join(CFG_DIR, "sa-key.json")
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 MAX_BYTES = 1_800_000
-DISPLAY_BG = "#d8d4dd"  # class 0 in the sheet: light grey, so white sprites stay visible
+from .emit import DISPLAY_BG, render_spec  # noqa: E402  (class 0 colour: light grey, white sprites stay visible)
 PIXEL = 12
+DELETE_BATCH = 4
 
 
 def available() -> bool:
@@ -172,17 +173,30 @@ def _chunks(wb: Workbook, max_bytes=MAX_BYTES):
 
 
 # ---------------------------------------------------------------- push
-def push(wb: Workbook, client: Client | None = None, log=print) -> dict:
-    """Replace every tab of the shared spreadsheet with the workbook's tabs, write all cells, format Prompt."""
-    cl = client or Client()
+def push(wb: Workbook, client: Client | None = None, log=print, key="v32") -> dict:
+    """Replace every tab of the shared spreadsheet sheet_ids[key] (v32 = v1 demo, diffusion = v2) with the
+    workbook's tabs, write all cells, format Prompt. A given client wins over key."""
+    cl = client or Client(key)
     t0 = time.time()
     meta = cl.meta()
     old = [s["properties"] for s in meta.get("sheets", [])]
     tmp_title = f"_pixcell_tmp_{int(time.time())}"
     rep = cl.batch_update([{"addSheet": {"properties": {"title": tmp_title, "index": 0}}}])
     tmp_id = rep["replies"][0]["addSheet"]["properties"]["sheetId"]
-    if old:
-        cl.batch_update([{"deleteSheet": {"sheetId": p["sheetId"]}} for p in old])
+    # Delete the old tabs downstream-first (right-most first) in small batches: one request deleting a ~1M-formula
+    # workbook's 100+ tabs did not return within 25 min on the v2 spike; 4 tabs per request take ~20 s.
+    old = sorted([p for p in old if p["sheetId"] != tmp_id], key=lambda p: -p.get("index", 0))
+    for i in range(0, len(old), DELETE_BATCH):
+        batch = old[i:i + DELETE_BATCH]
+        try:
+            cl.batch_update([{"deleteSheet": {"sheetId": p["sheetId"]}} for p in batch])
+        except SheetsError as ex:   # stale tab list right after a failed push: delete what still exists
+            if "No sheet with id" not in str(ex):
+                raise
+            live = {x["properties"]["sheetId"] for x in cl.meta().get("sheets", [])}
+            rest = [p for p in batch if p["sheetId"] in live]
+            if rest:
+                cl.batch_update([{"deleteSheet": {"sheetId": p["sheetId"]}} for p in rest])
     adds = []
     for idx, name in enumerate(wb.sheets):
         nr, nc = wb.dims(name)
@@ -210,17 +224,22 @@ def push(wb: Workbook, client: Client | None = None, log=print) -> dict:
 
 
 def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
-    d = wb.meta["display"]
+    """Square pixel cells, gridlines hidden, digits hidden, one conditional-format colour rule per class over the
+    display and (v2) every filmstrip thumbnail, incl. MASK in the "unknown" colour. Layout from emit.render_spec."""
+    sp = render_spec(wb)
     reqs = []
-    for dim, start in (("ROWS", d["r0"] - 1), ("COLUMNS", d["c0"] - 1)):
-        reqs.append({"updateDimensionProperties": {
-            "range": {"sheetId": gid, "dimension": dim, "startIndex": start, "endIndex": start + d["n"]},
-            "properties": {"pixelSize": pixel}, "fields": "pixelSize"}})
-    reqs.append({"updateDimensionProperties": {"range": {"sheetId": gid, "dimension": "COLUMNS", "startIndex": 1,
-                                                         "endIndex": 2},
-                                               "properties": {"pixelSize": 320}, "fields": "pixelSize"}})
+
+    def dim(kind, a, b, px):
+        return {"updateDimensionProperties": {"range": {"sheetId": gid, "dimension": kind, "startIndex": a - 1,
+                                                        "endIndex": b}, "properties": {"pixelSize": px},
+                                              "fields": "pixelSize"}}
+    reqs += [dim("ROWS", a, b, pixel) for a, b in sp["pixel_rows"]]
+    reqs += [dim("COLUMNS", a, b, pixel) for a, b in sp["pixel_cols"]]
+    reqs += [dim("ROWS", r, r, 20) for r in sorted(set(sp["label_rows"]))]
+    reqs.append(dim("COLUMNS", 2, 2, 320))
     reqs.append({"updateSheetProperties": {"properties": {"sheetId": gid, "gridProperties": {"hideGridlines": True}},
                                            "fields": "gridProperties.hideGridlines"}})
+
     # Seamless sprite: hide the class-id digits and colour each cell by conditional formatting (one rule per class).
     def grid(r0, c0, nr, nc):
         return {"sheetId": gid, "startRowIndex": r0 - 1, "endRowIndex": r0 - 1 + nr,
@@ -230,12 +249,12 @@ def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
         h = h.lstrip("#")
         return {"red": int(h[0:2], 16) / 255, "green": int(h[2:4], 16) / 255, "blue": int(h[4:6], 16) / 255}
 
-    disp_rng = grid(d["r0"], d["c0"], d["n"], d["n"])
+    ranges = [grid(r0, c0, n, n) for r0, c0, n in sp["grids"]]
     hide = {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": ";;;"}}}
-    reqs.append({"repeatCell": {"range": disp_rng, "cell": hide, "fields": "userEnteredFormat.numberFormat"}})
-    colours = [DISPLAY_BG] + list(wb.meta.get("palette_hex", []))
-    for k, hx in enumerate(colours):
-        reqs.append({"addConditionalFormatRule": {"index": k, "rule": {"ranges": [disp_rng], "booleanRule": {
+    for g in ranges:
+        reqs.append({"repeatCell": {"range": g, "cell": hide, "fields": "userEnteredFormat.numberFormat"}})
+    for i, (k, hx) in enumerate(sp["classes"]):
+        reqs.append({"addConditionalFormatRule": {"index": i, "rule": {"ranges": ranges, "booleanRule": {
             "condition": {"type": "NUMBER_EQ", "values": [{"userEnteredValue": str(k)}]},
             "format": {"backgroundColor": rgb(hx)}}}}})
     pr = wb.meta.get("progress")
@@ -246,22 +265,24 @@ def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
             reqs.append({"addConditionalFormatRule": {"index": 0, "rule": {"ranges": [bar], "booleanRule": {
                 "condition": {"type": "NUMBER_EQ", "values": [{"userEnteredValue": str(k)}]},
                 "format": {"backgroundColor": rgb(hx)}}}}})
-    if pr:  # square stage-bar cells (same pixel size as the display)
-        reqs.append({"updateDimensionProperties": {"range": {"sheetId": gid, "dimension": "ROWS",
-                                                             "startIndex": pr["r0"] - 1, "endIndex": pr["r0"]},
-                                                   "properties": {"pixelSize": pixel}, "fields": "pixelSize"}})
+        reqs.append(dim("ROWS", pr["r0"], pr["r0"], pixel))
     cl.batch_update(reqs)
-    # read back the achieved sizes
-    r0, c0, n = d["r0"], d["c0"], d["n"]
-    got = cl.call("GET", "", params={"ranges": f"'Prompt'!{rng(r0, c0, r0 + 1, c0 + 1)}",
-                                     "fields": "sheets.data(rowMetadata.pixelSize,columnMetadata.pixelSize)"})
-    try:
-        dd = got["sheets"][0]["data"][0]
-        rows = [m.get("pixelSize") for m in dd.get("rowMetadata", [])]
-        cols = [m.get("pixelSize") for m in dd.get("columnMetadata", [])]
-    except (KeyError, IndexError):
-        rows = cols = None
-    return {"requested_px": pixel, "row_px": rows, "col_px": cols}
+    # read back the achieved sizes (display corner, and the last thumbnail's corner when there is a filmstrip)
+    out = {"requested_px": pixel, "grids": len(sp["grids"]), "cf_rules": len(sp["classes"])}
+    for tag, (r0, c0, n) in (("display", sp["grids"][0]), ("last_grid", sp["grids"][-1])):
+        got = cl.call("GET", "", params={"ranges": f"'Prompt'!{rng(r0, c0, r0 + 1, c0 + 1)}",
+                                         "fields": "sheets.data(rowMetadata.pixelSize,columnMetadata.pixelSize)"})
+        try:
+            dd = got["sheets"][0]["data"][0]
+            rows = [m.get("pixelSize") for m in dd.get("rowMetadata", [])]
+            cols = [m.get("pixelSize") for m in dd.get("columnMetadata", [])]
+        except (KeyError, IndexError):
+            rows = cols = None
+        if tag == "display":
+            out.update({"row_px": rows, "col_px": cols})
+        else:
+            out.update({"last_grid_row_px": rows, "last_grid_col_px": cols})
+    return out
 
 
 # ---------------------------------------------------------------- drive

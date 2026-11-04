@@ -44,6 +44,7 @@ def calibrate_tau(net, sampler, vocab, T, dev, n=512):
         n_masked, n_total = masked.sum().item(), masked.numel()
         n_commit = max(0, int(n_masked - keep_frac * n_total))
         tau = float(torch.sort(cm, descending=True).values[min(n_commit, len(cm)) - 1]) if n_commit > 0 else 1.01
+        tau = min(tau, 0.9999)  # conf == 1.0 only via rounding (summation-order dependent); keep commits robust (D-46)
         taus.append(round(tau, 6))
         x = torch.where(masked & (conf >= tau), am, x)
     return taus + [0.0]

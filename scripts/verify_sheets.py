@@ -72,13 +72,19 @@ def main():
     ap.add_argument("--seeds", type=int, default=1)
     ap.add_argument("--skip-push", action="store_true")
     ap.add_argument("--timeout", type=float, default=1800)
+    ap.add_argument("--random-cfg", default=None, help="JSON overrides of mdm.MDM_CFG for a random-weight v2 "
+                    "(e.g. the spike's half width), used only when the model dir has no weights.npz")
     ap.add_argument("--out", default=None)
     a = ap.parse_args()
     if not SH.available():
         print("A4 NOT RUN: no service-account key/config in ~/.config/spritesheet")
         sys.exit(2)
     mt = G.model_type_of(a.model, a.model_type)
-    w, cfg, vocab, pal, src = G.load_model(a.model, model_type=mt)
+    base = None
+    if a.random_cfg:
+        from spritesheet import mdm as D
+        base = dict(D.MDM_CFG, **json.loads(a.random_cfg))
+    w, cfg, vocab, pal, src = G.load_model(a.model, random_base=base, model_type=mt)
     mdm = G.is_mdm(cfg)
     sheet = a.sheet or ("diffusion" if mdm else "v32")
     if mdm and sheet == "v32":
