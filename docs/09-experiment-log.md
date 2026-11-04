@@ -189,3 +189,9 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - The decoder averages *inside* each 4×4 code cell; even reconstructions lose outlines.
   - The prior is weakly text-conditioned (NLL far above what sharp samples need). Sampled code grids mix several sprites' codes, which gives the oversized, patchy look.
 - **Next:** a critic (hinge GAN) fine-tune of the decoder for crisp cells (running). Then a classifier-free-guided prior (`--cond-drop`) so prompts steer the codes harder.
+
+### Critic fine-tune of v3_vq6 (adv weight 0.1): no effect, stopped at 7.75k/15k [runs/v3_vq6_gan_adv0.1_stopped7500/]
+- **Setup:** hinge-GAN patch critic with projection conditioning, on straight-through hard samples. The decoder was trained on reconstruction CE + 0.1 × adversarial loss; the encoder and prior were frozen.
+- **Result:** the critic learned to separate real from fake easily (d_loss 1.25 → 0.22 by 7.5k steps). But the samples at 2.5k, 5k and 7.5k are visually identical to v3_vq6, and reconstruction CE stayed flat (0.52–0.57).
+- **Reading:** at weight 0.1 the adversarial gradient is swamped by reconstruction. More importantly, the blob shapes come from the *sampled codes* (prior), which this run cannot change.
+- **Decision:** stopped early to free the GPU for the guided prior. A stronger critic (weight ≥ 1) remains an option if the prior fix lands.

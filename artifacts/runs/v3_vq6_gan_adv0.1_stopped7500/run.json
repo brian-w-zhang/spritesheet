@@ -1,0 +1,41 @@
+{
+ "name": "v3_vq6_gan",
+ "family": "v3",
+ "args": {
+  "src": "artifacts/model/v3_vq6",
+  "steps": 15000,
+  "batch": 128,
+  "lr": 0.0002,
+  "adv_weight": 0.1,
+  "recon_weight": 1.0,
+  "bg_weight": 0.5,
+  "out": "artifacts/model/v3_vq6_gan",
+  "note": "hinge-GAN critic fine-tune of v3_vq6 decoder; encoder+prior frozen; adv 0.1",
+  "snap_every": 2500
+ },
+ "cfg": {
+  "N": 24,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 8,
+  "e": 16,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "K": 48,
+  "G": 6,
+  "Kc": 256,
+  "hp": 256,
+  "attn_scale": 0.125,
+  "model": "v3vq",
+  "steps": 60000,
+  "sample_tau": 0.8,
+  "train_seconds": 8601.3,
+  "params_sheet": 1008706,
+  "params_total": 1945282
+ },
+ "started": "2026-11-04T15:10:59",
+ "strategy": "hinge-GAN critic fine-tune of v3_vq6 decoder; encoder+prior frozen; adv 0.1"
+}
