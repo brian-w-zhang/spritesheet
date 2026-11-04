@@ -43,6 +43,7 @@ Errors at scale were 1e-14 (summation order on values around 10). **SpriteSheet'
 
 ### The allowed subset (Pixcell may only emit these)
 `SUMPRODUCT`, `MMULT` (only inside `INDEX`, or avoid it), `INDEX`, `MATCH(…,0)`, `MAX`, `MIN`, `SUM` over ranges, `EXP`, `TANH`, `IF`, `MOD`, `INT`, `+ − * /`, and, for the tokenizer only, `LOWER`, `SUBSTITUTE`, `TRIM`, `MID`, `REPT`, `LEN`, `IFERROR`.
+v2 only: `LN` inside `S{t}_Score` tabs when temperature sampling is on (D-43), and `SUMPRODUCT(EXP(range − max))` for the softmax denominator (D-41).
 One **scalar formula per cell.** No multi-cell arrays, spills, LET/LAMBDA, or volatile functions (`RAND`, `NOW`, `INDIRECT`, `OFFSET`).
 Sheets-only functions (`SPARKLINE`, optionally `REGEXREPLACE`) are allowed **only in the render/UI layer**, with their own real-Sheets check, and the local oracles skip those cells.
 

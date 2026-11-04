@@ -77,3 +77,13 @@ Numbers come from the files cited in brackets under `artifacts/`. Newest entries
 - Tried a "Generate" checkbox; Brian preferred plain Enter, so it was removed. Kept a "Showing: …" done-indicator and a 9-stage bar.
 - An interrupted push left the sheet half-uploaded (tabs created, formatting missing): an important lesson for the demo. A full push takes ~2.5 min; always let it finish.
 - Verified in Chrome: the apple renders seamlessly. Render matched the reference exactly.
+
+## Phase 5 · v2: few-step masked discrete diffusion (03:00–)
+**Why:** v1's one-shot decoder averages possible drawings into mud (Brian's "fox" example). Masked diffusion (MaskGIT-style) commits confident pixels step by step, so later steps stay consistent with earlier ones. Chosen over continuous few-step diffusion (needs distillation), GANs (unstable overnight), and retrieval (can't invent). A **patch codebook** was ruled out first: 4×4 patches reconstruct only 74–84% of foreground pixels even with 4,096 codes [codebook_check.json].
+
+- **v2a** (232,312 params, 6 steps, emoji-only, 40k steps): **worse than v1.** Many prompts came out blank or tiny.
+  - Diagnosis 1, the sampler: the most confident pixels are background, so deterministic top-confidence commits fill the canvas with background and squeeze the object out. Blank rate was 26% [v2_sampler_sweep_a.json].
+  - Sampler sweep (no retraining): "foreground-first" removes blanks but bloats objects (fg area 1.5–1.7× target). Seeded temperature 1.0 removes blanks (0.3%) but gives confetti. No variant beat v1.
+  - Hybrid test: v1 keeps its most confident 50–85% of pixels and v2 refines the rest. Foreground accuracy 0.546–0.601 vs v1 alone 0.607 [v2_hybrid_test.json]. **So the v2a denoiser itself is the weak link.**
+  - Diagnosis 2, the architecture: v2a received the prompt only as per-channel FiLM shifts, which carry *what* but not *where*. From an empty canvas, a conv net with no positional signal can't place a shape. v1 has a dense prompt→4×4 layout layer, and v2a didn't.
+- **v2b**: adds a **prompt→8×8×C3 spatial prior** (dense layer, computed once per prompt and shared by every step, so cheap in the sheet). Training (60k steps). *Pending.*

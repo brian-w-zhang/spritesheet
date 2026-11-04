@@ -57,6 +57,9 @@ def ref_denoise(x, cond, w, cfg):
     a1 = np.maximum(0.0, R.conv3x3(h0, w["Wc1"], 0.0) + f(1))
     a2 = np.maximum(0.0, R.conv3x3(avg2(a1), w["Wc2"], 0.0) + f(2))
     a3 = np.maximum(0.0, R.conv3x3(avg2(a2), w["Wc3"], 0.0) + f(3))
+    if "Wg" in w:  # v2b: prompt → 8×8×C3 spatial prior (where things go), same for every step
+        n8 = cfg["N"] // 4
+        a3 = a3 + (cond @ w["Wg"] + w["bg"]).reshape(n8, n8, cfg["C3"])
     a4 = np.maximum(0.0, R.conv3x3(a3, w["Wc4"], 0.0) + f(4))
     u2 = np.maximum(0.0, R.conv3x3(R.upsample2(a4 @ w["P2"]), w["Wc5"], 0.0) + a2 + f(5))
     u1 = np.maximum(0.0, R.conv3x3(R.upsample2(u2 @ w["P1"]), w["Wc6"], 0.0) + a1 + f(6))
@@ -114,6 +117,10 @@ class MDMNet(nn.Module):
         self.p2, self.p1 = nn.Linear(C3, C2, bias=False), nn.Linear(C2, C1, bias=False)
         self.film = nn.ModuleList(nn.Linear(d + e, c) for c in (C1, C2, C3, C3, C2, C1))
         self.out = nn.Linear(C1, K + 1)
+        self.use_global = bool(cfg.get("global_map", False))
+        if self.use_global:
+            n8 = cfg["N"] // 4
+            self.gmap = nn.Linear(d + e, n8 * n8 * C3)
 
     def encode(self, ids):
         x = F.embedding(ids - 1, self.wordvec) + self.pos
@@ -129,6 +136,9 @@ class MDMNet(nn.Module):
         a1 = F.relu(self.c1(h0) + fl[0])
         a2 = F.relu(self.c2(F.avg_pool2d(a1, 2)) + fl[1])
         a3 = F.relu(self.c3(F.avg_pool2d(a2, 2)) + fl[2])
+        if self.use_global:
+            n8 = self.cfg["N"] // 4
+            a3 = a3 + self.gmap(cond).view(-1, n8, n8, self.cfg["C3"]).permute(0, 3, 1, 2)
         a4 = F.relu(self.c4(a3) + fl[3])
         up = lambda t: F.interpolate(t, scale_factor=2, mode="nearest")
         u2 = F.relu(self.c5(up(self.p2(a4.permute(0, 2, 3, 1)).permute(0, 3, 1, 2))) + a2 + fl[4])
@@ -152,6 +162,10 @@ class MDMNet(nn.Module):
             w[f"F{i}"], w[f"f{i}"] = sd[f"film.{i - 1}.weight"].T, sd[f"film.{i - 1}.bias"]
         w["P2"], w["P1"] = sd["p2.weight"].T, sd["p1.weight"].T
         w["Wout"], w["bout"] = sd["out.weight"].T, sd["out.bias"]
+        if self.use_global:  # Wg columns in (y, x, c) row-major order, matching reshape(n8, n8, C3)
+            n8, C3 = self.cfg["N"] // 4, self.cfg["C3"]
+            Wg = sd["gmap.weight"].reshape(n8, n8, C3, -1)      # torch view(-1,n8,n8,C3): out index = (y*n8+x)*C3+c
+            w["Wg"], w["bg"] = Wg.reshape(n8 * n8 * C3, -1).T, sd["gmap.bias"]
         w["wordvec"][0] = 0.0
         cfg = dict(self.cfg)
         cfg["V"] = int(w["wordvec"].shape[0])

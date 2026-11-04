@@ -2,7 +2,9 @@
 """Gate A3: end-to-end parity of the compiled workbook vs reference.forward on HyperFormula and LibreOffice.
 
 uv run python scripts/verify_e2e.py --model artifacts/model/v32 --prompts 200 --seeds 2 [--engines hyperformula,libreoffice]
-Works with random weights when the model dir has no weights.npz. Writes artifacts/metrics/parity_local.json.
+v2 (masked diffusion) is auto-detected from config.json "model": "mdm"; --model-type mdm forces it (and gives a
+full-size random-init v2 when the dir has no weights.npz). Works with random weights when the model dir has no
+weights.npz. Writes artifacts/metrics/parity_local.json (v1) or parity_local_mdm.json (v2).
 """
 import argparse
 import json
@@ -23,10 +25,13 @@ def main():
     ap.add_argument("--engines", default="hyperformula,libreoffice")
     ap.add_argument("--lo-max", type=int, default=None, help="cap LibreOffice cases (each is a full recalc)")
     ap.add_argument("--all-tabs", action="store_true", help="read and compare every tab, not only the key ones")
-    ap.add_argument("--out", default=os.path.join(ROOT, "artifacts/metrics/parity_local.json"))
+    ap.add_argument("--model-type", choices=["auto", "v1", "mdm"], default="auto")
+    ap.add_argument("--out", default=None)
     a = ap.parse_args()
+    mt = G.model_type_of(a.model, a.model_type)
+    a.out = a.out or os.path.join(ROOT, "artifacts/metrics", "parity_local_mdm.json" if mt == "mdm" else "parity_local.json")
     t0 = time.time()
-    res = G.gate_a3(a.model, a.prompts, a.seeds, tuple(a.engines.split(",")), a.lo_max, a.all_tabs)
+    res = G.gate_a3(a.model, a.prompts, a.seeds, tuple(a.engines.split(",")), a.lo_max, a.all_tabs, model_type=mt)
     res["wall_s"] = time.time() - t0
     res["when"] = time.strftime("%Y-%m-%dT%H:%M:%S%z")
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
@@ -38,6 +43,10 @@ def main():
         print(f"A3 {eng}: cases={e['cases']} max_rel={e['max_rel']:.3g} fail={e['n_fail']} errors={e['error_cells']} "
               f"stale={e['stale_cells']} style_mismatch={e['style_mismatch']} pixel_mismatch={e['pixels_mismatch']} "
               f"wall={e['timing']['wall_s']:.1f}s")
+    for st_ in res.get("steps", []):
+        print(f"  step {st_['step']}: tau={st_['tau']} committed/case={st_['committed_mean']:.1f} "
+              f"min|conf-tau|={G._g(st_['min_conf_tau_gap'])} min top1-top2={G._g(st_['min_top2_margin'])}"
+              + (" NEAR-TIE" if st_["near_tie"] else ""))
     print(f"min_margin={res['min_margin']:.3g} styles={res['styles']}  -> {'PASS' if res['pass'] else 'FAIL'}  ({a.out})")
     sys.exit(0 if res["pass"] else 1)
 

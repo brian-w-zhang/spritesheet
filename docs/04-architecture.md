@@ -81,6 +81,33 @@ transposed with the bias as an extra last column, so every linear unit is `SUMPR
 Size at the v32 shape (V=5000, d=32, h=64, S=8, e=8, C=64/48/32/24, K=32): 405,683 cells, 127,057 formulas,
 4.76M formula characters (`artifacts/metrics/spikes.json`).
 
+### v2 workbook layout (masked discrete diffusion; `pixcell/emit_mdm.py`, spec `mdm.ref_generate`)
+The front is emitted by the same code as v1 (`emit.emit_front`): Prompt inputs (B2 prompt, B3 seed, B4 style
+name), `Vocab`, `WordVec`, `Tokens`, the encoder tabs and `Latent`, whose row 8 is `cond = [c, style_emb[style]]`.
+Then one shared set of weight tabs, referenced by every step: `W_tok` ((K+2)×E token embedding, row x+1 = class x,
+row K+2 = MASK), `W_c1…W_c6` (kernel layout as v1), `W_f1…W_f6` → `FiLM` row i = `cond·F_i + f_i` (computed once:
+it does not depend on the step), `W_p2`, `W_p1` (1×1 projections, transposed), `W_out`. Then, per step t = 1…T,
+sixteen tabs `S{t}_…`:
+
+| Tab | Contents |
+| --- | --- |
+| `S{t}_Emb` | zero-bordered (N+2)×((N+2)·E): `INDEX(W_tok, x+1, k)` with x from `S{t-1}_Canvas` (step 1: the constant MASK row) |
+| `S{t}_A1` | N×(N·C1): `MAX(0, SUMPRODUCT(3×3E window, kernel) + FiLM1)` |
+| `S{t}_Pool1`, `S{t}_Pool2` | bordered avg2: `(a+b+c+d)/4` |
+| `S{t}_A2`, `S{t}_A3`, `S{t}_A4` | convs at 16×16 / 8×8 (A3 is written straight into a bordered layout, because A4 convolves it) |
+| `S{t}_P2`, `S{t}_P1` | 1×1 projection per cell before upsampling: `SUMPRODUCT(channel segment, W_p row)` |
+| `S{t}_Up2`, `S{t}_Up1` | nearest ×2 as plain references, bordered |
+| `S{t}_U2`, `S{t}_U1` | `MAX(0, conv + skip (A2 / A1) + FiLM5/6)` |
+| `S{t}_Logits` | N×(N·(K+1)) |
+| `S{t}_Conf` | cols 1..N max; N+2.. conf = `1/SUMPRODUCT(EXP(l − max))`; 2N+3.. argmax = `MATCH(max, l, 0)−1` (first max) |
+| `S{t}_Canvas` | `IF(old=MASK, IF(conf>=tau_t, argmax, MASK), old)`; t = T: `IF(old=MASK, argmax, old)`; tau inlined from `cfg["tau"]` |
+
+`Pixels` = `S{T}_Canvas`; `Palette`, `Hex` and the display are as in v1. **Filmstrip:** below the display, one 32×32
+thumbnail per step canvas (`=S{t}_Canvas!…`), two per row, on the same 12 px grid, each under a "step t" label; MASK
+(K+1) gets its own conditional-format colour `#b9b4c2` ("unknown"). The xlsx writer applies the same
+colour rules (openpyxl `CellIsRule`, number format `;;;`), so the .xlsx also renders in Excel / LibreOffice.
+Size and Sheets cost per step count: `artifacts/metrics/spikes_v2.json`.
+
 ## Training (CPU/MPS on the M4; a GPU is not needed at this size)
 - The data stream is generated on the fly by `synth.py` (doc 03), with a balanced mix: emoji base and variations, and PixelGPT.
 - Loss: cross-entropy over the K+1 classes per pixel. Weight foreground pixels more (backgrounds dominate). Add a style-head CE and the optional CLIP-distillation loss.

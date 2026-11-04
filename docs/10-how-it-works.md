@@ -66,6 +66,7 @@ A neural network is a big pile of multiply-and-add. A spreadsheet is very good a
 - `src/spritesheet/reference.py`: the spec (forward pass, LCG, style sampling).
 - `src/spritesheet/model.py`: the PyTorch twin used for training; `export()` maps it to reference layout.
 - `src/spritesheet/pixcell/emit.py`: `compile_model(w, cfg, vocab, palette, render=…)` → `Workbook` (`{sheet: {(row, col): value | "=formula"}}`).
+- `pixcell/emit_mdm.py`: `compile_mdm(...)` for v2 (masked discrete diffusion, spec `mdm.ref_generate`). It reuses the v1 front (`emit.emit_front`) and adds one shared set of weight tabs, then sixteen `S{t}_*` tabs per denoising step. The last step's canvas is `Pixels`, and the Prompt tab shows a filmstrip of every step (docs/04 "v2 workbook layout"). The gates auto-detect v2 from config `"model": "mdm"`.
 - `pixcell/xlsx.py` and `pixcell/sheets.py`: writers. `pixcell/lint.py` enforces the allowed function subset.
 - `oracles/hyperformula.py` and `oracles/libreoffice.py`: local engines. `pixcell/gates.py` + `scripts/verify_*.py`: the A1–A4 gates.
 

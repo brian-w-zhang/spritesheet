@@ -1,0 +1,22 @@
+{
+ "v1_one_shot": {
+  "fg_acc": 0.607,
+  "px_acc": 0.743,
+  "fg_area_ratio": 0.983
+ },
+ "hybrid_q0.5": {
+  "fg_acc": 0.546,
+  "px_acc": 0.733,
+  "fg_area_ratio": 0.835
+ },
+ "hybrid_q0.7": {
+  "fg_acc": 0.583,
+  "px_acc": 0.743,
+  "fg_area_ratio": 0.906
+ },
+ "hybrid_q0.85": {
+  "fg_acc": 0.601,
+  "px_acc": 0.745,
+  "fg_area_ratio": 0.955
+ }
+}

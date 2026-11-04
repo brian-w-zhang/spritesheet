@@ -1,0 +1,50 @@
+{
+ "conf_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.3917072831522186,
+  "pixel_acc": 0.6465462239583334,
+  "blank_rate": 0.2633333333333333,
+  "fg_area_ratio": 0.6931037316593652
+ },
+ "fgfirst_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.5311877714350737,
+  "pixel_acc": 0.48983072916666665,
+  "blank_rate": 0.05,
+  "fg_area_ratio": 1.4785854716253548
+ },
+ "conf_t1.0_T6": {
+  "fg_pixel_acc_given_style": 0.41304911275894984,
+  "pixel_acc": 0.6325423177083334,
+  "blank_rate": 0.0033333333333333335,
+  "fg_area_ratio": 0.8388742437747729
+ },
+ "fgfirst_t1.0_T6": {
+  "fg_pixel_acc_given_style": 0.542358095165848,
+  "pixel_acc": 0.4298177083333333,
+  "blank_rate": 0.0,
+  "fg_area_ratio": 1.646254116962835
+ },
+ "fgfirst_t0.5_T6": {
+  "fg_pixel_acc_given_style": 0.5415678911667836,
+  "pixel_acc": 0.4500553385416667,
+  "blank_rate": 0.0,
+  "fg_area_ratio": 1.6017182195755657
+ },
+ "fgfirst_t1.0_T4": {
+  "fg_pixel_acc_given_style": 0.5369910296042026,
+  "pixel_acc": 0.452294921875,
+  "blank_rate": 0.0,
+  "fg_area_ratio": 1.593070227009805
+ },
+ "fgfirst_t1.0_T8": {
+  "fg_pixel_acc_given_style": 0.5419661539823121,
+  "pixel_acc": 0.42061197916666665,
+  "blank_rate": 0.0,
+  "fg_area_ratio": 1.6655919892279392
+ },
+ "fgfirst_t1.0_T12": {
+  "fg_pixel_acc_given_style": 0.5421874111020502,
+  "pixel_acc": 0.409873046875,
+  "blank_rate": 0.0,
+  "fg_area_ratio": 1.687066573106513
+ }
+}
