@@ -14,7 +14,7 @@
   "refresh": 0.15,
   "seed": 0,
   "out": "artifacts/model/v3_var16",
-  "note": "v3 variants: 16 learned variants, amortised winner-takes-all (refresh 0.15, eps 1->0.05), prior head samples variant from seed",
+  "note": "v3 variants: 16 learned variants, amortised winner-takes-all (refresh 0.15, eps 1->0.05), prior head samples the variant from the seed; 3x3 kernels",
   "snap_every": 5000
  },
  "cfg": {
@@ -30,7 +30,7 @@
   "C3": 32,
   "K": 48
  },
- "started": "2026-11-04T09:25:26",
- "strategy": "v3 variants: 16 learned variants, amortised winner-takes-all (refresh 0.15, eps 1->0.05), prior head samples variant from seed",
+ "started": "2026-11-04T09:33:55",
+ "strategy": "v3 variants: 16 learned variants, amortised winner-takes-all (refresh 0.15, eps 1->0.05), prior head samples the variant from the seed; 3x3 kernels",
  "data": "PixelGPT-24x24-216K train split (195,154 sprites), Sampler3 augmentation"
 }

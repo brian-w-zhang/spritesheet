@@ -1,0 +1,2 @@
+{"step": 1, "loss_px": 3.8704, "loss_prior": 2.8208, "fg_acc": 0.0265, "eps": 1.0, "s": 1.2, "variants_used_eff": 13.17, "val_oracle": 2.715, "val_expected": 2.7156, "val_top": 2.7156}
+{"step": 500, "loss_px": 2.4731, "loss_prior": 2.7379, "fg_acc": 0.05, "eps": 1.0, "s": 245.8, "variants_used_eff": 12.04}

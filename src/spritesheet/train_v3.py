@@ -47,7 +47,7 @@ def per_sample(lg, tgt, cw):
 
 
 @torch.no_grad()
-def all_variant_losses(net, c, tgt, cw, S, chunk=4096):
+def all_variant_losses(net, c, tgt, cw, S, chunk=512):
     """[B, S] per-sample loss for every variant, decoded as one (B*S) batch (chunked)."""
     B = len(c)
     cc = c.repeat_interleave(S, 0)

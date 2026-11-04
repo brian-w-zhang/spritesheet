@@ -1,2 +1,20 @@
-{"step": 1, "loss_px": 3.9185, "loss_prior": 0.0, "fg_acc": 0.0378, "eps": 0.0, "s": 0.1, "variants_used_eff": 1.0, "val_oracle": 2.7503, "val_expected": 2.7503, "val_top": 2.7503}
-{"step": 500, "loss_px": 2.5234, "loss_prior": 0.0, "fg_acc": 0.0315, "eps": 0.0, "s": 68.0, "variants_used_eff": 1.0}
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "/Users/junzhang/Projects/spritesheet/src/spritesheet/train_v3.py", line 221, in <module>
+    main()
+  File "/Users/junzhang/Projects/spritesheet/src/spritesheet/train_v3.py", line 95, in main
+    net = Net3(cfg, wv).to(dev)
+          ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/junzhang/Projects/spritesheet/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1392, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/junzhang/Projects/spritesheet/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 933, in _apply
+    module._apply(fn)
+  File "/Users/junzhang/Projects/spritesheet/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 966, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/Users/junzhang/Projects/spritesheet/.venv/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1374, in convert
+    return t.to(
+           ^^^^^
+RuntimeError: invalid low watermark ratio 1.4

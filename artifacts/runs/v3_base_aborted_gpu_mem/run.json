@@ -32,5 +32,6 @@
  },
  "started": "2026-11-04T09:25:25",
  "strategy": "v3 control: 24x24 PixelGPT-216K only, plain one-shot (no variants), word-noise 0.15, C 256/128/64/32",
- "data": "PixelGPT-24x24-216K train split (195,154 sprites), Sampler3 augmentation"
+ "data": "PixelGPT-24x24-216K train split (195,154 sprites), Sampler3 augmentation",
+ "outcome": "aborted: two parallel runs exhausted unified GPU memory (10.5 GB wired, swap full); restarted sequentially with smaller search chunks"
 }

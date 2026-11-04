@@ -48,13 +48,16 @@ def softmax_rows(S):
 
 
 def conv3x3(x, W, b):
-    """x [H,W,Cin], W [3,3,Cin,Cout], zero padding 1 → [H,W,Cout] (cross-correlation, like torch)."""
+    """x [H,W,Cin], W [k,k,Cin,Cout] (k odd; 3 unless cfg k1..k3 say otherwise), zero padding k//2 → [H,W,Cout]
+    (cross-correlation, like torch)."""
     H, Wd, Cin = x.shape
-    xp = np.zeros((H + 2, Wd + 2, Cin))
-    xp[1:-1, 1:-1] = x
+    k = W.shape[0]
+    p = k // 2
+    xp = np.zeros((H + 2 * p, Wd + 2 * p, Cin))
+    xp[p:p + H, p:p + Wd] = x
     out = np.zeros((H, Wd, W.shape[3]))
-    for ky in range(3):
-        for kx in range(3):
+    for ky in range(k):
+        for kx in range(k):
             out += np.einsum("hwc,co->hwo", xp[ky:ky + H, kx:kx + Wd], W[ky, kx])
     return out + b
 
@@ -135,7 +138,8 @@ def random_weights(cfg, seed=0, scale=0.3):
          "Wout": g(C[3], K + 1), "bout": g(K + 1)}
     w["wordvec"][0] = 0.0
     for i in (1, 2, 3):
-        w[f"Wc{i}"] = g(3, 3, C[i - 1], C[i]) / math.sqrt(9 * C[i - 1]) * 3
+        k = cfg.get(f"k{i}", 3)
+        w[f"Wc{i}"] = g(k, k, C[i - 1], C[i]) / math.sqrt(k * k * C[i - 1]) * 3
         w[f"bc{i}"] = g(C[i])
         w[f"F{i}"] = g(d, C[i])
     return {k: round15(v) for k, v in w.items()}

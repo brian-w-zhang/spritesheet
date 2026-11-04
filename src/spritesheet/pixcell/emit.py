@@ -91,12 +91,17 @@ def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", 
     # ---- Prompt (inputs) first, so it is the first tab
     P = "Prompt"
     wb.set(P, 1, 1, Text("SpriteSheet"))
-    wb.set(P, 1, 2, Text(intro or "Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style."))
+    variants = bool(cfg.get("variants"))  # v3: learned variants, no named styles shown (D-51)
+    if intro is None:
+        intro = ("Type a prompt in B2 and press Enter. Change the seed (B3) to get a different drawing." if variants
+                 else "Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style.")
+    wb.set(P, 1, 2, Text(intro))
     wb.set(P, 2, 1, Text("Prompt"))
     wb.set(P, 2, 2, Text(default_prompt))
     wb.set(P, 3, 1, Text("Seed"))
     wb.set(P, 3, 2, float(default_seed))
-    wb.set(P, 4, 1, Text("Style (picked)"))
+    if not variants:
+        wb.set(P, 4, 1, Text("Style (picked)"))
     PROMPT, SEED = "Prompt!$B$2", "Prompt!$B$3"
     wb.meta["inputs"] = {"prompt": (P, 2, 2), "seed": (P, 3, 2)}
 
@@ -209,11 +214,15 @@ def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", 
     wb.set(Lt, 7, 3, f"=MOD({LCG_A}*B7,{M31})/{M31}")
     wb.set(Lt, 7, 4, f"=MIN({S},1+SUMPRODUCT(({cum.range()}<C7)*1))")
     STYLE = "Latent!$D$7"
-    if style_names is None:
+    if variants:
+        pass  # the picked variant stays internal (Latent tab); nothing on the Prompt tab
+    elif style_names is None:
         sj = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
                           "data", "build", "styles.json")
         style_names = json.load(open(sj)) if os.path.exists(sj) else None
-    if style_names and len(style_names) == S:
+    if variants:
+        pass
+    elif style_names and len(style_names) == S:
         SR = 20  # style-name lookup table on the About tab (rows 20..), out of the demo's sight
         wb.set("About", SR - 1, 1, Text("style names"))
         for i, nm in enumerate(style_names):
@@ -295,17 +304,19 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
         Wf = _wtab(wb, f"W_f{i}", w[f"F{i}"].T, w[f"bc{i}"])
         fb = wb.add_block(f"FiLM{i}", "FiLM", i, 1, 1, Cout)
         wb.fill(fb, lambda _, o, Wf=Wf: "=" + lin(Wf, o, CROW, d))
-        # conv weights: block o = rows 3o+1..3o+3, element [ky, kx*Cin+ci] = Wc[ky, kx, ci, o]
-        Wc = np.asarray(w[f"Wc{i}"], np.float64)                  # [3,3,Cin,Cout]
-        Wm = Wc.transpose(3, 0, 1, 2).reshape(Cout * 3, 3 * Cin)
+        # conv weights: block o = rows k*o+1..k*o+k, element [ky, kx*Cin+ci] = Wc[ky, kx, ci, o]
+        Wc = np.asarray(w[f"Wc{i}"], np.float64)                  # [k,k,Cin,Cout], k odd
+        k = Wc.shape[0]
+        p = k // 2
+        Wm = Wc.transpose(3, 0, 1, 2).reshape(Cout * k, k * Cin)
         wcb = _wtab(wb, f"W_c{i}", Wm)
-        # upsample into a zero-bordered (Hn+2) x ((Hn+2)*Cin) grid
+        # upsample into a zero-bordered (Hn+2p) x ((Hn+2p)*Cin) grid
         up_name = f"Up_{i}"
-        up = wb.add_block(up_name, up_name, 1, 1, Hn + 2, (Hn + 2) * Cin)
+        up = wb.add_block(up_name, up_name, 1, 1, Hn + 2 * p, (Hn + 2 * p) * Cin)
         src_sheet = prev.sheet
 
-        def upcell(r, cc, prev=prev, Cin=Cin, Hn=Hn, src_sheet=src_sheet):
-            Y, X_ = r - 1, cc // Cin - 1
+        def upcell(r, cc, prev=prev, Cin=Cin, Hn=Hn, src_sheet=src_sheet, p=p):
+            Y, X_ = r - p, cc // Cin - p
             if Y < 0 or Y >= Hn or X_ < 0 or X_ >= Hn:
                 return 0.0
             ch = cc % Cin
@@ -314,10 +325,10 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
         cv_name = f"Conv_{i}"
         cv = wb.add_block(f"G{i}", cv_name, 1, 1, Hn, Hn * Cout)
 
-        def convcell(y, j, up=up, Cin=Cin, Cout=Cout, wcb=wcb, fb=fb, up_name=up_name, i=i):
+        def convcell(y, j, up=up, Cin=Cin, Cout=Cout, wcb=wcb, fb=fb, up_name=up_name, i=i, k=k):
             x, o = divmod(j, Cout)
-            win = rng(up.r0 + y, up.c0 + x * Cin, up.r0 + y + 2, up.c0 + x * Cin + 3 * Cin - 1, up_name)
-            wr = rng(wcb.r0 + 3 * o, 1, wcb.r0 + 3 * o + 2, 3 * Cin, wcb.sheet)
+            win = rng(up.r0 + y, up.c0 + x * Cin, up.r0 + y + k - 1, up.c0 + x * Cin + k * Cin - 1, up_name)
+            wr = rng(wcb.r0 + k * o, 1, wcb.r0 + k * o + k - 1, k * Cin, wcb.sheet)
             return f"=MAX(0,SUMPRODUCT({win},{wr})+{fb.ref(0, o, 'FiLM', absolute=True)})"
         wb.fill(cv, convcell)
         prev, Hs = cv, Hn

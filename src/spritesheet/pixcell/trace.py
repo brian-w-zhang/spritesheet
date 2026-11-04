@@ -53,7 +53,8 @@ def trace(prompt, seed, w, cfg, vocab_index) -> dict:
     for i in (1, 2, 3):
         E[f"FiLM{i}"] = (c @ w[f"F{i}"] + w[f"bc{i}"])[None, :]
         up = R.upsample2(acts[i - 1])
-        E[f"Up_{i}"] = np.pad(up, ((1, 1), (1, 1), (0, 0))).reshape(up.shape[0] + 2, -1)
+        pk = np.asarray(w[f"Wc{i}"]).shape[0] // 2  # zero border = kernel radius
+        E[f"Up_{i}"] = np.pad(up, ((pk, pk), (pk, pk), (0, 0))).reshape(up.shape[0] + 2 * pk, -1)
     lg = out["logits"]
     E["Logits"] = lg.reshape(lg.shape[0], -1)
     E["Pixels"] = out["classes"].astype(float)

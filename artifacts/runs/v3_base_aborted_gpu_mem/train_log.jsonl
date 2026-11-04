@@ -1,0 +1,4 @@
+{"step": 1, "loss_px": 3.9185, "loss_prior": 0.0, "fg_acc": 0.0378, "eps": 0.0, "s": 0.1, "variants_used_eff": 1.0, "val_oracle": 2.7503, "val_expected": 2.7503, "val_top": 2.7503}
+{"step": 500, "loss_px": 2.5234, "loss_prior": 0.0, "fg_acc": 0.0315, "eps": 0.0, "s": 68.0, "variants_used_eff": 1.0}
+{"step": 1000, "loss_px": 2.2208, "loss_prior": 0.0, "fg_acc": 0.1805, "eps": 0.0, "s": 145.3, "variants_used_eff": 1.0}
+{"step": 1500, "loss_px": 2.1999, "loss_prior": 0.0, "fg_acc": 0.1683, "eps": 0.0, "s": 211.2, "variants_used_eff": 1.0}

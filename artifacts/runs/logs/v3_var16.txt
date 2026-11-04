@@ -1,1 +1,6 @@
-{"step": 1, "loss_px": 3.8704, "loss_prior": 2.8208, "fg_acc": 0.0265, "eps": 1.0, "s": 1.2, "variants_used_eff": 13.17, "val_oracle": 2.715, "val_expected": 2.7156, "val_top": 2.7156}
+{"step": 1, "loss_px": 3.8704, "loss_prior": 2.8208, "fg_acc": 0.0265, "eps": 1.0, "s": 0.6, "variants_used_eff": 13.17, "val_oracle": 2.715, "val_expected": 2.7156, "val_top": 2.7156}
+{"step": 500, "loss_px": 2.4733, "loss_prior": 2.7452, "fg_acc": 0.0498, "eps": 1.0, "s": 185.4, "variants_used_eff": 12.04}
+{"step": 1000, "loss_px": 2.2152, "loss_prior": 2.6137, "fg_acc": 0.1841, "eps": 1.0, "s": 309.2, "variants_used_eff": 13.95}
+{"step": 1500, "loss_px": 2.1896, "loss_prior": 2.5139, "fg_acc": 0.1829, "eps": 1.0, "s": 410.9, "variants_used_eff": 14.02}
+{"step": 2000, "loss_px": 2.042, "loss_prior": 2.5788, "fg_acc": 0.2254, "eps": 0.974, "s": 494.2, "variants_used_eff": 14.17}
+{"step": 2500, "loss_px": 2.038, "loss_prior": 2.6214, "fg_acc": 0.2233, "eps": 0.908, "s": 567.9, "variants_used_eff": 13.72, "val_oracle": 1.5731, "val_expected": 1.5843, "val_top": 1.5848}
