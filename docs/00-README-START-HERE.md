@@ -14,5 +14,6 @@
 | `05-sheets-engine-and-verification.md` | Which formula engines to verify with, which functions are safe, how to push to Sheets |
 | `06-evaluation-and-benchmarks.md` | Gates A1–A5, quality metrics, baselines, systems benchmarks, comparison table |
 | `07-risks-and-fallbacks.md` | Risk register, spikes to run first, the fallback ladder |
+| `09-experiment-log.md` | Iterations, numbers, and how we got to the final model (slide source) |
 | `decisions.md` | Append-only decisions log |
 | `course/` | (local only, gitignored) course guide, AskJev MP1 slides text |
