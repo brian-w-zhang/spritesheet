@@ -212,6 +212,20 @@ def main():
         seeds = [1 + i for i in range(len(caps))]
         outs, sts = generate(net, caps, vocab, seeds)
         res["sets"][s] = evaluate_grids(s, caps, list(outs), tgts, metas, clip, names, concept_txt, rgb)
+        # decoder quality given the target's style (the seed-sampled style may legitimately differ from the target's)
+        outs_g, _ = generate(net, caps, vocab, seeds, style_override=[d[2] for d in data])
+        o, t = np.stack(outs_g), np.stack(tgts)
+        fg = t != 0
+        res["sets"][s]["given_style"] = {"pixel_acc": float((o == t).mean()),
+                                         "fg_pixel_acc": float(((o == t) & fg).sum() / max(1, fg.sum())),
+                                         "pixel_perfect": float((o == t).all(axis=(1, 2)).mean())}
+        named = [i for i, m in enumerate(metas) if len(m.get("styles_ok") or []) == 1]
+        ok = [i for i, m in enumerate(metas) if m.get("styles_ok")]
+        if ok:
+            res["sets"][s]["sampled_style_valid"] = float(np.mean([metas[i]["styles_ok"] and int(sts[i]) in
+                                                                   [int(x) for x in metas[i]["styles_ok"]] for i in ok]))
+        if named:
+            res["sets"][s]["named_style_acc"] = float(np.mean([int(sts[i]) == int(data[i][2]) for i in named]))
         if s == "underspecified":  # seed diversity: same prompt, 8 seeds
             div = []
             for cap in caps[:40]:
