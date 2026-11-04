@@ -67,7 +67,7 @@ Convert with: `soffice -env:UserInstallation=file://$PROFILE --headless --norest
 
 ## Writing the workbook
 - **Local artifact:** openpyxl, plain formula strings, one per cell. (`ArrayFormula` works in LibreOffice, but avoid it.) openpyxl writes no cached values.
-- **Google Sheets:** prefer the Sheets API directly over uploading xlsx. Create the spreadsheet, add sheets, write weights as `values` (RAW, numbers) and formulas as `USER_ENTERED` strings in ≤2 MB batches at ≤1 req/s. For repeated formula patterns, use `batchUpdate` `repeatCell`/`copyPaste` with relative references, so you send one formula per block instead of thousands.
+- **Google Sheets** (probe PASS 2026-11-04; EXP, TANH and the LCG came back bit-identical to Python): use the Sheets API directly with the service account, writing into Brian's shared spreadsheet (the service account cannot create spreadsheets). Add sheets, write weights as `values` (RAW, numbers) and formulas as `USER_ENTERED` strings in ≤2 MB batches at ≤1 req/s. For repeated formula patterns, use `batchUpdate` `repeatCell`/`copyPaste` with relative references, so you send one formula per block instead of thousands.
   - *Fallback:* Drive upload with conversion of the `.xlsx`. Unverified: how Sheets treats `t="array"` and `_xlfn.` prefixes, and whether a very large xlsx converts at all.
 - **Unverified until A4:** Sheets' recalc time at our size, whether its `SUMPRODUCT` summation order stays within 1e-12, and whether 15-digit numbers parse exactly. Run the cheap check first: one small compiled layer pushed and compared against numpy.
 

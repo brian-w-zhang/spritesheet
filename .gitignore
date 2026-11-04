@@ -16,3 +16,4 @@ artifacts/*.log
 *.npy
 !data/wordvec_*.npy
 artifacts/figures/preview_pixelgpt.png
+artifacts/preflight/
