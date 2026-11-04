@@ -1,0 +1,276 @@
+{
+ "when": "2026-11-04T04:38:12-0500",
+ "sheet": "diffusion",
+ "weights": "random-init MDMNet",
+ "runs": [
+  {
+   "T": 4,
+   "config": {
+    "N": 32,
+    "L": 12,
+    "d": 64,
+    "h": 128,
+    "S": 7,
+    "e": 8,
+    "K": 32,
+    "E": 24,
+    "C1": 24,
+    "C2": 48,
+    "C3": 96,
+    "T": 4,
+    "tau": [
+     0.9,
+     0.8,
+     0.7,
+     0.0
+    ],
+    "attn_scale": 0.125,
+    "V": 12119,
+    "model": "mdm"
+   },
+   "cells": 1916008,
+   "formulas": 830197,
+   "formula_chars": 38807086,
+   "tabs": 109,
+   "compile_s": 2.3804869651794434,
+   "model_hash": "3f82460cd0a826d2",
+   "errors": [
+    "SheetsError: HTTP 404 on POST /values:batchUpdate: {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"Requested entity was not found.\",\n    \"status\": \"NOT_FOUND\"\n  }\n}\n"
+   ],
+   "requests_total": 53,
+   "retries_total": 8,
+   "width": "full",
+   "upload_progress_before_failure": {
+    "chunks_done": 40,
+    "chunks_total": 47,
+    "t_s": 2641.5,
+    "per_chunk_t_s": [
+     0.6,
+     3.8,
+     6.5,
+     8.8,
+     11.3,
+     14.3,
+     16.8,
+     19.1,
+     22.5,
+     24.8,
+     30.2,
+     32.0,
+     34.4,
+     36.3,
+     37.9,
+     51.8,
+     61.5,
+     107.8,
+     111.5,
+     194.6,
+     294.1,
+     305.4,
+     311.5,
+     324.4,
+     332.9,
+     377.8,
+     383.2,
+     456.9,
+     479.3,
+     662.1,
+     1081.1,
+     1100.0,
+     1111.4,
+     1159.3,
+     1166.8,
+     1242.2,
+     1265.0,
+     2340.1,
+     2627.7,
+     2641.5
+    ],
+    "note": "values:batchUpdate requests of <= 1.8 MB; per-request time grows as the sheet fills; then HTTP 404 (spreadsheet temporarily unavailable) on chunk 41"
+   }
+  },
+  {
+   "T": 6,
+   "config": {
+    "N": 32,
+    "L": 12,
+    "d": 64,
+    "h": 128,
+    "S": 7,
+    "e": 8,
+    "K": 32,
+    "E": 24,
+    "C1": 24,
+    "C2": 48,
+    "C3": 96,
+    "T": 6,
+    "tau": [
+     0.9,
+     0.8,
+     0.7,
+     0.6,
+     0.5,
+     0.0
+    ],
+    "attn_scale": 0.125,
+    "V": 12119,
+    "model": "mdm"
+   },
+   "cells": 2358442,
+   "formulas": 1239797,
+   "formula_chars": 58180334,
+   "tabs": 141,
+   "compile_s": 2.6832571029663086,
+   "model_hash": "8ca99f950b5fe651",
+   "errors": [
+    "SheetsError: HTTP 404 on GET : {\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"Requested entity was not found.\",\n    \"status\": \"NOT_FOUND\"\n  }\n}\n"
+   ],
+   "requests_total": 1,
+   "retries_total": 0,
+   "width": "full",
+   "note": "T=6 push never started: HTTP 404 on the first metadata GET right after the T=4 failure (the sheet was reachable again minutes later)"
+  },
+  {
+   "T": 2,
+   "width": "half",
+   "config": {
+    "N": 32,
+    "L": 12,
+    "d": 64,
+    "h": 128,
+    "S": 7,
+    "e": 8,
+    "K": 32,
+    "E": 12,
+    "C1": 12,
+    "C2": 24,
+    "C3": 48,
+    "T": 2,
+    "tau": [
+     0.9,
+     0.0
+    ],
+    "attn_scale": 0.125,
+    "V": 12119,
+    "model": "mdm"
+   },
+   "cells": 1149297,
+   "formulas": 254541,
+   "formula_chars": 11678270,
+   "tabs": 77,
+   "compile_s": 1.2239680290222168,
+   "model_hash": "ed5838a61069ae33",
+   "errors": [],
+   "upload": {
+    "tabs": 77,
+    "value_requests": 21,
+    "tabs_s": 3.5019588470458984,
+    "values_s": 152.13311576843262,
+    "upload_s": 249.26300501823425,
+    "requests": 28,
+    "retries": 0,
+    "bytes_sent": 30124359,
+    "format": {
+     "requested_px": 12,
+     "grids": 3,
+     "cf_rules": 34,
+     "row_px": [
+      12,
+      12
+     ],
+     "col_px": [
+      12,
+      12
+     ],
+     "last_grid_row_px": [
+      12,
+      12
+     ],
+     "last_grid_col_px": [
+      12,
+      12
+     ]
+    }
+   },
+   "latency": [
+    {
+     "prompt": "a red apple",
+     "seed": 1,
+     "elapsed_s": 18.049755096435547,
+     "write_s": 0.39453792572021484,
+     "first_consistent_s": 9.567147970199585,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 2,
+     "style_ref": 2,
+     "committed_per_step": [
+      958,
+      66
+     ],
+     "min_top2_margin": [
+      0.11896148107862725,
+      0.4998643773889153
+     ],
+     "min_conf_tau_gap": [
+      0.004820565145260858,
+      null
+     ]
+    },
+    {
+     "prompt": "a tiny blue rocket facing left",
+     "seed": 2,
+     "elapsed_s": 26.780712842941284,
+     "write_s": 1.618844747543335,
+     "first_consistent_s": 20.89776587486267,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 2,
+     "style_ref": 2,
+     "committed_per_step": [
+      931,
+      93
+     ],
+     "min_top2_margin": [
+      0.02643467580166714,
+      0.21838745146465044
+     ],
+     "min_conf_tau_gap": [
+      0.00849426768426309,
+      null
+     ]
+    },
+    {
+     "prompt": "green cat with a hat",
+     "seed": 3,
+     "elapsed_s": 27.756945848464966,
+     "write_s": 0.1946859359741211,
+     "first_consistent_s": 19.179893016815186,
+     "reads": 2,
+     "pixels_match_reference": true,
+     "style_sheet": 3,
+     "style_ref": 3,
+     "committed_per_step": [
+      29,
+      995
+     ],
+     "min_top2_margin": [
+      0.17004699073430096,
+      0.0731847556829468
+     ],
+     "min_conf_tau_gap": [
+      0.0025592604368928074,
+      null
+     ]
+    }
+   ],
+   "latency_summary": {
+    "first_consistent_median_s": 19.179893016815186,
+    "stable_median_s": 26.780712842941284,
+    "stable_max_s": 27.756945848464966
+   },
+   "requests_total": 37,
+   "retries_total": 0
+  }
+ ],
+ "summary": "full width (E/C1/C2/C3 = 24/24/48/96): T=4 (830k formulas) failed to upload: 40/47 chunks in 2641 s, per-request time grew from ~2.5 s to ~18 min, then HTTP 404 and the sheet became briefly unavailable; T=6 (1.24M formulas) was never pushed. half width (12/12/24/48) T=2 (255k formulas): see the last run."
+}

@@ -1,0 +1,789 @@
+{
+ "gate": "A3",
+ "model": {
+  "source": "trained",
+  "model_dir": "artifacts/model/v2_mdm_a",
+  "vocab": "/Users/junzhang/Projects/spritesheet/data/build/vocab.txt",
+  "palette": "/Users/junzhang/Projects/spritesheet/data/build/palette.json"
+ },
+ "model_hash": "4a5fae9ff17d6944",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "K": 32,
+  "E": 24,
+  "C1": 24,
+  "C2": 48,
+  "C3": 96,
+  "T": 6,
+  "attn_scale": 0.125,
+  "tau": [
+   1.0,
+   0.999914,
+   0.979443,
+   0.666998,
+   0.5302,
+   0.0
+  ],
+  "V": 12119,
+  "model": "mdm",
+  "tier": 1,
+  "steps": 40000,
+  "mix": "{\"emoji_var\":0.6,\"emoji_plain\":0.4}",
+  "train_seconds": 1513.2,
+  "params": 232312
+ },
+ "compile_s": 2.0663700103759766,
+ "prompts": 30,
+ "seeds": 2,
+ "engines": {
+  "hyperformula": {
+   "version": "HyperFormula 3.5.0",
+   "max_rel": 9.9253938401489e-14,
+   "per_block": {
+    "Tokens.clean": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.rest": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.word": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.ids": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.mask": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.denom": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "H": {
+     "max_rel": 1.1102230246251565e-15,
+     "bad": 0
+    },
+    "c": {
+     "max_rel": 4.440892098500626e-16,
+     "bad": 0
+    },
+    "style_logits": {
+     "max_rel": 1.1102230246251565e-15,
+     "bad": 0
+    },
+    "style.max": {
+     "max_rel": 7.771561172376096e-16,
+     "bad": 0
+    },
+    "style.sum": {
+     "max_rel": 7.257513116646284e-16,
+     "bad": 0
+    },
+    "style.exp": {
+     "max_rel": 1.2212453270876722e-15,
+     "bad": 0
+    },
+    "p_style": {
+     "max_rel": 1.3877787807814457e-16,
+     "bad": 0
+    },
+    "cum": {
+     "max_rel": 3.3306690738754696e-16,
+     "bad": 0
+    },
+    "s0": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "s1": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "u": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "style": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "z": {
+     "max_rel": 4.440892098500626e-16,
+     "bad": 0
+    },
+    "FiLM1": {
+     "max_rel": 4.440892098500626e-16,
+     "bad": 0
+    },
+    "FiLM2": {
+     "max_rel": 8.6759548437484e-16,
+     "bad": 0
+    },
+    "FiLM3": {
+     "max_rel": 1.3322676295501878e-15,
+     "bad": 0
+    },
+    "FiLM4": {
+     "max_rel": 1.5543122344752192e-15,
+     "bad": 0
+    },
+    "FiLM5": {
+     "max_rel": 1.4432899320127035e-15,
+     "bad": 0
+    },
+    "FiLM6": {
+     "max_rel": 2.0926743226289537e-15,
+     "bad": 0
+    },
+    "S1.logits": {
+     "max_rel": 2.5757174171303632e-14,
+     "bad": 0
+    },
+    "S1.max": {
+     "max_rel": 3.294597090949137e-15,
+     "bad": 0
+    },
+    "S1.conf": {
+     "max_rel": 3.6637359812630166e-15,
+     "bad": 0
+    },
+    "S1.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S1.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S2.logits": {
+     "max_rel": 2.5757174171303632e-14,
+     "bad": 0
+    },
+    "S2.max": {
+     "max_rel": 3.294597090949137e-15,
+     "bad": 0
+    },
+    "S2.conf": {
+     "max_rel": 3.6637359812630166e-15,
+     "bad": 0
+    },
+    "S2.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S2.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S3.logits": {
+     "max_rel": 5.3679726416982096e-14,
+     "bad": 0
+    },
+    "S3.max": {
+     "max_rel": 9.842964615337203e-15,
+     "bad": 0
+    },
+    "S3.conf": {
+     "max_rel": 6.38378239159465e-15,
+     "bad": 0
+    },
+    "S3.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S3.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S4.logits": {
+     "max_rel": 5.873079800267078e-14,
+     "bad": 0
+    },
+    "S4.max": {
+     "max_rel": 9.981528150181867e-15,
+     "bad": 0
+    },
+    "S4.conf": {
+     "max_rel": 7.771561172376096e-15,
+     "bad": 0
+    },
+    "S4.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S4.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S5.logits": {
+     "max_rel": 9.9253938401489e-14,
+     "bad": 0
+    },
+    "S5.max": {
+     "max_rel": 1.0036002831077153e-14,
+     "bad": 0
+    },
+    "S5.conf": {
+     "max_rel": 1.0880185641326534e-14,
+     "bad": 0
+    },
+    "S5.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S5.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S6.logits": {
+     "max_rel": 7.904787935331115e-14,
+     "bad": 0
+    },
+    "S6.max": {
+     "max_rel": 1.126205957350306e-14,
+     "bad": 0
+    },
+    "S6.conf": {
+     "max_rel": 8.659739592076221e-15,
+     "bad": 0
+    },
+    "S6.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S6.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Pixels": {
+     "max_rel": 0.0,
+     "bad": 0
+    }
+   },
+   "failures": [],
+   "n_fail": 0,
+   "error_cells": 0,
+   "stale_cells": 0,
+   "style_mismatch": 0,
+   "pixels_mismatch": 0,
+   "timing": {
+    "build_s": 418.023,
+    "node_s": 3511.195056915283,
+    "per_run_eval_s": [
+     59.014,
+     6.465,
+     53.098,
+     59.33,
+     75.967,
+     44.369,
+     66.227,
+     62.02,
+     79.761,
+     47.214,
+     82.632,
+     63.819,
+     62.746,
+     47.444,
+     99.64,
+     71.189,
+     100.268,
+     3.071,
+     81.223,
+     73.036,
+     72.724,
+     73.438,
+     65.427,
+     66.077,
+     85.692,
+     7.948,
+     61.766,
+     51.776,
+     84.008,
+     66.289,
+     81.435,
+     47.862,
+     56.683,
+     48.145,
+     54.985,
+     56.191,
+     77.564,
+     42.629,
+     58.14,
+     1.959,
+     51.278,
+     38.723,
+     55.999,
+     47.384,
+     51.631,
+     2.094,
+     42.773,
+     49.038,
+     41.302,
+     3.583,
+     2.072,
+     40.285,
+     41.739,
+     36.383,
+     4.413,
+     29.821,
+     37.072,
+     36.32,
+     38.519,
+     31.138
+    ],
+    "wall_s": 3514.9325881004333,
+    "batches": 2,
+    "runs": 60
+   },
+   "cases": 60
+  },
+  "libreoffice": {
+   "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+   "max_rel": 3.430589146091734e-14,
+   "per_block": {
+    "Tokens.clean": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.rest": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.word": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.ids": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.mask": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Tokens.denom": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "H": {
+     "max_rel": 6.0000118999865285e-15,
+     "bad": 0
+    },
+    "c": {
+     "max_rel": 2.052164854833114e-15,
+     "bad": 0
+    },
+    "style_logits": {
+     "max_rel": 4.836256657956669e-15,
+     "bad": 0
+    },
+    "style.max": {
+     "max_rel": 4.836256657956669e-15,
+     "bad": 0
+    },
+    "style.sum": {
+     "max_rel": 1.6385274924670507e-15,
+     "bad": 0
+    },
+    "style.exp": {
+     "max_rel": 1.3322676295501878e-15,
+     "bad": 0
+    },
+    "p_style": {
+     "max_rel": 5.551115123125783e-16,
+     "bad": 0
+    },
+    "cum": {
+     "max_rel": 6.661338147750939e-16,
+     "bad": 0
+    },
+    "s0": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "s1": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "u": {
+     "max_rel": 5.551115123125783e-16,
+     "bad": 0
+    },
+    "style": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "z": {
+     "max_rel": 2.052164854833114e-15,
+     "bad": 0
+    },
+    "FiLM1": {
+     "max_rel": 4.206547108904796e-15,
+     "bad": 0
+    },
+    "FiLM2": {
+     "max_rel": 4.928227518720302e-15,
+     "bad": 0
+    },
+    "FiLM3": {
+     "max_rel": 5.187308550358025e-15,
+     "bad": 0
+    },
+    "FiLM4": {
+     "max_rel": 6.98423507604645e-15,
+     "bad": 0
+    },
+    "FiLM5": {
+     "max_rel": 5.073745973912198e-15,
+     "bad": 0
+    },
+    "FiLM6": {
+     "max_rel": 4.971540600477336e-15,
+     "bad": 0
+    },
+    "S1.logits": {
+     "max_rel": 1.4499152366169005e-14,
+     "bad": 0
+    },
+    "S1.max": {
+     "max_rel": 5.662724485017686e-15,
+     "bad": 0
+    },
+    "S1.conf": {
+     "max_rel": 2.55351295663786e-15,
+     "bad": 0
+    },
+    "S1.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S1.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S2.logits": {
+     "max_rel": 1.4499152366169005e-14,
+     "bad": 0
+    },
+    "S2.max": {
+     "max_rel": 5.662724485017686e-15,
+     "bad": 0
+    },
+    "S2.conf": {
+     "max_rel": 2.55351295663786e-15,
+     "bad": 0
+    },
+    "S2.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S2.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S3.logits": {
+     "max_rel": 2.220446049250313e-14,
+     "bad": 0
+    },
+    "S3.max": {
+     "max_rel": 5.815837496483587e-15,
+     "bad": 0
+    },
+    "S3.conf": {
+     "max_rel": 2.7755575615628914e-15,
+     "bad": 0
+    },
+    "S3.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S3.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S4.logits": {
+     "max_rel": 2.1538326677728037e-14,
+     "bad": 0
+    },
+    "S4.max": {
+     "max_rel": 5.9603526484781384e-15,
+     "bad": 0
+    },
+    "S4.conf": {
+     "max_rel": 3.4416913763379853e-15,
+     "bad": 0
+    },
+    "S4.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S4.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S5.logits": {
+     "max_rel": 2.7977620220553945e-14,
+     "bad": 0
+    },
+    "S5.max": {
+     "max_rel": 5.939883184485827e-15,
+     "bad": 0
+    },
+    "S5.conf": {
+     "max_rel": 3.552713678800501e-15,
+     "bad": 0
+    },
+    "S5.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S5.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S6.logits": {
+     "max_rel": 3.430589146091734e-14,
+     "bad": 0
+    },
+    "S6.max": {
+     "max_rel": 7.677271799802118e-15,
+     "bad": 0
+    },
+    "S6.conf": {
+     "max_rel": 4.218847493575595e-15,
+     "bad": 0
+    },
+    "S6.argmax": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "S6.canvas": {
+     "max_rel": 0.0,
+     "bad": 0
+    },
+    "Pixels": {
+     "max_rel": 0.0,
+     "bad": 0
+    }
+   },
+   "failures": [],
+   "n_fail": 0,
+   "error_cells": 0,
+   "stale_cells": 0,
+   "style_mismatch": 0,
+   "pixels_mismatch": 0,
+   "timing": {
+    "xlsx_s": 69.82966899871826,
+    "variants_s": 88.48614120483398,
+    "convert_s": 1086.5550689697266,
+    "read_s": 48.67103052139282,
+    "wall_s": 1294.7633366584778,
+    "batches": 8,
+    "runs": 60
+   },
+   "cases": 60
+  }
+ },
+ "stats": {
+  "cells": 2351273,
+  "formulas": 1232629,
+  "formula_chars": 58102158,
+  "sheets": 141
+ },
+ "min_margin": 9.64556985394438e-07,
+ "styles": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6
+ ],
+ "lint_violations": 0,
+ "functions": {
+  "INDEX": 149257,
+  "SUBSTITUTE": 55,
+  "LOWER": 1,
+  "TRIM": 24,
+  "MID": 24,
+  "REPT": 12,
+  "IF": 10264,
+  "IFERROR": 12,
+  "MATCH": 6156,
+  "MAX": 523790,
+  "SUM": 14,
+  "SUMPRODUCT": 786984,
+  "EXP": 6295,
+  "MOD": 3,
+  "INT": 1,
+  "ABS": 1,
+  "MIN": 1
+ },
+ "steps": [
+  {
+   "step": 1,
+   "tau": 1.0,
+   "min_top2_margin": 2.678904945430105e-06,
+   "margin_case": [
+    "flotation and handmade",
+    178763
+   ],
+   "min_conf_tau_gap": 1.028066520802895e-13,
+   "gap_case": [
+    "a tiny two mammoth, facing left",
+    896870
+   ],
+   "committed_mean": 0.0,
+   "near_tie": true
+  },
+  {
+   "step": 2,
+   "tau": 0.999914,
+   "min_top2_margin": 2.678904945430105e-06,
+   "margin_case": [
+    "flotation and handmade",
+    178763
+   ],
+   "min_conf_tau_gap": 6.464231283587196e-08,
+   "gap_case": [
+    "a saucers alone",
+    86374
+   ],
+   "committed_mean": 106.05,
+   "near_tie": false
+  },
+  {
+   "step": 3,
+   "tau": 0.979443,
+   "min_top2_margin": 1.0634766070438673e-05,
+   "margin_case": [
+    "shattering",
+    660757
+   ],
+   "min_conf_tau_gap": 3.454454772233717e-05,
+   "gap_case": [
+    "the horses card with a wry",
+    516586
+   ],
+   "committed_mean": 105.73333333333333,
+   "near_tie": false
+  },
+  {
+   "step": 4,
+   "tau": 0.666998,
+   "min_top2_margin": 9.64556985394438e-07,
+   "margin_case": [
+    "MERCURY Hind!!",
+    865351
+   ],
+   "min_conf_tau_gap": 2.4272798502145143e-05,
+   "gap_case": [
+    "poly and chapter",
+    16996
+   ],
+   "committed_mean": 216.16666666666666,
+   "near_tie": false
+  },
+  {
+   "step": 5,
+   "tau": 0.5302,
+   "min_top2_margin": 3.604804488510638e-05,
+   "margin_case": [
+    "MERCURY Hind!!",
+    865351
+   ],
+   "min_conf_tau_gap": 3.1212373706068774e-05,
+   "gap_case": [
+    "a big hydroponic stallion",
+    734239
+   ],
+   "committed_mean": 227.06666666666666,
+   "near_tie": false
+  },
+  {
+   "step": 6,
+   "tau": null,
+   "min_top2_margin": 0.0001008420453190162,
+   "margin_case": [
+    "dream asian in tia style",
+    446830
+   ],
+   "min_conf_tau_gap": null,
+   "gap_case": null,
+   "committed_mean": 368.98333333333335,
+   "near_tie": false
+  }
+ ],
+ "cases": 60,
+ "max_rel_per_tab": {
+  "Tokens.clean": 0.0,
+  "Tokens.rest": 0.0,
+  "Tokens.word": 0.0,
+  "Tokens.ids": 0.0,
+  "Tokens.mask": 0.0,
+  "Tokens.denom": 0.0,
+  "H": 6.0000118999865285e-15,
+  "c": 2.052164854833114e-15,
+  "style_logits": 4.836256657956669e-15,
+  "style.max": 4.836256657956669e-15,
+  "style.sum": 1.6385274924670507e-15,
+  "style.exp": 1.3322676295501878e-15,
+  "p_style": 5.551115123125783e-16,
+  "cum": 6.661338147750939e-16,
+  "s0": 0.0,
+  "s1": 0.0,
+  "u": 5.551115123125783e-16,
+  "style": 0.0,
+  "z": 2.052164854833114e-15,
+  "FiLM1": 4.206547108904796e-15,
+  "FiLM2": 4.928227518720302e-15,
+  "FiLM3": 5.187308550358025e-15,
+  "FiLM4": 6.98423507604645e-15,
+  "FiLM5": 5.073745973912198e-15,
+  "FiLM6": 4.971540600477336e-15,
+  "S1.logits": 2.5757174171303632e-14,
+  "S1.max": 5.662724485017686e-15,
+  "S1.conf": 3.6637359812630166e-15,
+  "S1.argmax": 0.0,
+  "S1.canvas": 0.0,
+  "S2.logits": 2.5757174171303632e-14,
+  "S2.max": 5.662724485017686e-15,
+  "S2.conf": 3.6637359812630166e-15,
+  "S2.argmax": 0.0,
+  "S2.canvas": 0.0,
+  "S3.logits": 5.3679726416982096e-14,
+  "S3.max": 9.842964615337203e-15,
+  "S3.conf": 6.38378239159465e-15,
+  "S3.argmax": 0.0,
+  "S3.canvas": 0.0,
+  "S4.logits": 5.873079800267078e-14,
+  "S4.max": 9.981528150181867e-15,
+  "S4.conf": 7.771561172376096e-15,
+  "S4.argmax": 0.0,
+  "S4.canvas": 0.0,
+  "S5.logits": 9.9253938401489e-14,
+  "S5.max": 1.0036002831077153e-14,
+  "S5.conf": 1.0880185641326534e-14,
+  "S5.argmax": 0.0,
+  "S5.canvas": 0.0,
+  "S6.logits": 7.904787935331115e-14,
+  "S6.max": 1.126205957350306e-14,
+  "S6.conf": 8.659739592076221e-15,
+  "S6.argmax": 0.0,
+  "S6.canvas": 0.0,
+  "Pixels": 0.0
+ },
+ "pass": true,
+ "wall_s": 4843.901649951935,
+ "when": "2026-11-04T05:26:30-0500"
+}

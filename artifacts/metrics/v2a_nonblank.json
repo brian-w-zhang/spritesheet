@@ -1,0 +1,16 @@
+{
+ "conf_t0.0": {
+  "n_nonblank": 221,
+  "v2_fg_acc_nonblank": 0.464,
+  "v1_fg_acc_same_subset": 0.67,
+  "v2_coherence": 0.843,
+  "v1_coherence": 0.754
+ },
+ "conf_t1.0": {
+  "n_nonblank": 299,
+  "v2_fg_acc_nonblank": 0.414,
+  "v1_fg_acc_same_subset": 0.608,
+  "v2_coherence": 0.708,
+  "v1_coherence": 0.732
+ }
+}

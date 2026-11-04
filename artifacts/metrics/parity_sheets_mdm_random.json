@@ -1,0 +1,218 @@
+{
+ "gate": "A4",
+ "model": {
+  "source": "random",
+  "model_dir": "artifacts/model/none",
+  "weights_seed": 0,
+  "model": "mdm"
+ },
+ "model_type": "mdm",
+ "sheet": "diffusion",
+ "model_hash": "ed5838a61069ae33",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "K": 32,
+  "E": 12,
+  "C1": 12,
+  "C2": 24,
+  "C3": 48,
+  "T": 2,
+  "tau": [
+   0.9,
+   0.0
+  ],
+  "attn_scale": 0.125,
+  "V": 12119,
+  "model": "mdm"
+ },
+ "cells": 1149297,
+ "formulas": 254541,
+ "when": "2026-11-04T04:43:51-0500",
+ "upload": null,
+ "cases": 6,
+ "pixels_mismatch": 0,
+ "style_mismatch": 0,
+ "max_rel": 7.993605777301127e-15,
+ "latency_s": {
+  "median": 17.313459157943726,
+  "max": 20.015332221984863,
+  "min": 16.64656710624695
+ },
+ "stable_s": {
+  "median": 24.316113471984863,
+  "max": 26.9788601398468
+ },
+ "min_margin": 0.0007733656469444128,
+ "rows": [
+  {
+   "prompt": "the shelter bins with a fted",
+   "seed": 1,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 20.015332221984863,
+   "stable_s": 26.9788601398468,
+   "logits_max_rel": 7.105427357601002e-15,
+   "conf_max_rel": 1.2212453270876722e-15,
+   "c_max_rel": 8.326672684688674e-17,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.02679889045167272,
+   "margins": [
+    0.20009535738771866,
+    0.02679889045167272
+   ],
+   "tau_gaps": [
+    0.018251767505377492,
+    null
+   ],
+   "committed": [
+    30,
+    994
+   ]
+  },
+  {
+   "prompt": "ORAL Performance!!",
+   "seed": 945215,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 17.92430877685547,
+   "stable_s": 24.984299898147583,
+   "logits_max_rel": 7.105427357601002e-15,
+   "conf_max_rel": 1.5543122344752192e-15,
+   "c_max_rel": 1.1102230246251565e-16,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.3531264264772105,
+   "margins": [
+    0.38147073301919754,
+    0.3531264264772105
+   ],
+   "tau_gaps": [
+    0.016884844572079283,
+    null
+   ],
+   "committed": [
+    930,
+    94
+   ]
+  },
+  {
+   "prompt": "calipers poisonous in make style",
+   "seed": 332849,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 17.719873189926147,
+   "stable_s": 26.367191791534424,
+   "logits_max_rel": 6.661338147750939e-15,
+   "conf_max_rel": 1.9984014443252818e-15,
+   "c_max_rel": 9.020562075079397e-17,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.02359217378212186,
+   "margins": [
+    0.12724528169729332,
+    0.02359217378212186
+   ],
+   "tau_gaps": [
+    1.1192246454072574e-06,
+    null
+   ],
+   "committed": [
+    565,
+    459
+   ]
+  },
+  {
+   "prompt": "a big spy absolutely",
+   "seed": 32075,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 16.876621961593628,
+   "stable_s": 23.647927045822144,
+   "logits_max_rel": 7.105427357601002e-15,
+   "conf_max_rel": 1.4432899320127035e-15,
+   "c_max_rel": 2.220446049250313e-16,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.0007733656469444128,
+   "margins": [
+    0.0007733656469444128,
+    0.0007733656469444128
+   ],
+   "tau_gaps": [
+    0.005603846568082216,
+    null
+   ],
+   "committed": [
+    0,
+    1024
+   ]
+  },
+  {
+   "prompt": "two winks fernlikes",
+   "seed": 23406,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 16.907045125961304,
+   "stable_s": 23.621403217315674,
+   "logits_max_rel": 6.217248937900877e-15,
+   "conf_max_rel": 1.3322676295501878e-15,
+   "c_max_rel": 8.326672684688674e-17,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.27171907769745207,
+   "margins": [
+    0.27171907769745207,
+    0.31851965845395114
+   ],
+   "tau_gaps": [
+    0.008963316744507788,
+    null
+   ],
+   "committed": [
+    930,
+    94
+   ]
+  },
+  {
+   "prompt": "",
+   "seed": 26681,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 16.64656710624695,
+   "stable_s": 22.700165271759033,
+   "logits_max_rel": 7.993605777301127e-15,
+   "conf_max_rel": 1.4432899320127035e-15,
+   "c_max_rel": 0.0,
+   "canvas_mismatch_steps": [],
+   "min_margin": 0.0043632081064259864,
+   "margins": [
+    0.12359096414806636,
+    0.0043632081064259864
+   ],
+   "tau_gaps": [
+    0.0005444499549894788,
+    null
+   ],
+   "committed": [
+    933,
+    91
+   ]
+  }
+ ],
+ "requests": 25,
+ "retries": 0,
+ "steps": [
+  {
+   "step": 1,
+   "min_top2_margin": 0.0007733656469444128,
+   "min_conf_tau_gap": 1.1192246454072574e-06
+  },
+  {
+   "step": 2,
+   "min_top2_margin": 0.0007733656469444128,
+   "min_conf_tau_gap": null
+  }
+ ],
+ "pass": true
+}
