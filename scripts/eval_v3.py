@@ -44,7 +44,8 @@ class Model:
         d = os.path.join(ROOT, "artifacts", "model", name)
         self.name, self.dir = name, d
         self.cfg = json.load(open(os.path.join(d, "config.json")))
-        self.v3 = self.cfg.get("model") == "v3"
+        self.v3 = self.cfg.get("model") in ("v3", "v3vq")
+        self.vq = self.cfg.get("model") == "v3vq"
         self.mdm = self.cfg.get("model") == "mdm"
         vp = os.path.join(d, "vocab.txt")
         self.vocab = T.load_vocab(vp if os.path.exists(vp) else os.path.join(E.BUILD, "vocab.txt"))
@@ -54,6 +55,11 @@ class Model:
         if self.mdm:
             from compare_models import load_v2
             self.net, self.c2 = load_v2(d)
+        elif self.vq:
+            from spritesheet.vq import VQNet
+            self.net = VQNet(self.cfg, np.load(os.path.join(ROOT, "data", "build", "v3", "wordvec.npy")))
+            self.net.load_state_dict(torch.load(os.path.join(d, "model.pt"), map_location="cpu"))
+            self.net = self.net.double().eval()
         else:
             from spritesheet.model import SpriteNet
             wv = np.load(os.path.join(d, "weights.npz"))["wordvec"] if self.v3 else np.load(os.path.join(E.BUILD, "wordvec.npy"))
@@ -69,6 +75,17 @@ class Model:
             g, _, _ = gen_v2(self.net, self.c2, caps, self.vocab, seeds)
             return np.asarray(g), None
         ids = torch.tensor([T.encode(c, self.vocab) for c in caps])
+        if self.vq:
+            from spritesheet.vq import seed_uniforms
+            Tn = self.cfg["G"] ** 2
+            out_g, out_c = [], []
+            for i in range(0, len(caps), 128):
+                u = torch.tensor([seed_uniforms(s, Tn) for s in seeds[i:i + 128]], dtype=torch.float64)
+                lg, _ = self.net.generate(ids[i:i + 128], u, self.cfg.get("sample_tau", 1.0))
+                pr = torch.softmax(lg, 1)
+                out_g.append(pr.argmax(1).numpy().astype(np.uint8))
+                out_c.append(pr.max(1).values.mean((1, 2)).numpy())
+            return np.concatenate(out_g), np.concatenate(out_c)
         out_g, out_c = [], []
         for i in range(0, len(caps), 128):
             c = self.net.encode(ids[i:i + 128])
@@ -89,6 +106,17 @@ class Model:
         return [self.rgb[g] for g in grids]
 
 
+def boot_ci(img_emb, txt_emb, n=1000, seed=0):
+    """95% bootstrap CI (over prompts) for R@5 and CLIP score."""
+    sims = (img_emb @ txt_emb.T).numpy()
+    rank = (sims > np.diag(sims)[:, None]).sum(1)
+    r5, cs = (rank < 5).astype(float), np.diag(sims)
+    rng = np.random.default_rng(seed)
+    idx = rng.integers(0, len(cs), (n, len(cs)))
+    q = lambda v: [float(np.quantile(v[idx].mean(1), 0.025)), float(np.quantile(v[idx].mean(1), 0.975))]
+    return {"R@5_ci95": q(r5), "clip_score_ci95": q(cs)}
+
+
 def mode3_changes(g):
     N = g.shape[0]
     ch = 0
@@ -104,7 +132,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--models", required=True)
     ap.add_argument("--tag", default="r1")
-    ap.add_argument("--n-test", type=int, default=300)
+    ap.add_argument("--n-test", type=int, default=1000)
     a = ap.parse_args()
     from spritesheet.data.v3 import eval_set3, Sampler3
     clip = E.Clip()
@@ -126,7 +154,9 @@ def main():
         r = {"params": m.cfg.get("params"), "N": m.cfg.get("N", 32), "steps": m.cfg.get("steps")}
         for k, caps in sets.items():
             g, conf = m.generate(caps, [1 + i for i in range(len(caps))])
-            r[k] = r_precision(clip.img(m.rgbs(g)), txt[k])
+            ie = clip.img(m.rgbs(g))
+            r[k] = r_precision(ie, txt[k])
+            r[k].update(boot_ci(ie, txt[k]))
             if conf is not None:
                 r[k]["mean_pixel_confidence"] = float(conf.mean())
             r[k]["speckle"] = float(np.mean([mode3_changes(x) for x in g]))
@@ -141,7 +171,7 @@ def main():
         r["seed_diversity"] = float(np.mean(div))
         res[m.name] = r
         print(m.name, json.dumps({k: (round(v, 3) if isinstance(v, float) else v if not isinstance(v, dict) else
-                                      {kk: round(vv, 3) for kk, vv in v.items() if kk != "chance_R@1"}) for k, v in r.items()}), flush=True)
+                                      {kk: (round(vv, 3) if isinstance(vv, float) else [round(x, 3) for x in vv]) for kk, vv in v.items() if kk != "chance_R@1"}) for k, v in r.items()}), flush=True)
     json.dump(res, open(out_p, "w"), indent=1)
     # line-ups: rows = models, seed 1
     for gname, prompts in GROUPS.items():
@@ -172,6 +202,57 @@ def main():
             for j, x in enumerate(g):
                 im.paste(Image.fromarray(m.rgb[x]).resize((cs, cs), Image.NEAREST), (left + j * (cs + pad), y))
         im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_seeds_{a.tag}_{m.name}.png"))
+    # panel: 2 held-out test captions per PixelGPT family + 10 novel + 12 adjective prompts, 4 seeds each
+    import collections
+    z = np.load(os.path.join(ROOT, "data", "build", "v3", "imgs_24.npz"))
+    te = np.nonzero(z["split"] == 2)[0]
+    fam = collections.defaultdict(list)
+    for i in te:
+        fam[str(z["category"][i]).split("/")[0]].append(i)
+    rr = np.random.default_rng(5)
+    panel = []
+    for f in sorted(fam):
+        for i in rr.choice(fam[f], 2, replace=False):
+            panel.append(("a " + str(z["caption"][i]), int(i)))
+    panel += [(p, None) for p in NOVEL[:10]] + [(p, None) for p in GROUPS["adjectives"]]
+    seeds = [1, 2, 3, 4]
+    for m in models:
+        cs, pad, per_row = 64, 3, 4
+        cols = 4  # prompts per row, each with 4 seeds
+        nrow = (len(panel) + cols - 1) // cols
+        W = cols * (4 * (cs + pad) + 24)
+        im = Image.new("RGB", (W + 10, 40 + nrow * (cs + 24)), PAPER)
+        d = ImageDraw.Draw(im)
+        d.text((10, 8), f"{m.name} · {len(panel)} prompts × seeds 1-4 (2 held-out captions per PixelGPT family, novel, adjectives)",
+               fill=INK, font=font(16))
+        for k, (p, gi) in enumerate(panel):
+            g, _ = m.generate([p] * 4, seeds)
+            r_, c_ = divmod(k, cols)
+            x0, y0 = 10 + c_ * (4 * (cs + pad) + 24), 34 + r_ * (cs + 24)
+            for j in range(4):
+                im.paste(Image.fromarray(m.rgb[g[j]]).resize((cs, cs), Image.NEAREST), (x0 + j * (cs + pad), y0))
+            d.text((x0, y0 + cs + 2), p[:44], fill=MUTED, font=font(11))
+        im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_panel_{a.tag}_{m.name}.png"))
+    # ground truth vs models on 24 random held-out test captions (seed 1)
+    pick = rr.choice(te, 24, replace=False)
+    gcaps = [str(z["caption"][i]) for i in pick]
+    cs, pad, left = 72, 4, 150
+    im = Image.new("RGB", (left + 24 * (cs + pad) + 10, 60 + (len(models) + 1) * (cs + pad) + 10), PAPER)
+    d = ImageDraw.Draw(im)
+    d.text((10, 8), "held-out test captions: real sprite (top) vs each model (seed 1)", fill=INK, font=font(18))
+    for j, cap in enumerate(gcaps):
+        d.text((left + j * (cs + pad), 34), cap[:11], fill=MUTED, font=font(9))
+        t = z["imgs"][pick[j]]
+        im.paste(Image.fromarray(np.where(t[..., None] > 0, s3.pal.rgb[np.maximum(t, 1) - 1], BG)).resize((cs, cs), Image.NEAREST),
+                 (left + j * (cs + pad), 50))
+    d.text((10, 50 + cs // 2), "ground truth", fill=INK, font=font(14))
+    for i, m in enumerate(models):
+        g, _ = m.generate(gcaps, [1] * len(gcaps))
+        y = 50 + (i + 1) * (cs + pad)
+        d.text((10, y + cs // 2 - 8), m.name, fill=INK, font=font(14))
+        for j in range(len(gcaps)):
+            im.paste(Image.fromarray(m.rgb[g[j]]).resize((cs, cs), Image.NEAREST), (left + j * (cs + pad), y))
+    im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_groundtruth_{a.tag}.png"))
     print("wrote", out_p)
 
 

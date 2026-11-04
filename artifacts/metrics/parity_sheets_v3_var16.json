@@ -1,0 +1,161 @@
+{
+ "gate": "A4",
+ "model": {
+  "source": "trained",
+  "model_dir": "artifacts/model/v3_var16",
+  "vocab": "artifacts/model/v3_var16/vocab.txt",
+  "palette": "artifacts/model/v3_var16/palette.json"
+ },
+ "model_type": "v1",
+ "sheet": "v3",
+ "model_hash": "61e15336ca9fcb0e",
+ "config": {
+  "N": 24,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 16,
+  "e": 8,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "K": 48,
+  "attn_scale": 0.125,
+  "V": 16119,
+  "model": "v3",
+  "steps": 60000,
+  "variants": true,
+  "emb_noise": 0.15,
+  "train_seconds": 7340.0,
+  "data": "PixelGPT-24x24-216K train split",
+  "params": 606593
+ },
+ "cells": 1811522,
+ "formulas": 136872,
+ "when": "2026-11-04T12:51:53-0500",
+ "upload": {
+  "tabs": 45,
+  "value_requests": 26,
+  "tabs_s": 3.417116165161133,
+  "values_s": 80.07950806617737,
+  "inert": false,
+  "activate_s": 0.0,
+  "upload_s": 91.38873410224915,
+  "requests": 33,
+  "retries": 0,
+  "bytes_sent": 37965510,
+  "format": {
+   "requested_px": 12,
+   "grids": 1,
+   "cf_rules": 49,
+   "row_px": [
+    12,
+    12
+   ],
+   "col_px": [
+    12,
+    12
+   ],
+   "last_grid_row_px": [
+    12,
+    12
+   ],
+   "last_grid_col_px": [
+    12,
+    12
+   ]
+  }
+ },
+ "cases": 6,
+ "pixels_mismatch": 0,
+ "style_mismatch": 0,
+ "max_rel": 9.992007221626409e-15,
+ "latency_s": {
+  "median": 17.195911407470703,
+  "max": 22.71900200843811,
+  "min": 15.447271823883057
+ },
+ "stable_s": {
+  "median": 20.625605821609497,
+  "max": 26.514028787612915
+ },
+ "min_margin": 0.0005436293654415003,
+ "rows": [
+  {
+   "prompt": "the nardo syndrome with a spigot",
+   "seed": 1,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 15.447271823883057,
+   "stable_s": 18.685882806777954,
+   "logits_max_rel": 3.814537107582535e-15,
+   "c_max_rel": 2.220446049250313e-16,
+   "min_margin": 0.02001592366789051,
+   "rereads": 0
+  },
+  {
+   "prompt": "buttonhole",
+   "seed": 2208,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 17.116766929626465,
+   "stable_s": 20.65984582901001,
+   "logits_max_rel": 9.992007221626409e-15,
+   "c_max_rel": 2.788243777335372e-16,
+   "min_margin": 0.00598602276505078,
+   "rereads": 0
+  },
+  {
+   "prompt": "KNOTS Ponytail!!",
+   "seed": 729633,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 16.64991593360901,
+   "stable_s": 20.31824278831482,
+   "logits_max_rel": 4.3298697960381105e-15,
+   "c_max_rel": 3.3306690738754696e-16,
+   "min_margin": 0.0012041504327209296,
+   "rereads": 0
+  },
+  {
+   "prompt": "bond leech in tracy style",
+   "seed": 467022,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 17.27505588531494,
+   "stable_s": 20.591365814208984,
+   "logits_max_rel": 3.1086244689504383e-15,
+   "c_max_rel": 1.249000902703301e-16,
+   "min_margin": 0.017909105507862844,
+   "rereads": 0
+  },
+  {
+   "prompt": "a big ined pachyrhinosaurus",
+   "seed": 279267,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 22.71900200843811,
+   "stable_s": 26.514028787612915,
+   "logits_max_rel": 8.104628079763643e-15,
+   "c_max_rel": 5.551115123125783e-16,
+   "min_margin": 0.0005436293654415003,
+   "rereads": 0
+  },
+  {
+   "prompt": "",
+   "seed": 756589,
+   "pixels_match": true,
+   "style_match": true,
+   "latency_s": 18.503041744232178,
+   "stable_s": 22.245457887649536,
+   "logits_max_rel": 3.3306690738754696e-15,
+   "c_max_rel": 0.0,
+   "min_margin": 0.002447664348289358,
+   "rereads": 0
+  }
+ ],
+ "requests": 57,
+ "retries": 0,
+ "pass": true
+}

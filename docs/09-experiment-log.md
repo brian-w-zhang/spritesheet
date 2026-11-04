@@ -158,3 +158,19 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **Worse:** by eye, mostly flat silhouettes with little interior detail (white blobs for cat, owl, skeleton; a sword is a dot; the castle is blank). Novel-prompt R@5 0.35 (v1-XL 0.41). PixelGPT-test R@5 0.067 (v1-XL 0.057).
 - **Diagnosis:** 16 variants carry only 4 bits of "which drawing". Winner-takes-all spent them on the cheapest split (colour, silhouette), so interior detail still averages within a variant. The 216K captions are specific and rarely repeat, so they are far less predictable than emoji (7 clean renders per concept): training fg accuracy 0.36 vs ~0.57 for v1-XL.
 - **Next:** the control (v3_base, no variants) to measure what the variants bought. Then give the latent more bits: a small grid of discrete codes (a VQ-style tokenizer at 3×3) with a cheap prior over 9 codes, so the decoder gets enough information to draw detail.
+
+### v3_base control (12:35): variants bought diversity, not detail [metrics/v3_eval_r2.json; figures/v3_lineup_r2_*.png; runs/v3_base/]
+- v3_base (no variants, same data, arch and steps; 605,498 params): **by eye about the same as v3_var16**, mostly flat blobs, with slightly better numbers (novel R@5 0.41 vs 0.35; colour-adjective accuracy 0.933 vs 0.896; PixelGPT-test R@5 0.077 vs 0.067). Seed diversity 0.0 (deterministic) vs 0.293.
+- **Conclusion:** 16 winner-takes-all variants are too few bits. They give seed variety (colour, silhouette) but no structure. The remaining blur is averaging *within* each variant. v1-XL (emoji + PixelGPT, 150k steps) still draws the most detail, because emoji give clean, repeated targets per concept.
+- **Next:** v3_vq (3×3 grid of 64 codes, 54 bits, autoregressive prior); started 12:34.
+
+### Better evaluation + v3 in the real sheet (13:40) [metrics/v3_eval_r3.json, parity_sheets_v3_var16.json; figures/v3_panel_r3_*.png; figures/v3_groundtruth_r3.png is local only (real PixelGPT sprites)]
+- **Evaluation upgrade** (after Brian asked whether ~30 by-eye prompts are enough): 1,000 held-out PixelGPT test captions, bootstrap 95% CIs, and a 64-prompt × 4-seed panel per model (2 held-out captions from each of the 21 PixelGPT families, plus novel and adjective prompts, ≈256 images). Also a ground-truth strip (real sprite vs each model), kept local because of the licence.
+- **Results:**
+  - Novel prompts R@5 (n = 100): v3_base 0.41 [0.32, 0.51], v3_var16 0.35 [0.26, 0.45], v1-XL 0.41 [0.31, 0.50]. **A statistical tie;** the earlier 0.35-vs-0.41 "gap" was noise.
+  - Held-out PixelGPT captions R@5 (n = 1,000): v3_base 0.027 [0.018, 0.038], v3_var16 0.033 [0.023, 0.044], v1-XL 0.013 [0.007, 0.020]. Real sprites: 0.209.
+  - By eye, all models get colour and rough silhouette but no outlines or detail.
+- **v3_var16 live in the v3 Google Sheet:** 136,872 formulas; 6/6 prompts pixel-identical to the reference, max rel 9.99e-15, median 17.2 s via the API.
+- **v3_vq6 (6×6 × 256 codes) at 5k steps:** reconstructions through the codes are much better than with 3×3 (val fg accuracy 0.76 vs 0.57) and keep the shapes. Prompt-driven samples are still blobs, so the text→codes prior is the bottleneck (NLL 3.55 nats/code vs 5.5 for uniform).
+- **Size budget** (Brian: use the room): at 24×24, width costs stored weights and multiply-adds more than formulas. 384/192/96/48 with 5×5 kernels = 186k formulas and 158M multiply-adds (2.7× v1-XL); 512/256/128/64 with 5×5 = 236k and 281M (4.8×). The final v3 trains the winning idea at that size for 150k+ steps.
+- **Licence hygiene:** figures and snapshots that show real PixelGPT sprites (ground-truth strips, VQ reconstruction snapshots) are gitignored. Only model outputs are published.

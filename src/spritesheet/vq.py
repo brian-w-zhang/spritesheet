@@ -17,8 +17,7 @@ from .model import SpriteNet
 class Encoder(nn.Module):
     def __init__(self, K1, Kc, G, width=128):
         super().__init__()
-        assert G == 3, "prototype: 3x3 code grid (decoder starts at C0 channels)"
-        n_down = 3
+        n_down = {3: 3, 6: 2}[G]  # 24x24 → 3x3 or 6x6
         layers, cin = [nn.Conv2d(K1, width // 2, 3, padding=1), nn.ReLU()], width // 2
         for i in range(n_down):
             layers += [nn.Conv2d(cin, width, 4, stride=2, padding=1), nn.ReLU(), nn.Conv2d(width, width, 3, padding=1), nn.ReLU()]
@@ -41,11 +40,12 @@ class VQNet(nn.Module):
         self.sn = SpriteNet(base, wordvec)          # text encoder + convs + films + out (dense/style unused)
         self.cfg["attn_scale"] = self.sn.cfg["attn_scale"]
         self.enc = Encoder(K + 1, Kc, G)
-        self.codebook = nn.Parameter(torch.randn(Kc, C[0]) * 0.5)
-        self.dense_c = nn.Linear(d, G * G * C[0])  # text → per-position bias at the code grid
         n_up = int(round(math.log2(cfg["N"] / G)))
         assert G * 2 ** n_up == cfg["N"] and n_up in (2, 3)
         self.n_up = n_up
+        self.cg = C[3 - n_up]                       # channels at the code grid (C0 for 3x3, C1 for 6x6)
+        self.codebook = nn.Parameter(torch.randn(Kc, self.cg) * 0.5)
+        self.dense_c = nn.Linear(d, G * G * self.cg)  # text → per-position bias at the code grid
         # prior
         T = G * G
         self.p_emb = nn.Parameter(torch.randn(Kc, e) * 0.3)
@@ -55,7 +55,7 @@ class VQNet(nn.Module):
     # ---------------- decoder
     def decode_soft(self, c, code_w):
         """code_w: [B, T, Kc] one-hot (or straight-through soft) → logits [B, K+1, N, N]."""
-        B, G, C0 = c.shape[0], self.cfg["G"], self.cfg["C0"]
+        B, G, C0 = c.shape[0], self.cfg["G"], self.cg
         emb = code_w @ self.codebook                                  # [B, T, C0]
         g = F.relu(emb + self.dense_c(c).view(B, G * G, C0))
         g = g.view(B, G, G, C0).permute(0, 3, 1, 2)
@@ -102,3 +102,16 @@ class VQNet(nn.Module):
         codes = self.sample_codes(c, uniforms, tau)
         w = F.one_hot(codes, self.cfg["Kc"]).float()
         return self.decode_soft(c, w), codes
+
+
+def seed_uniforms(seed, T):
+    """Per-position uniforms from the seed, sheet-computable: MINSTD chain from s0 = MOD(INT(ABS(seed)),M31-1)+1,
+    discarding the first step (as reference.lcg_uniform); u_t = s_{t+2} / M31."""
+    M31, A = 2147483647, 48271
+    s = int(math.floor(abs(seed))) % (M31 - 1) + 1
+    s = (A * s) % M31
+    out = []
+    for _ in range(T):
+        s = (A * s) % M31
+        out.append(s / M31)
+    return out

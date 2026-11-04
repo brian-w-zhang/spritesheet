@@ -27,3 +27,6 @@ lo_profile*/
 *.xlsx
 artifacts/figures/vs_spritex32.png
 artifacts/tmp_sx_examples.npy
+# images that contain real PixelGPT sprites (licence: no redistribution); local only
+artifacts/figures/v3_groundtruth_*.png
+artifacts/runs/*vq*/snapshots/*.png
