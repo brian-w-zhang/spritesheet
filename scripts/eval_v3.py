@@ -41,9 +41,15 @@ HUE_OK = {"red": {0, 11}, "orange": {0, 1}, "yellow": {1, 2}, "green": {3, 4, 5}
 
 class Model:
     def __init__(self, name):
-        d = os.path.join(ROOT, "artifacts", "model", name)
+        # "dir@g=2,t=0.7": VQ sampling overrides (g = classifier-free guidance weight, t = prior temperature)
+        base, _, opts = name.partition("@")
+        d = os.path.join(ROOT, "artifacts", "model", base)
         self.name, self.dir = name, d
+        self.fname = name.replace("@", "_").replace("=", "").replace(",", "_")
         self.cfg = json.load(open(os.path.join(d, "config.json")))
+        for kv in filter(None, opts.split(",")):
+            k, v = kv.split("=")
+            self.cfg[{"g": "guidance", "t": "sample_tau"}[k]] = float(v)
         self.v3 = self.cfg.get("model") in ("v3", "v3vq")
         self.vq = self.cfg.get("model") == "v3vq"
         self.mdm = self.cfg.get("model") == "mdm"
@@ -81,7 +87,7 @@ class Model:
             out_g, out_c = [], []
             for i in range(0, len(caps), 128):
                 u = torch.tensor([seed_uniforms(s, Tn) for s in seeds[i:i + 128]], dtype=torch.float64)
-                lg, _ = self.net.generate(ids[i:i + 128], u, self.cfg.get("sample_tau", 1.0))
+                lg, _ = self.net.generate(ids[i:i + 128], u, self.cfg.get("sample_tau", 1.0), self.cfg.get("guidance", 0.0))
                 pr = torch.softmax(lg, 1)
                 out_g.append(pr.argmax(1).numpy().astype(np.uint8))
                 out_c.append(pr.max(1).values.mean((1, 2)).numpy())
@@ -201,7 +207,7 @@ def main():
             d.text((10, y + cs // 2 - 8), p, fill=INK, font=font(14))
             for j, x in enumerate(g):
                 im.paste(Image.fromarray(m.rgb[x]).resize((cs, cs), Image.NEAREST), (left + j * (cs + pad), y))
-        im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_seeds_{a.tag}_{m.name}.png"))
+        im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_seeds_{a.tag}_{m.fname}.png"))
     # panel: 2 held-out test captions per PixelGPT family + 10 novel + 12 adjective prompts, 4 seeds each
     import collections
     z = np.load(os.path.join(ROOT, "data", "build", "v3", "imgs_24.npz"))
@@ -232,7 +238,7 @@ def main():
             for j in range(4):
                 im.paste(Image.fromarray(m.rgb[g[j]]).resize((cs, cs), Image.NEAREST), (x0 + j * (cs + pad), y0))
             d.text((x0, y0 + cs + 2), p[:44], fill=MUTED, font=font(11))
-        im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_panel_{a.tag}_{m.name}.png"))
+        im.save(os.path.join(ROOT, "artifacts", "figures", f"v3_panel_{a.tag}_{m.fname}.png"))
     # ground truth vs models on 24 random held-out test captions (seed 1)
     pick = rr.choice(te, 24, replace=False)
     gcaps = [str(z["caption"][i]) for i in pick]

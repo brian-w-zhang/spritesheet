@@ -32,6 +32,9 @@ def main():
     ap.add_argument("--sample-tau", type=float, default=0.8)
     ap.add_argument("--cond-drop", type=float, default=0.0, help="share of prior training rows with the prompt blanked (enables guidance)")
     ap.add_argument("--init", default=None, help="warm-start from a v3vq model.pt (e.g. to continue training)")
+    ap.add_argument("--prior-only", action="store_true",
+                    help="train only the prior (p_emb/p1/p2) on frozen encoder codes; the decoder and text encoder stay as --init, "
+                         "so the new prior can be grafted onto a fine-tuned decoder. Prior tensors whose shape changed (e.g. --cfg hp) start fresh")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", required=True)
     ap.add_argument("--note", default="")
@@ -47,14 +50,21 @@ def main():
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
     net = VQNet(cfg, wv).to(dev)
     if a.init:
-        net.load_state_dict(torch.load(a.init, map_location=dev))
+        sd, own = torch.load(a.init, map_location=dev), net.state_dict()
+        keep = {k: v for k, v in sd.items() if k in own and own[k].shape == v.shape}
+        net.load_state_dict(keep, strict=False)
+        print("init from", a.init, "fresh:", sorted(set(own) - set(keep)), flush=True)
+    PRIOR = ("p_emb", "p1.", "p2.")
+    if a.prior_only:
+        for n_, p in net.named_parameters():
+            p.requires_grad = n_.startswith(PRIOR)
     net.sn.__class__ = Net3   # word-vector noise in the text encoder (training only)
     net.sn.emb_noise = a.emb_noise
     sampler = Sampler3("train", seed=a.seed)
     vc, vt = eval_set3("validation", 512)
     v_ids = torch.tensor([T.encode(c, vocab) for c in vc], device=dev)
     v_tgt = torch.as_tensor(vt, dtype=torch.long, device=dev)
-    opt = torch.optim.AdamW(net.parameters(), lr=a.lr, weight_decay=1e-4)
+    opt = torch.optim.AdamW([p for p in net.parameters() if p.requires_grad], lr=a.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=a.lr, total_steps=a.steps, pct_start=0.05)
     cw = torch.ones(cfg["K"] + 1, device=dev)
     cw[0] = a.bg_weight
@@ -118,10 +128,17 @@ def main():
         caps, tgt = sampler.batch(a.batch)
         ids = torch.tensor([T.encode(c, vocab) for c in caps], device=dev)
         tgt = torch.as_tensor(tgt, dtype=torch.long, device=dev)
-        c = net.sn.encode(ids)
-        w, lg = net.encode_codes(tgt, tau_at(step))
-        rec = net.decode_soft(c, w)
-        loss_rec = F.cross_entropy(rec, tgt, weight=cw)
+        if a.prior_only:
+            with torch.no_grad():
+                c = net.sn.encode(ids)   # word-vector noise kept: it only regularises the prior here
+                w, lg = net.encode_codes(tgt, a.tau1)
+                w = F.one_hot(lg.argmax(-1), cfg["Kc"]).float()   # clean codes (what the decoder reconstructs from)
+            loss_rec = torch.zeros((), device=dev)
+        else:
+            c = net.sn.encode(ids)
+            w, lg = net.encode_codes(tgt, tau_at(step))
+            rec = net.decode_soft(c, w)
+            loss_rec = F.cross_entropy(rec, tgt, weight=cw)
         codes = w.argmax(-1).detach()
         cp = c
         if a.cond_drop > 0:
@@ -130,10 +147,10 @@ def main():
         loss_pr = F.cross_entropy(net.prior_logits(cp, codes).flatten(0, 1), codes.flatten())
         pm = torch.softmax(lg, -1).mean(0)                        # [T, Kc] batch usage per position
         usage_ent = -(pm * torch.log(pm + 1e-9)).sum(-1).mean()
-        loss = loss_rec + a.prior_weight * loss_pr - a.usage_weight * usage_ent
+        loss = loss_rec + a.prior_weight * loss_pr - (0.0 if a.prior_only else a.usage_weight) * usage_ent
         opt.zero_grad(set_to_none=True)
         loss.backward()
-        torch.nn.utils.clip_grad_norm_(net.parameters(), 1.0)
+        torch.nn.utils.clip_grad_norm_([p for p in net.parameters() if p.requires_grad], 1.0)
         opt.step()
         sched.step()
         if step % 500 == 0 or step == 1:
@@ -151,7 +168,7 @@ def main():
             torch.save(net.state_dict(), os.path.join(run_dir, f"ckpt_{step:06d}.pt"))
     net.eval()
     net = net.cpu()
-    cfg_out = dict(net.cfg, model="v3vq", steps=a.steps, sample_tau=a.sample_tau, cond_drop=a.cond_drop, train_seconds=round(time.time() - t0, 1),
+    cfg_out = dict(net.cfg, model="v3vq", steps=a.steps, sample_tau=a.sample_tau, cond_drop=a.cond_drop, prior_only=a.prior_only, init=a.init, train_seconds=round(time.time() - t0, 1),
                    params_sheet=int(sum(p.numel() for n_, p in net.named_parameters() if not n_.startswith("enc.") and "dense" not in n_.split(".")[1:2])),
                    params_total=int(sum(p.numel() for p in net.parameters())))
     json.dump(cfg_out, open(os.path.join(a.out, "config.json"), "w"), indent=1)
