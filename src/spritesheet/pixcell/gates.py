@@ -214,7 +214,7 @@ def gate_a3(model_dir=None, n_prompts=20, seeds=2, engines=ENGINES, lo_max=None,
     wb = emit.compile_model(w, cfg, vocab, pal)
     t_compile = time.time() - t0
     cases = e2e_cases(n_prompts, vocab, seeds)
-    res = {"gate": "A3", "model": src, "config": cfg, "compile_s": t_compile, "prompts": n_prompts, "seeds": seeds,
+    res = {"gate": "A3", "model": src, "model_hash": wb.meta.get("model_hash"), "config": cfg, "compile_s": t_compile, "prompts": n_prompts, "seeds": seeds,
            "engines": {}}
     read = None if all_tabs else E2E_READ
     for eng in engines:
