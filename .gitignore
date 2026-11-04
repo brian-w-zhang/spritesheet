@@ -21,3 +21,7 @@ artifacts/preflight/
 data/build/**/bases_*.npz
 data/build/
 artifacts/figures/dataset_samples.png
+arr.xlsx
+lo_out*/
+lo_profile*/
+*.xlsx
