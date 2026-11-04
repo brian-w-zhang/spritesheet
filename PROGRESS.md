@@ -10,7 +10,7 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
 | A2 | MUST | Op parity (HyperFormula + LibreOffice) | TODO | |
 | A3 | MUST | End-to-end parity (local) | TODO | |
 | A4 | MUST* | End-to-end parity (Google Sheets) | TODO | |
-| A5 | MUST | Data pipeline tests | TODO | |
+| A5 | MUST | Data pipeline tests | PASS | `uv run pytest -q tests/test_data.py` → `9 passed` |
 | B | MUST | Quality metrics | TODO | |
 | C1–C3 | MUST | Retrieval / BoW / no-CLIP-table | TODO | |
 | C4 | MUST | SpriteX32 head-to-head | TODO | |
@@ -24,3 +24,5 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
 
 ## Log
 - 00:30 · Setup verified: Sheets probe PASS (service account → shared sheet), MPS available, data + CLIP local.
+- 00:45 · Data pipeline done (tier 0: 300 concepts / 1,800 bases; tier 1: 1,409 concepts, 8,358 emoji bases + 20,000 PixelGPT; S = 7 styles, K = 32). CLIP word table V = 12,119, d = 64 (d chosen by a synonym-rank check: puppy→dog rank 37 at d=64 vs 233 at d=32).
+- 00:50 · torch twin == numpy reference (test). Tier-0 bring-up (165k params, 4k steps): shapes and colours right, details blurry; train fg-pixel acc ≈ 0.50. Training a larger model (C = 96/64/48/32, 15k steps).
