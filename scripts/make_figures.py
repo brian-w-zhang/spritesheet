@@ -133,9 +133,9 @@ def main():
     if os.path.exists(ex):
         items = []
         for cap, sx, ours in np.load(ex, allow_pickle=True):
-            items += [(np.asarray(sx, dtype=np.uint8), cap, "SpriteX32 (11.4M + CLIP, 50 steps, GPU)"),
-                      (np.asarray(ours, dtype=np.uint8), cap, "SpriteSheet (1 pass, in a spreadsheet)")]
-        grid(items, 6, title="Same prompts: SpriteX32 vs SpriteSheet", path=os.path.join(FIG, "vs_spritex32.png"))
+            items += [(np.asarray(sx, dtype=np.uint8), cap, "SpriteX32 · 50 steps, GPU"),
+                      (np.asarray(ours, dtype=np.uint8), cap, "SpriteSheet · 1 pass, sheet")]
+        grid(items, 6, title="SpriteX32 (~75M params, 50 steps, GPU) vs SpriteSheet (310k, 1 pass, in a sheet)", path=os.path.join(FIG, "vs_spritex32.png"))
 
 
 if __name__ == "__main__":

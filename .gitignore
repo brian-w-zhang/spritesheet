@@ -25,3 +25,5 @@ arr.xlsx
 lo_out*/
 lo_profile*/
 *.xlsx
+artifacts/figures/vs_spritex32.png
+artifacts/tmp_sx_examples.npy

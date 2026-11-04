@@ -1,0 +1,59 @@
+{
+ "spritex32": {
+  "unet_params": 11405827,
+  "text_encoder_params": 63428096,
+  "steps": 50,
+  "guidance": 3.0,
+  "device": "mps"
+ },
+ "spritesheet": {
+  "params": 309648,
+  "steps": 1
+ },
+ "sets": {
+  "heldout_combo": {
+   "spritex32": {
+    "clip_score": 0.24906191229820251,
+    "clip_concept_top1": 0.008333333767950535,
+    "clip_concept_top5": 0.02500000037252903
+   },
+   "spritesheet": {
+    "clip_score": 0.2673743963241577,
+    "clip_concept_top1": 0.0,
+    "clip_concept_top5": 0.02500000037252903
+   },
+   "seconds_per_image": {
+    "spritex32_torch": 0.2574977338314056,
+    "spritesheet_torch": 0.0020398418108622234
+   }
+  },
+  "unseen_words": {
+   "spritex32": {
+    "clip_score": 0.24790480732917786,
+    "clip_concept_top1": 0.0,
+    "clip_concept_top5": 0.0
+   },
+   "spritesheet": {
+    "clip_score": 0.24577583372592926,
+    "clip_concept_top1": 0.0,
+    "clip_concept_top5": 0.0
+   },
+   "seconds_per_image": {
+    "spritex32_torch": 0.2486355404059092,
+    "spritesheet_torch": 0.001844567060470581
+   }
+  },
+  "pixelgpt_test": {
+   "spritex32": {
+    "clip_score": 0.23395074903964996
+   },
+   "spritesheet": {
+    "clip_score": 0.2463075965642929
+   },
+   "seconds_per_image": {
+    "spritex32_torch": 0.24647375146547953,
+    "spritesheet_torch": 0.0016599337259928385
+   }
+  }
+ }
+}

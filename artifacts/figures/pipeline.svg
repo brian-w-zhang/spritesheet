@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1700" height="360" viewBox="0 0 1700 360" font-family="Helvetica, Arial, sans-serif">
+<rect width="1700" height="360" fill="#ffffff"/>
+<text x="55" y="54" font-size="30" fill="#201e26">Prompt cell → sprite cells: one recalculation, 169,526 formulas</text>
+<text x="55" y="88" font-size="19" fill="#78748a">1,282,295 cells in 45 tabs (6.4% of the 20M-cell Google Sheets limit)</text>
+<rect x="55" y="140" width="270" height="150" rx="14" fill="#f6f4ef" stroke="#d9d5e0"/>
+<text x="75" y="185" font-size="24" fill="#201e26">Tokens</text>
+<text x="75" y="215" font-size="16" fill="#78748a">tokenizer</text>
+<text x="75" y="265" font-size="26" fill="#e8705b">51</text>
+<text x="111" y="265" font-size="16" fill="#78748a">formulas</text>
+<path d="M333 215 L377 215" stroke="#201e26" stroke-width="2.5"/>
+<path d="M369 207 L379 215 L369 223" fill="none" stroke="#201e26" stroke-width="2.5"/>
+<rect x="385" y="140" width="270" height="150" rx="14" fill="#f6f4ef" stroke="#d9d5e0"/>
+<text x="405" y="185" font-size="24" fill="#201e26">Encoder</text>
+<text x="405" y="215" font-size="16" fill="#78748a">CLIP word table + attention</text>
+<text x="405" y="265" font-size="26" fill="#e8705b">7,368</text>
+<text x="483" y="265" font-size="16" fill="#78748a">formulas</text>
+<path d="M663 215 L707 215" stroke="#201e26" stroke-width="2.5"/>
+<path d="M699 207 L709 215 L699 223" fill="none" stroke="#201e26" stroke-width="2.5"/>
+<rect x="715" y="140" width="270" height="150" rx="14" fill="#f6f4ef" stroke="#d9d5e0"/>
+<text x="735" y="185" font-size="24" fill="#201e26">Latent</text>
+<text x="735" y="215" font-size="16" fill="#78748a">seeded style sampler</text>
+<text x="735" y="265" font-size="26" fill="#e8705b">170</text>
+<text x="785" y="265" font-size="16" fill="#78748a">formulas</text>
+<path d="M993 215 L1037 215" stroke="#201e26" stroke-width="2.5"/>
+<path d="M1029 207 L1039 215 L1029 223" fill="none" stroke="#201e26" stroke-width="2.5"/>
+<rect x="1045" y="140" width="270" height="150" rx="14" fill="#f6f4ef" stroke="#d9d5e0"/>
+<text x="1065" y="185" font-size="24" fill="#201e26">Decoder</text>
+<text x="1065" y="215" font-size="16" fill="#78748a">dense + 3 conv blocks</text>
+<text x="1065" y="265" font-size="26" fill="#e8705b">125,072</text>
+<text x="1171" y="265" font-size="16" fill="#78748a">formulas</text>
+<path d="M1323 215 L1367 215" stroke="#201e26" stroke-width="2.5"/>
+<path d="M1359 207 L1369 215 L1359 223" fill="none" stroke="#201e26" stroke-width="2.5"/>
+<rect x="1375" y="140" width="270" height="150" rx="14" fill="#f6f4ef" stroke="#d9d5e0"/>
+<text x="1395" y="185" font-size="24" fill="#201e26">Logits → Pixels</text>
+<text x="1395" y="215" font-size="16" fill="#78748a">33-class argmax</text>
+<text x="1395" y="265" font-size="26" fill="#e8705b">35,840</text>
+<text x="1487" y="265" font-size="16" fill="#78748a">formulas</text>
+</svg>

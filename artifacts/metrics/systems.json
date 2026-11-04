@@ -1,6 +1,6 @@
 {
- "model_hash": "1a5c8db0e84d7e89",
- "model_dir": "../../../../private/tmp/claude-501/-Users-junzhang-Projects-spritesheet/9fcd60fd-03ae-433d-9143-938fc3dec60b/scratchpad/tmpmodel",
+ "model_hash": "8b3c09aed16a19ab",
+ "model_dir": "artifacts/model/v32",
  "config": {
   "N": 32,
   "L": 12,
@@ -8,38 +8,38 @@
   "h": 128,
   "S": 7,
   "e": 8,
-  "C0": 96,
+  "C0": 128,
   "C1": 64,
   "C2": 48,
   "C3": 32,
   "K": 32,
   "attn_scale": 0.125,
   "V": 12119,
-  "tier": 0,
-  "steps": 15000,
+  "tier": 1,
+  "steps": 40000,
   "bow": false,
   "learn_wordvec": false,
   "mix": null,
   "pixelgpt_n": null,
-  "train_seconds": 726.2,
-  "params": 253840
+  "train_seconds": 3151.8,
+  "params": 309648
  },
- "trainable_params_excl_wordtable": 253840,
+ "trainable_params_excl_wordtable": 309648,
  "wordtable_values": 775616,
- "total_cells": 1222767,
- "formula_cells": 166966,
- "value_cells": 1055801,
- "formula_chars": 6127694,
+ "total_cells": 1282295,
+ "formula_cells": 169526,
+ "value_cells": 1112769,
+ "formula_chars": 6135399,
  "tabs": 45,
  "cell_limit_google_sheets": 20000000,
- "share_of_cell_limit": 0.06113835,
+ "share_of_cell_limit": 0.06411475,
  "value_cell_groups": {
-  "weights (W_*, WordVec, style/palette tables)": 1029456,
+  "weights (W_*, WordVec, style/palette tables)": 1085264,
   "vocabulary": 12119
  },
- "xlsx_bytes": 13881731,
- "compile_s": 0.34001994132995605,
- "numpy_forward_s": 0.006772744655609131,
+ "xlsx_bytes": 14598011,
+ "compile_s": 0.3531792163848877,
+ "numpy_forward_s": 0.00761265754699707,
  "per_tab": {
   "Prompt": {
    "formulas": 1025,
@@ -137,12 +137,16 @@
    "formulas": 170,
    "values": 0
   },
+  "About": {
+   "formulas": 0,
+   "values": 18
+  },
   "W_d": {
    "formulas": 0,
-   "values": 112128
+   "values": 149504
   },
   "Dense": {
-   "formulas": 1536,
+   "formulas": 2048,
    "values": 0
   },
   "W_f1": {
@@ -155,11 +159,11 @@
   },
   "W_c1": {
    "formulas": 0,
-   "values": 55296
+   "values": 73728
   },
   "Up_1": {
-   "formulas": 6144,
-   "values": 3456
+   "formulas": 8192,
+   "values": 4608
   },
   "Conv_1": {
    "formulas": 4096,
@@ -216,29 +220,26 @@
   "Hex": {
    "formulas": 1024,
    "values": 0
-  },
-  "About": {
-   "formulas": 0,
-   "values": 10
   }
  },
  "local": {
-  "same_model": false,
-  "hyperformula_build_s": 25.095000000000002,
-  "hyperformula_median_prompt_s": 1.764,
-  "libreoffice_wall_s": 271.71861481666565,
-  "libreoffice_cases": 100
+  "same_model": true,
+  "hyperformula_build_s": 990.855,
+  "hyperformula_median_prompt_s": 5.064,
+  "libreoffice_wall_s": 2690.9211888313293,
+  "libreoffice_cases": 400
  },
  "sheets": {
-  "same_model": false,
-  "upload_s": 106.02228665351868,
-  "upload_bytes": 10652669,
-  "upload_requests": 15,
+  "same_model": true,
+  "upload_s": 208.26284503936768,
+  "upload_bytes": 28555280,
+  "upload_requests": 27,
   "latency_s": {
-   "median": 11.399211287498474,
-   "max": 12.135082006454468,
-   "min": 3.592188835144043
+   "median": 30.637271881103516,
+   "max": 36.74503302574158,
+   "min": 12.484953165054321
   },
-  "cases": 20
+  "cases": 20,
+  "slowdown_vs_numpy_median": 4024.517284793516
  }
 }
