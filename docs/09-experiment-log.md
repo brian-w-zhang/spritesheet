@@ -195,3 +195,22 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **Result:** the critic learned to separate real from fake easily (d_loss 1.25 → 0.22 by 7.5k steps). But the samples at 2.5k, 5k and 7.5k are visually identical to v3_vq6, and reconstruction CE stayed flat (0.52–0.57).
 - **Reading:** at weight 0.1 the adversarial gradient is swamped by reconstruction. More importantly, the blob shapes come from the *sampled codes* (prior), which this run cannot change.
 - **Decision:** stopped early to free the GPU for the guided prior. A stronger critic (weight ≥ 1) remains an option if the prior fix lands.
+
+### Wider guided prior (v3_vq6_pg) + guidance sweep (r5): guidance is the first real lever [metrics/v3_eval_r5.json; figures/v3_lineup_r5_*.png, v3_panel_r5_*.png]
+- **Setup:** prior-only retrain on v3_vq6's frozen codes, hp 256 → 1024, 15% prompt dropout, 40k steps (49 min). Val prior NLL 3.28 → 3.12 nats/code. The decoder is unchanged (reconstruction fg accuracy 0.781).
+- **Novel R@5 / PixelGPT-test R@5 / seed diversity:**
+  - no guidance: 0.28 / 0.019 / 0.57
+  - g=1: 0.37 / 0.037 / 0.48
+  - **g=3: 0.45 [0.35, 0.55] / 0.045 [0.033, 0.059] / 0.41.** Best of any model so far: v1-XL is 0.41 / 0.013, v3_var16 0.35 / 0.033. Clip score 0.258.
+  - g=3, t=0.6: about the same as g=3.
+- **By eye:** objects become recognisable at g=3: a diagonal sword, a long key, a red-capped mushroom with a stem, a tree with a trunk, a lantern with a flame. Creatures are still mush. The conv decoder's within-cell blur remains.
+- **Learned:** a strong, well-conditioned prior plus classifier-free guidance is what moves quality. In the sheet, guidance needs an unconditional prior pass (cost: one more prior).
+
+### Patch dictionary (k-modes): crisp patches with no decoder [artifacts/model/patchdict_k*_p*/patchdict.json]
+- **Idea:** replace the conv decoder with a fixed dictionary of hard P×P patches, fit by weighted k-modes on augmented training patches (distance = mismatched pixels; update = per-pixel majority). Output is a lookup, so there's no averaging inside a patch. In the sheet it is INDEX formulas.
+- **Validation reconstruction fg accuracy** (exact pixel match; v3_vq6's conv decoder is 0.781 with blur):
+  - 4×4 patches: K=1024 0.718, K=4096 0.771;
+  - **3×3 patches: K=1024 0.799**, K=4096 0.848;
+  - 2×2 patches, K=1024: 0.913.
+- **By eye** (local-only images: they show real sprites): 3×3 at K=1024 keeps outlines, faces and fish. Chosen: 64 tokens per sprite.
+- **Next:** v3p (PatchGPT), a causal transformer over the 64 patch tokens with the prompt as a 12-row prefix. It is designed to compile as one causal grid of formulas, with Gumbel-max seed noise that is exact in float64. Run v3p_a started.

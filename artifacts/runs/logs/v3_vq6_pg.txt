@@ -1,0 +1,83 @@
+init from artifacts/model/v3_vq6/model.pt fresh: ['p1.bias', 'p1.weight', 'p2.weight']
+{"step": 1, "loss_px": 0.0, "loss_prior": 5.5931, "usage_entropy": 4.941, "tau": 1.0, "s": 0.5, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 5.5992, "codes_used": 256}
+{"step": 500, "loss_px": 0.0, "loss_prior": 4.1223, "usage_entropy": 4.961, "tau": 0.975, "s": 38.4}
+{"step": 1000, "loss_px": 0.0, "loss_prior": 3.6541, "usage_entropy": 4.887, "tau": 0.951, "s": 76.3}
+{"step": 1500, "loss_px": 0.0, "loss_prior": 3.4985, "usage_entropy": 4.93, "tau": 0.928, "s": 114.5}
+{"step": 2000, "loss_px": 0.0, "loss_prior": 3.2546, "usage_entropy": 4.935, "tau": 0.905, "s": 151.7}
+{"step": 2500, "loss_px": 0.0, "loss_prior": 3.2345, "usage_entropy": 4.923, "tau": 0.882, "s": 189.0, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.3323, "codes_used": 256}
+{"step": 3000, "loss_px": 0.0, "loss_prior": 3.1798, "usage_entropy": 4.903, "tau": 0.86, "s": 226.5}
+{"step": 3500, "loss_px": 0.0, "loss_prior": 3.1845, "usage_entropy": 4.914, "tau": 0.839, "s": 263.5}
+{"step": 4000, "loss_px": 0.0, "loss_prior": 3.1441, "usage_entropy": 4.905, "tau": 0.818, "s": 300.8}
+{"step": 4500, "loss_px": 0.0, "loss_prior": 3.1004, "usage_entropy": 4.904, "tau": 0.798, "s": 339.0}
+{"step": 5000, "loss_px": 0.0, "loss_prior": 3.0886, "usage_entropy": 4.946, "tau": 0.778, "s": 377.5, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.2183, "codes_used": 256}
+{"step": 5500, "loss_px": 0.0, "loss_prior": 3.037, "usage_entropy": 4.884, "tau": 0.759, "s": 415.3}
+{"step": 6000, "loss_px": 0.0, "loss_prior": 3.0175, "usage_entropy": 4.899, "tau": 0.74, "s": 452.9}
+{"step": 6500, "loss_px": 0.0, "loss_prior": 3.1018, "usage_entropy": 4.95, "tau": 0.722, "s": 490.5}
+{"step": 7000, "loss_px": 0.0, "loss_prior": 3.0708, "usage_entropy": 4.967, "tau": 0.704, "s": 527.6}
+{"step": 7500, "loss_px": 0.0, "loss_prior": 2.9771, "usage_entropy": 4.874, "tau": 0.686, "s": 564.9, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1829, "codes_used": 256}
+{"step": 8000, "loss_px": 0.0, "loss_prior": 3.0032, "usage_entropy": 4.916, "tau": 0.669, "s": 602.1}
+{"step": 8500, "loss_px": 0.0, "loss_prior": 3.0867, "usage_entropy": 4.881, "tau": 0.653, "s": 641.3}
+{"step": 9000, "loss_px": 0.0, "loss_prior": 2.9925, "usage_entropy": 4.931, "tau": 0.637, "s": 678.6}
+{"step": 9500, "loss_px": 0.0, "loss_prior": 2.9586, "usage_entropy": 4.883, "tau": 0.621, "s": 716.3}
+{"step": 10000, "loss_px": 0.0, "loss_prior": 3.0207, "usage_entropy": 4.924, "tau": 0.606, "s": 754.9, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1666, "codes_used": 256}
+{"step": 10500, "loss_px": 0.0, "loss_prior": 3.0037, "usage_entropy": 4.914, "tau": 0.591, "s": 792.6}
+{"step": 11000, "loss_px": 0.0, "loss_prior": 2.964, "usage_entropy": 4.908, "tau": 0.576, "s": 830.3}
+{"step": 11500, "loss_px": 0.0, "loss_prior": 2.9623, "usage_entropy": 4.909, "tau": 0.562, "s": 867.6}
+{"step": 12000, "loss_px": 0.0, "loss_prior": 3.0131, "usage_entropy": 4.915, "tau": 0.548, "s": 905.6}
+{"step": 12500, "loss_px": 0.0, "loss_prior": 2.9987, "usage_entropy": 4.858, "tau": 0.534, "s": 943.9, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1568, "codes_used": 256}
+{"step": 13000, "loss_px": 0.0, "loss_prior": 3.0213, "usage_entropy": 4.922, "tau": 0.521, "s": 981.7}
+{"step": 13500, "loss_px": 0.0, "loss_prior": 3.0244, "usage_entropy": 4.941, "tau": 0.508, "s": 1019.6}
+{"step": 14000, "loss_px": 0.0, "loss_prior": 2.9608, "usage_entropy": 4.907, "tau": 0.495, "s": 1057.4}
+{"step": 14500, "loss_px": 0.0, "loss_prior": 2.9569, "usage_entropy": 4.917, "tau": 0.483, "s": 1095.5}
+{"step": 15000, "loss_px": 0.0, "loss_prior": 2.9821, "usage_entropy": 4.966, "tau": 0.471, "s": 1134.0, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1486, "codes_used": 256}
+{"step": 15500, "loss_px": 0.0, "loss_prior": 2.9354, "usage_entropy": 4.91, "tau": 0.46, "s": 1171.7}
+{"step": 16000, "loss_px": 0.0, "loss_prior": 2.9698, "usage_entropy": 4.931, "tau": 0.448, "s": 1209.7}
+{"step": 16500, "loss_px": 0.0, "loss_prior": 2.9116, "usage_entropy": 4.893, "tau": 0.437, "s": 1247.4}
+{"step": 17000, "loss_px": 0.0, "loss_prior": 3.0034, "usage_entropy": 4.92, "tau": 0.426, "s": 1286.3}
+{"step": 17500, "loss_px": 0.0, "loss_prior": 2.9421, "usage_entropy": 4.898, "tau": 0.416, "s": 1324.4, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1484, "codes_used": 256}
+{"step": 18000, "loss_px": 0.0, "loss_prior": 3.0003, "usage_entropy": 4.949, "tau": 0.405, "s": 1362.8}
+{"step": 18500, "loss_px": 0.0, "loss_prior": 3.0055, "usage_entropy": 4.938, "tau": 0.395, "s": 1400.0}
+{"step": 19000, "loss_px": 0.0, "loss_prior": 2.8946, "usage_entropy": 4.918, "tau": 0.386, "s": 1437.7}
+{"step": 19500, "loss_px": 0.0, "loss_prior": 2.9084, "usage_entropy": 4.906, "tau": 0.376, "s": 1475.6}
+{"step": 20000, "loss_px": 0.0, "loss_prior": 2.9188, "usage_entropy": 4.904, "tau": 0.367, "s": 1513.1, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1373, "codes_used": 256}
+{"step": 20500, "loss_px": 0.0, "loss_prior": 2.9409, "usage_entropy": 4.884, "tau": 0.358, "s": 1551.4}
+{"step": 21000, "loss_px": 0.0, "loss_prior": 3.046, "usage_entropy": 4.969, "tau": 0.349, "s": 1589.1}
+{"step": 21500, "loss_px": 0.0, "loss_prior": 3.0001, "usage_entropy": 4.948, "tau": 0.34, "s": 1626.6}
+{"step": 22000, "loss_px": 0.0, "loss_prior": 2.9806, "usage_entropy": 4.923, "tau": 0.332, "s": 1656.6}
+{"step": 22500, "loss_px": 0.0, "loss_prior": 2.9429, "usage_entropy": 4.967, "tau": 0.323, "s": 1694.8, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.133, "codes_used": 256}
+{"step": 23000, "loss_px": 0.0, "loss_prior": 2.9673, "usage_entropy": 4.889, "tau": 0.315, "s": 1734.5}
+{"step": 23500, "loss_px": 0.0, "loss_prior": 2.8814, "usage_entropy": 4.917, "tau": 0.308, "s": 1773.0}
+{"step": 24000, "loss_px": 0.0, "loss_prior": 2.9474, "usage_entropy": 4.926, "tau": 0.3, "s": 1812.3}
+{"step": 24500, "loss_px": 0.0, "loss_prior": 2.8949, "usage_entropy": 4.881, "tau": 0.3, "s": 1850.3}
+{"step": 25000, "loss_px": 0.0, "loss_prior": 2.9316, "usage_entropy": 4.909, "tau": 0.3, "s": 1889.8, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1267, "codes_used": 256}
+{"step": 25500, "loss_px": 0.0, "loss_prior": 2.9702, "usage_entropy": 4.95, "tau": 0.3, "s": 1929.3}
+{"step": 26000, "loss_px": 0.0, "loss_prior": 2.9323, "usage_entropy": 4.888, "tau": 0.3, "s": 1967.1}
+{"step": 26500, "loss_px": 0.0, "loss_prior": 3.0082, "usage_entropy": 4.953, "tau": 0.3, "s": 2004.8}
+{"step": 27000, "loss_px": 0.0, "loss_prior": 2.9002, "usage_entropy": 4.92, "tau": 0.3, "s": 2042.7}
+{"step": 27500, "loss_px": 0.0, "loss_prior": 2.9651, "usage_entropy": 4.938, "tau": 0.3, "s": 2080.5, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1235, "codes_used": 256}
+{"step": 28000, "loss_px": 0.0, "loss_prior": 2.948, "usage_entropy": 4.945, "tau": 0.3, "s": 2118.2}
+{"step": 28500, "loss_px": 0.0, "loss_prior": 2.9347, "usage_entropy": 4.935, "tau": 0.3, "s": 2156.1}
+{"step": 29000, "loss_px": 0.0, "loss_prior": 2.9584, "usage_entropy": 4.921, "tau": 0.3, "s": 2193.9}
+{"step": 29500, "loss_px": 0.0, "loss_prior": 2.8639, "usage_entropy": 4.903, "tau": 0.3, "s": 2231.8}
+{"step": 30000, "loss_px": 0.0, "loss_prior": 2.9297, "usage_entropy": 4.946, "tau": 0.3, "s": 2269.7, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1202, "codes_used": 256}
+{"step": 30500, "loss_px": 0.0, "loss_prior": 2.921, "usage_entropy": 4.889, "tau": 0.3, "s": 2307.5}
+{"step": 31000, "loss_px": 0.0, "loss_prior": 2.9274, "usage_entropy": 4.908, "tau": 0.3, "s": 2345.6}
+{"step": 31500, "loss_px": 0.0, "loss_prior": 2.9963, "usage_entropy": 4.916, "tau": 0.3, "s": 2383.3}
+{"step": 32000, "loss_px": 0.0, "loss_prior": 2.9953, "usage_entropy": 4.921, "tau": 0.3, "s": 2421.2}
+{"step": 32500, "loss_px": 0.0, "loss_prior": 2.9277, "usage_entropy": 4.889, "tau": 0.3, "s": 2458.9, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1174, "codes_used": 256}
+{"step": 33000, "loss_px": 0.0, "loss_prior": 2.9732, "usage_entropy": 4.931, "tau": 0.3, "s": 2496.8}
+{"step": 33500, "loss_px": 0.0, "loss_prior": 2.9455, "usage_entropy": 4.962, "tau": 0.3, "s": 2534.7}
+{"step": 34000, "loss_px": 0.0, "loss_prior": 2.9087, "usage_entropy": 4.915, "tau": 0.3, "s": 2573.1}
+{"step": 34500, "loss_px": 0.0, "loss_prior": 2.9804, "usage_entropy": 4.911, "tau": 0.3, "s": 2610.0}
+{"step": 35000, "loss_px": 0.0, "loss_prior": 2.9653, "usage_entropy": 4.926, "tau": 0.3, "s": 2640.4, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1168, "codes_used": 256}
+{"step": 35500, "loss_px": 0.0, "loss_prior": 2.9697, "usage_entropy": 4.965, "tau": 0.3, "s": 2671.2}
+{"step": 36000, "loss_px": 0.0, "loss_prior": 2.9453, "usage_entropy": 4.877, "tau": 0.3, "s": 2701.3}
+{"step": 36500, "loss_px": 0.0, "loss_prior": 2.8659, "usage_entropy": 4.958, "tau": 0.3, "s": 2731.6}
+{"step": 37000, "loss_px": 0.0, "loss_prior": 2.876, "usage_entropy": 4.879, "tau": 0.3, "s": 2762.0}
+{"step": 37500, "loss_px": 0.0, "loss_prior": 2.9357, "usage_entropy": 4.924, "tau": 0.3, "s": 2792.3, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1159, "codes_used": 256}
+{"step": 38000, "loss_px": 0.0, "loss_prior": 2.9, "usage_entropy": 4.893, "tau": 0.3, "s": 2822.9}
+{"step": 38500, "loss_px": 0.0, "loss_prior": 2.9765, "usage_entropy": 4.943, "tau": 0.3, "s": 2853.2}
+{"step": 39000, "loss_px": 0.0, "loss_prior": 2.9315, "usage_entropy": 4.942, "tau": 0.3, "s": 2883.9}
+{"step": 39500, "loss_px": 0.0, "loss_prior": 2.9091, "usage_entropy": 4.91, "tau": 0.3, "s": 2914.2}
+{"step": 40000, "loss_px": 0.0, "loss_prior": 2.9651, "usage_entropy": 4.922, "tau": 0.3, "s": 2944.9, "val_recon_loss": 0.5786, "val_recon_fg_acc": 0.7806, "val_prior_nll": 3.1157, "codes_used": 256}
+saved artifacts/model/v3_vq6_pg 2649538 params (total)

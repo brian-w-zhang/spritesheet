@@ -1,0 +1,43 @@
+{
+ "name": "v3_vq6_pg",
+ "family": "v3",
+ "args": {
+  "steps": 40000,
+  "batch": 256,
+  "lr": 0.001,
+  "cfg": "{\"C0\":256,\"C1\":128,\"C2\":64,\"C3\":32,\"G\":6,\"Kc\":256,\"e\":16,\"hp\":1024}",
+  "emb_noise": 0.15,
+  "bg_weight": 0.5,
+  "prior_weight": 1.0,
+  "usage_weight": 0.1,
+  "tau0": 1.0,
+  "tau1": 0.3,
+  "sample_tau": 0.8,
+  "cond_drop": 0.15,
+  "init": "artifacts/model/v3_vq6/model.pt",
+  "prior_only": true,
+  "seed": 0,
+  "out": "artifacts/model/v3_vq6_pg",
+  "note": "prior-only retrain on frozen v3_vq6 codes: hp 256->1024, 15% prompt dropout for classifier-free guidance",
+  "snap_every": 5000
+ },
+ "cfg": {
+  "N": 24,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 8,
+  "e": 16,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "K": 48,
+  "G": 6,
+  "Kc": 256,
+  "hp": 1024
+ },
+ "started": "2026-11-04T15:52:23",
+ "strategy": "prior-only retrain on frozen v3_vq6 codes: hp 256->1024, 15% prompt dropout for classifier-free guidance",
+ "data": "PixelGPT-24x24-216K train split, Sampler3 augmentation"
+}

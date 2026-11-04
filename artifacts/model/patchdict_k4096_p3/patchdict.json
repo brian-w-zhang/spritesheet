@@ -1,0 +1,72 @@
+{
+ "K": 4096,
+ "P": 3,
+ "K1": 49,
+ "n_sprites": 120000,
+ "iters": 10,
+ "fit_log": [
+  {
+   "iter": 0,
+   "pixel_err": 0.06922,
+   "dead": 0,
+   "s": 16.6
+  },
+  {
+   "iter": 1,
+   "pixel_err": 0.06917,
+   "dead": 0,
+   "s": 22.2
+  },
+  {
+   "iter": 2,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 27.7
+  },
+  {
+   "iter": 3,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 33.1
+  },
+  {
+   "iter": 4,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 39.1
+  },
+  {
+   "iter": 5,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 45.3
+  },
+  {
+   "iter": 6,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 50.6
+  },
+  {
+   "iter": 7,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 56.8
+  },
+  {
+   "iter": 8,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 62.4
+  },
+  {
+   "iter": 9,
+   "pixel_err": 0.06916,
+   "dead": 0,
+   "s": 67.8
+  }
+ ],
+ "recon_fg_acc": 0.8484099788195455,
+ "recon_px_acc": 0.9348678588867188,
+ "codes_used_val": 4008
+}
