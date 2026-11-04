@@ -254,8 +254,9 @@ class Sampler:
     """Deterministic stream of (caption, exact target, style id, meta)."""
 
     def __init__(self, split: str = "train", seed: int = 0, tier: int = 0, mix: dict | None = None,
-                 pixelgpt_n: int | None = None):
+                 pixelgpt_n: int | None = None, pg_shift: bool = False):
         self.split, self.seed, self.tier = split, seed, tier
+        self.pg_shift = pg_shift  # random placement of the padded 24×24 PixelGPT sprite inside 32×32 (train only)
         self.rng = np.random.default_rng([seed, _h(split) % (2 ** 31)])
         D = self.D = load_build(tier)
         self.N = int(D["imgs"].shape[1])
@@ -429,6 +430,11 @@ class Sampler:
         b = int(pool[int(rng.integers(len(pool)))])
         sid = int(self.D["style"][b])
         g = self.D["imgs"][b]
+        if self.pg_shift and which == "train":
+            # The 24×24 sprite sits inside a 4-px transparent border, so shifts of up to ±4 stay pixel-exact:
+            # np.roll only wraps border (class 0) pixels.
+            dy, dx = (int(v) for v in rng.integers(-4, 5, size=2))
+            g = np.roll(np.roll(g, dy, axis=0), dx, axis=1)
         cap = str(self.D["pg_caption"][b]).lower().strip()
         transform = bg = None
         n_words = len(words(cap))

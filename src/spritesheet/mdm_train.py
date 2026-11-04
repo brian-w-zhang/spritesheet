@@ -61,6 +61,7 @@ def main():
     ap.add_argument("--bg-weight", type=float, default=0.5)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--init", default=None, help="warm-start from a model.pt")
+    ap.add_argument("--pg-shift", action="store_true", help="random placement of PixelGPT sprites (augmentation)")
     a = ap.parse_args()
     from .data.synth import Sampler
     torch.manual_seed(a.seed)
@@ -75,7 +76,7 @@ def main():
     net = MDMNet(cfg, wv).to(dev)
     if a.init:
         net.load_state_dict(torch.load(a.init, map_location=dev))
-    sampler = Sampler(split="train", seed=a.seed, tier=a.tier, mix=json.loads(a.mix) if a.mix else None)
+    sampler = Sampler(split="train", seed=a.seed, tier=a.tier, mix=json.loads(a.mix) if a.mix else None, pg_shift=a.pg_shift)
     opt = torch.optim.AdamW(net.parameters(), lr=a.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=a.lr, total_steps=a.steps, pct_start=0.05)
     K = cfg["K"]
