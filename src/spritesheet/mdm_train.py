@@ -83,6 +83,25 @@ def main():
     cw = torch.ones(K + 1, device=dev)
     cw[0] = a.bg_weight
     os.makedirs(a.out, exist_ok=True)
+    # fixed held-out batch for a validation loss (memorisation check): PixelGPT val sprites + held-out emoji combos
+    from .data.synth import eval_set
+    vs = eval_set("pixelgpt_val", 128, tier=a.tier) + eval_set("heldout_combo", 128, tier=a.tier)
+    v_ids = encode_batch([d[0] for d in vs], vocab).to(dev)
+    v_tgt = torch.as_tensor(np.stack([d[1] for d in vs]), dtype=torch.long, device=dev)
+    v_sty = torch.as_tensor([d[2] for d in vs], dtype=torch.long, device=dev)
+    v_gen = torch.Generator().manual_seed(4242)
+    v_x, v_m = mask_batch(v_tgt.cpu(), M, v_gen)
+    v_x, v_m = v_x.to(dev), v_m.to(dev)
+
+    @torch.no_grad()
+    def val_loss():
+        net.eval()
+        _, cnd = net.cond(v_ids, v_sty)
+        lgv = net.denoise(v_x, cnd)
+        l = (F.cross_entropy(lgv.permute(0, 3, 1, 2), v_tgt, weight=cw, reduction="none") * v_m).sum() / v_m.sum()
+        net.train()
+        return round(l.item(), 4)
+
     log, t0 = [], time.time()
     for step in range(1, a.steps + 1):
         caps, tgt, sty, _ = sampler.batch(a.batch)
@@ -104,6 +123,8 @@ def main():
             with torch.no_grad():
                 acc = ((lg.argmax(-1) == tgt) & m).sum().item() / m.sum().item()
             rec = {"step": step, "loss": round(loss.item(), 4), "masked_acc": round(acc, 4), "s": round(time.time() - t0, 1)}
+            if step % 2000 == 0 or step == 1:
+                rec["val_loss"] = val_loss()
             log.append(rec)
             print(json.dumps(rec), flush=True)
     net.eval()

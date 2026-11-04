@@ -116,3 +116,9 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **v2a (diffusion) is clearly worst:** fragments, or nothing.
 - **Bug found by looking:** all figures and CLIP scores used a near-white background (#f6f4ef), which made white subjects (ghosts, skeletons, snowmen) invisible. Figures and evaluation now use the sheet's light grey (#d8d4dd). CLIP numbers before 04:05 are biased against white subjects for every model, and will be re-scored.
 **Lesson for the slides:** metrics alone misled us twice tonight (the PixelGPT call, the white-background bug). Every claim now gets a visual check.
+
+### Latency correction + v2d (04:20)
+- Brian measured v1 at **~3–4 s per prompt in the browser**. Our API-polled latency (11–30 s) includes network writes and repeated 1,024-cell reads, so it overstates what a user sees. That implies ~7–9M multiply-adds/s in Sheets, so a 30–60 s budget is ~250–500M per prompt: room for a bigger diffusion model.
+- "Training longer" = more optimizer steps (more passes over the data). More data matters only once a model **memorises** (train improves, held-out stalls). Our models **underfit**, so the trainer now logs a **validation loss** (PixelGPT val + held-out emoji combos) every 2k steps.
+- **v2d** (launched 04:20): E=32, C1=32, C2=64, C3=192 + layout map, T=6. ~63M multiply-adds/step ≈ 380M/prompt (est. 45–55 s in the browser). 120k steps, 50% PixelGPT.
+- **PixelGPT padding (Brian's question):** padding 24→32 is the correct, lossless choice. A 1.33× resize gives uneven pixel widths (nearest) or blur and speckle (bilinear). The side effect is a size gap vs emoji (24 px vs ~30 px content). Next run: **random placement** of PixelGPT sprites within the 32×32 canvas (augmentation, still pixel-exact).
