@@ -87,3 +87,10 @@ Numbers come from the files cited in brackets under `artifacts/`. Newest entries
   - Hybrid test: v1 keeps its most confident 50–85% of pixels and v2 refines the rest. Foreground accuracy 0.546–0.601 vs v1 alone 0.607 [v2_hybrid_test.json]. **So the v2a denoiser itself is the weak link.**
   - Diagnosis 2, the architecture: v2a received the prompt only as per-channel FiLM shifts, which carry *what* but not *where*. From an empty canvas, a conv net with no positional signal can't place a shape. v1 has a dense prompt→4×4 layout layer, and v2a didn't.
 - **v2b**: adds a **prompt→8×8×C3 spatial prior** (dense layer, computed once per prompt and shared by every step, so cheap in the sheet). Training (60k steps). *Pending.*
+
+### Correction (03:50): the "drop PixelGPT" call was based on a biased measurement
+Brian asked whether PixelGPT was really useless. It wasn't shown to be. Two problems with the evidence:
+1. On PixelGPT test captions (free text like "ghost with a snail shell") we scored **pixel match against one specific sprite**. For an open-ended caption, many drawings are valid, so every model scores ≈0.10–0.14, and the metric can't see improvement.
+2. The other evidence came from **emoji-only test sets**, which naturally favour emoji-only training.
+
+**Fix:** generalisation is now measured with **CLIP R-precision** (does CLIP pick the image's own prompt out of the whole set?) on (a) 100 novel prompts from neither dataset and (b) PixelGPT test captions, with ground-truth PixelGPT sprites as an upper reference [generalization.json]. v2b was restarted *with* PixelGPT (30%), and a PixelGPT-majority v2c (70%) plus a matching one-shot ablation were added to test "more semantically diverse captions → better generalisation".
