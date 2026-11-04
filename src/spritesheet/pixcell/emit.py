@@ -295,10 +295,6 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     # ---- "Showing:" status (C2). It depends on every pixel, so it only switches to the new prompt once the whole
     # sprite has been recalculated: a done-indicator for the demo. Portable formula.
     wb.set(P, 2, DISPLAY_C0, f'="Showing: "&IF(SUMPRODUCT(({px.range("Pixels", absolute=True)}>=0)*1)={N * N},{PROMPT},"")')
-    # ---- stage bar (C4:K4, Sheets only): one square per pipeline stage, each depending on that stage's last cell.
-    stages = ["Tokens.ids", "H", "z", "G0", "G1", "G2", "G3", "Logits", "Pixels"]
-    prog = wb.add_block("Progress", P, 5, DISPLAY_C0, 1, len(stages))
-    wb.meta["progress"] = {"r0": 5, "c0": DISPLAY_C0, "stages": stages}
 
     # ---- render (Google Sheets only)
     disp = wb.add_block("Display", P, DISPLAY_R0, DISPLAY_C0, N, N)
@@ -307,10 +303,6 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
         # Display = class ids; the Sheets writer colours them with one conditional-format rule per class and hides
         # the digits (number format ;;;), so the 32x32 block reads as one seamless image. Portable formulas only.
         wb.fill(disp, lambda y, x: "=" + px.ref(y, x, "Pixels"))
-        for i, name in enumerate(stages):
-            b = wb.blocks[name]
-            last = b.ref(b.nrows - 1, b.ncols - 1, b.sheet)
-            wb.set(P, 5, DISPLAY_C0 + i, f"=IF(ABS({last})>=0,1,0)")
     wb.meta["palette_hex"] = list(palette_hex)
 
     # ---- About
