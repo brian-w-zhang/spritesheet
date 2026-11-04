@@ -1,0 +1,16 @@
+=== installing tools/ node deps (npm ci)
+=== pytest (A1 tokenizer, A2 op parity, model twin, data): uv run pytest -q
+19 passed, 8 skipped in 276.46s (0:04:36)
+--- pytest (A1 tokenizer, A2 op parity, model twin, data) PASS
+=== A3 end-to-end local (HyperFormula + LibreOffice): uv run python scripts/verify_e2e.py --model artifacts/model/v32 --prompts 200 --seeds 2
+A3 hyperformula: cases=400 max_rel=4.74e-13 fail=0 errors=0 stale=0 style_mismatch=0 pixel_mismatch=0 wall=4676.2s
+A3 libreoffice: cases=400 max_rel=3.7e-13 fail=0 errors=0 stale=0 style_mismatch=0 pixel_mismatch=0 wall=3348.6s
+min_margin=1.11e-07 styles=[1, 2, 3, 4, 5, 6, 7]  -> PASS  (artifacts/metrics/parity_local.json)
+--- A3 end-to-end local (HyperFormula + LibreOffice) PASS
+=== A4 Google Sheets: uv run python scripts/verify_sheets.py --model artifacts/model/v32 --prompts 20
+A4 sheets[v32]: cases=20 max_rel=9.31e-14 pixel_mismatch=0 style_mismatch=0 latency median=30.5s stable median=34.8s -> PASS (artifacts/metrics/parity_sheets.json)
+--- A4 Google Sheets PASS
+=== H claims check: uv run python scripts/check_claims.py
+--- H claims check PASS
+real	155m57.230s
+exit=0
