@@ -18,3 +18,4 @@ You are working on **SpriteSheet** (public repo, so mind what you commit): a tex
 - **Never print, log or commit access tokens or credentials.**
 - Use `uv` for Python (`uv run ...`); keep node deps local to `tools/`.
 - Update `PROGRESS.md` after every milestone (what's done, what's verified, what's next, any blockers). A fresh agent must be able to resume from it.
+- **After every training/eval iteration, append to `docs/09-experiment-log.md`**: what was tried, the numbers (cite the artifacts file), what was learned, and what changes next. It is the source for the slides.
