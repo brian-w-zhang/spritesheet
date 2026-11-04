@@ -38,7 +38,7 @@ def test_lint_allowed_subset(small):
     w, cfg, vocab, pal, _ = small
     wr = emit.compile_model(w, cfg, vocab, pal, render=True)
     rr = lint.lint(wr)
-    assert rr["violations"] == [] and rr["functions"]["SPARKLINE"] == 32 * 32
+    assert rr["violations"] == [] and rr["functions"]["SPARKLINE"] == 32 * 32 + 9  # display + stage bar
 
 
 def test_lint_catches_violations(small):

@@ -97,3 +97,19 @@ An H×W×C activation is stored as an `H` × `W·C` block (channels interleaved)
 
 ### Rules that keep the three engines agreeing
 Only `SUMPRODUCT, INDEX, MATCH(…,0), MAX, MIN, SUM, EXP, IF, IFERROR, MOD, INT, ABS`, arithmetic, and the text functions `LOWER/SUBSTITUTE/TRIM/MID/REPT` (tokenizer only). One scalar formula per cell. No LET/LAMBDA/array spill/volatile functions. Weights are rounded to 15 significant digits so they survive file formats exactly. Softmax always subtracts the row max. See doc 05.
+
+---
+
+## Demo controls (Prompt tab)
+| Cell | What it does |
+| --- | --- |
+| **B2** | the prompt: type, then press Enter |
+| **B3** | seed: change it for a different drawing style or variation |
+| **B4** | which style the sheet sampled (read-only) |
+| **B5 · Generate** | native checkbox. The model reads the prompt only while it is ticked (`B40 = IF(B5, B2&"", "")`). Demo flow: untick, type the prompt, tick → watch it render. Unticking blanks the input. |
+| **C2 · "Showing: …"** | depends on all 1,024 pixels, so it changes to the new prompt only when the sprite is fully computed: the "done" indicator |
+| **C4:K4 · stage bar** | 9 squares (tokens → encoder → style → dense → conv 1 → conv 2 → conv 3 → logits → pixels); each depends on its stage's last cell. **Untested in the browser:** whether Google's UI fills them progressively during the ~30 s recalc or all at once; check it while recording |
+| **C6:AH37** | the 32×32 sprite (square 12 px cells, SPARKLINE-coloured) |
+
+**Why there is no real button:** clickable buttons in Google Sheets need Apps Script, which would break "no code runs". Enter (or the Generate checkbox) is the trigger.
+**Latency (honest number for the video):** median 30.6 s per prompt in real Google Sheets for the 309,648-param main model (`artifacts/metrics/parity_sheets.json`). Show it real-time once, then speed up the wait in editing with a label.

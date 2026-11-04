@@ -218,6 +218,15 @@ def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
                                                "properties": {"pixelSize": 320}, "fields": "pixelSize"}})
     reqs.append({"updateSheetProperties": {"properties": {"sheetId": gid, "gridProperties": {"hideGridlines": True}},
                                            "fields": "gridProperties.hideGridlines"}})
+    # B5 "Generate" as a native checkbox (data validation BOOLEAN; still a plain TRUE/FALSE cell)
+    reqs.append({"setDataValidation": {"range": {"sheetId": gid, "startRowIndex": 4, "endRowIndex": 5,
+                                                 "startColumnIndex": 1, "endColumnIndex": 2},
+                                       "rule": {"condition": {"type": "BOOLEAN"}, "showCustomUi": True}}})
+    pr = wb.meta.get("progress")
+    if pr:  # square stage-bar cells (same pixel size as the display)
+        reqs.append({"updateDimensionProperties": {"range": {"sheetId": gid, "dimension": "ROWS",
+                                                             "startIndex": pr["r0"] - 1, "endIndex": pr["r0"]},
+                                                   "properties": {"pixelSize": pixel}, "fields": "pixelSize"}})
     cl.batch_update(reqs)
     # read back the achieved sizes
     r0, c0, n = d["r0"], d["c0"], d["n"]

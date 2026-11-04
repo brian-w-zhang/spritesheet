@@ -35,15 +35,15 @@ def _args(s: str, start: int) -> list[str]:
 
 def lint(wb) -> dict:
     used, bad = {}, []
-    disp = wb.blocks.get("Display")
+    render_blocks = [b for k, b in wb.blocks.items() if k in ("Display", "Progress")]
     for sheet, cells in wb.sheets.items():
         if _CELLISH.match(sheet) or sheet.upper() in ("R", "C"):
             bad.append((sheet, None, "sheet name looks like a cell reference"))
         for (r, c), v in cells.items():
             if not is_formula(v):
                 continue
-            in_disp = disp is not None and sheet == disp.sheet and disp.r0 <= r < disp.r0 + disp.nrows \
-                and disp.c0 <= c < disp.c0 + disp.ncols
+            in_disp = any(sheet == b.sheet and b.r0 <= r < b.r0 + b.nrows and b.c0 <= c < b.c0 + b.ncols
+                          for b in render_blocks)
             body = _STR.sub('""', v)
             allowed = CORE | TOKENIZER | (RENDER if in_disp else set())
             if "{" in body and not in_disp:

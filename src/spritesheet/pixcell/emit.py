@@ -96,7 +96,14 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     wb.set(P, 3, 1, Text("Seed"))
     wb.set(P, 3, 2, float(default_seed))
     wb.set(P, 4, 1, Text("Style"))
-    PROMPT, SEED = "Prompt!$B$2", "Prompt!$B$3"
+    # Generate checkbox (B5, a native checkbox in the Sheets build): the model reads the prompt only while it is
+    # ticked, so "type, tick Generate, watch" works with formulas alone (no scripts, no iterative calc).
+    wb.set(P, 5, 1, Text("Generate"))
+    wb.set(P, 5, 2, True)
+    GEN_R = DISPLAY_R0 + 8 * GRID0 + 2           # a row below the display block
+    wb.set(P, GEN_R, 1, Text("model input"))
+    wb.set(P, GEN_R, 2, '=IF(Prompt!$B$5,Prompt!$B$2&"","")')  # &"" keeps an empty B2 as text, not 0
+    PROMPT, SEED = f"Prompt!$B${GEN_R}", "Prompt!$B$3"
     wb.meta["inputs"] = {"prompt": (P, 2, 2), "seed": (P, 3, 2)}
 
     # ---- Vocab + WordVec (values)
@@ -277,11 +284,24 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     hx = wb.add_block("Hex", "Hex", 1, 1, N, N)
     wb.fill(hx, lambda y, x: f"=INDEX({PAL},{px.ref(y, x, 'Pixels')}+1)")
 
+    # ---- "Showing:" status (C2). It depends on every pixel, so it only switches to the new prompt once the whole
+    # sprite has been recalculated: a done-indicator for the demo. Portable formula.
+    wb.set(P, 2, DISPLAY_C0, f'="Showing: "&IF(SUMPRODUCT(({px.range("Pixels", absolute=True)}>=0)*1)={N * N},{PROMPT},"")')
+    # ---- stage bar (C4:K4, Sheets only): one square per pipeline stage, each depending on that stage's last cell.
+    stages = ["Tokens.ids", "H", "z", "G0", "G1", "G2", "G3", "Logits", "Pixels"]
+    prog = wb.add_block("Progress", P, 4, DISPLAY_C0, 1, len(stages))
+    wb.meta["progress"] = {"r0": 4, "c0": DISPLAY_C0, "stages": stages}
+
     # ---- render (Google Sheets only)
     disp = wb.add_block("Display", P, DISPLAY_R0, DISPLAY_C0, N, N)
     wb.meta["display"] = {"r0": DISPLAY_R0, "c0": DISPLAY_C0, "n": N}
     if render:
         wb.fill(disp, lambda y, x: '=SPARKLINE(1,{"charttype","bar";"max",1;"color1",' + hx.ref(y, x, "Hex") + "})")
+        for i, name in enumerate(stages):
+            b = wb.blocks[name]
+            last = b.ref(b.nrows - 1, b.ncols - 1, b.sheet)
+            wb.set(P, 4, DISPLAY_C0 + i, '=SPARKLINE(1,{"charttype","bar";"max",1;"color1",IF(ABS(' + last +
+                   ')>=0,"#e8705b","#e6e3ea")})')
 
     # ---- About
     ab = "About"
