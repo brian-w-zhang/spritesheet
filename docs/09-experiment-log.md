@@ -214,3 +214,14 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - 2×2 patches, K=1024: 0.913.
 - **By eye** (local-only images: they show real sprites): 3×3 at K=1024 keeps outlines, faces and fish. Chosen: 64 tokens per sprite.
 - **Next:** v3p (PatchGPT), a causal transformer over the 64 patch tokens with the prompt as a 12-row prefix. It is designed to compile as one causal grid of formulas, with Gumbel-max seed noise that is exact in float64. Run v3p_a started.
+
+### v3-P (PatchGPT) training + sheet path (Nov 4, 16:30–18:30) [runs/v3p_a/; metrics/parity_ops_v3p.json; D-52]
+- **v3p_a:** dm 128, 4 layers, 4 heads, MLP 256, 810,112 params; batch 256, 60k steps (0.2 s/step on MPS; most of it is the 1024-way output). Val NLL per patch: 7.16 (start) → 2.08 (2.5k) → 1.93 (10k) → 1.89 (22.5k); top-1 patch accuracy 0.57.
+- **By eye** (snapshots, seed 1 and 16 frog seeds): from 5k steps the samples are crisp pixel art with dark outlines, not blobs: a black cat face with yellow eyes, an owl face, a clean diagonal sword by 10k. Frog seeds give 16 different drawings, several frog-shaped. Weakness: some samples are fragmented (scattered patches at temperature 1).
+- **Sheet path:** spec `reference_p.py` (row by row) + emitter `emit_p.py` (one causal grid). Op parity on a random small model: HyperFormula 4.8e-14, LibreOffice 4.2e-14, codes/pixels exact, with and without guidance.
+- **Real Google Sheets, full size (random weights, 431,836 formulas, inert upload):**
+  - Upload and activation of all tabs up to `Score` worked (15–25 s per tab).
+  - Activating the whole `Score` tab (the step that closes the 64-step loop) made the spreadsheet return 404/503 for >15 min, and the request never applied.
+  - Activating `Score` one row at a time works: 17–49 s per row, each roughly one full recalc of the sheet.
+  - Measuring a real prompt change once every row is live (in progress).
+- **Data finding:** of 653 captions containing "frog", only 296 have "frog" as the head noun ("frog foot imprint" and "frog leg skewer rack" are not frogs). So short prompts map to mixtures of frog-related objects. Added head-noun-preserving caption dropout (`data.v3.shorten`, `--p-short`).

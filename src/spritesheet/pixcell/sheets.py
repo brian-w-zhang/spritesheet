@@ -232,19 +232,37 @@ def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert
     t_values = time.time() - t1
     t_activate = 0.0
     if inert:  # switch formulas on tab by tab, upstream first (workbook order), so each request computes one tab
-        t2 = time.time()
-        for name in wb.sheets:
-            if not any(is_formula(v) for v in wb.sheets[name].values()):
-                continue
-            ta = time.time()
-            cl.batch_update([{"findReplace": {"find": INERT, "replacement": "=", "sheetId": ids[name], "matchCase": True}}])
-            log(f"  activate {name}: {time.time() - ta:.1f}s")
-        t_activate = time.time() - t2
+        t_activate = activate(wb, cl, ids, log)
     fmt = format_prompt(cl, wb, ids["Prompt"])
     return {"tabs": len(ids), "value_requests": len(chunks), "tabs_s": t_tabs, "values_s": t_values,
             "inert": inert, "activate_s": t_activate,
             "upload_s": time.time() - t0, "requests": cl.requests, "retries": cl.retries,
             "bytes_sent": cl.bytes_sent, "format": fmt}
+
+
+def activate(wb: Workbook, cl: Client, ids=None, log=print, start=None, tries=12) -> float:
+    """findReplace "#=" → "=" per formula tab, upstream first. Idempotent (an active tab has nothing to replace), so it
+    also resumes a push whose activation was cut off. A 404 during a heavy recalculation (the spreadsheet is briefly
+    unavailable, D-45/D-53) is waited out and retried."""
+    if ids is None:
+        ids = {x["properties"]["title"]: x["properties"]["sheetId"] for x in cl.meta().get("sheets", [])}
+    t2 = time.time()
+    names = [n for n in wb.sheets if any(is_formula(v) for v in wb.sheets[n].values())]
+    if start:
+        names = names[names.index(start):]
+    for name in names:
+        ta = time.time()
+        for k in range(tries):
+            try:
+                cl.batch_update([{"findReplace": {"find": INERT, "replacement": "=", "sheetId": ids[name], "matchCase": True}}])
+                break
+            except SheetsError as ex:
+                if "HTTP 404" not in str(ex) or k == tries - 1:
+                    raise
+                log(f"  activate {name}: 404 (sheet busy), retry {k + 1} in 60s")
+                time.sleep(60)
+        log(f"  activate {name}: {time.time() - ta:.1f}s")
+    return time.time() - t2
 
 
 def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
