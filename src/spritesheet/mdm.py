@@ -28,6 +28,23 @@ MDM_CFG = dict(N=32, L=12, d=64, h=128, S=7, e=8, K=32, E=24, C1=24, C2=48, C3=9
 
 
 # ------------------------------------------------------------------ numpy reference (spec)
+HASH_B = 104729  # odd multiplier for the per-cell index
+
+
+def seeded_uniform(s1, t, N, K1):
+    """Exact per-(step, pixel, class) uniforms in (0,1) from the seed state s1 (Latent!B7, same as v1).
+    Sheet formula per cell: v = MOD(48271*MOD(s1 + 104729*idx, 2147483647), 2147483647); u = (v + 0.5)/2147483647
+    with idx = ((t-1)*N*N + y*N + x)*K1 + k + 1. Every intermediate < 2^53, so it is exact in every engine."""
+    idx = ((t - 1) * N * N + np.arange(N * N)[:, None]) * K1 + np.arange(K1)[None, :] + 1
+    a = (s1 + HASH_B * idx) % R.M31
+    v = (R.LCG_A * a) % R.M31
+    return ((v + 0.5) / R.M31).reshape(N, N, K1)
+
+
+def seed_state(seed):
+    s0 = int(math.floor(abs(seed))) % (R.M31 - 1) + 1
+    return (R.LCG_A * s0) % R.M31
+
 def avg2(x):
     H, W, C = x.shape
     return x.reshape(H // 2, 2, W // 2, 2, C).sum(axis=(1, 3)) / 4.0
@@ -46,7 +63,7 @@ def ref_denoise(x, cond, w, cfg):
     return u1 @ w["Wout"] + w["bout"]
 
 
-def ref_generate(ids, seed, w, cfg, keep_steps=True):
+def ref_generate(ids, seed, w, cfg, keep_steps=True, temp=None):
     c, enc = R.encode_text(ids, w, cfg)
     style, p_style, u = R.pick_style(c, seed, w, cfg)
     cond = np.concatenate([c, w["style_emb"][style - 1]])
@@ -58,7 +75,14 @@ def ref_generate(ids, seed, w, cfg, keep_steps=True):
         lg = ref_denoise(x, cond, w, cfg)
         mx = lg.max(-1)
         conf = 1.0 / np.exp(lg - mx[..., None]).sum(-1)          # max softmax prob
-        am = lg.argmax(-1)
+        tp = cfg.get("temp", 0.0) if temp is None else temp
+        if tp > 0:  # Gumbel-max sampling from softmax(logits/tp), reproducible from the seed
+            u_ = seeded_uniform(seed_state(seed), t, N, K + 1)
+            score = lg + tp * (-np.log(-np.log(u_)))
+            am = score.argmax(-1)
+            conf = np.take_along_axis(np.exp(lg - mx[..., None]), am[..., None], -1)[..., 0] * conf  # p(chosen)
+        else:
+            am = lg.argmax(-1)
         top2 = np.sort(lg, -1)[..., -2:]
         margins.append(float((top2[..., 1] - top2[..., 0])[x == M].min()) if (x == M).any() else None)
         tau = cfg["tau"][t - 1] if t < T else -1.0
@@ -134,8 +158,8 @@ class MDMNet(nn.Module):
         return {k: R.round15(v) for k, v in w.items()}, cfg
 
     @torch.no_grad()
-    def generate(self, ids, style_idx, T, tau):
-        """Batched torch sampler with the same commit rule as ref_generate (for training-time eval)."""
+    def generate(self, ids, style_idx, T, tau, temp=0.0, seeds=None):
+        """Batched torch sampler with the same commit rule as ref_generate (temp > 0 needs per-row seeds)."""
         B, N, K = ids.shape[0], self.cfg["N"], self.cfg["K"]
         M = K + 1
         _, cond = self.cond(ids, style_idx)
@@ -145,6 +169,11 @@ class MDMNet(nn.Module):
             lg = self.denoise(x, cond)
             p = torch.softmax(lg, -1)
             conf, am = p.max(-1)
+            if temp > 0:
+                g = torch.stack([torch.from_numpy(-np.log(-np.log(seeded_uniform(seed_state(s), t, N, K + 1))))
+                                 for s in seeds]).to(lg.dtype).to(lg.device)
+                am = (lg + temp * g).argmax(-1)
+                conf = torch.gather(p, -1, am[..., None])[..., 0]
             th = tau[t - 1] if t < T else -1.0
             commit = (x == M) & (conf >= th)
             x = torch.where(commit, am, x)

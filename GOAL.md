@@ -48,6 +48,10 @@ Read first: `CLAUDE.md` (hard rules), then `docs/00-README-START-HERE.md`, then 
 | S3 | STRETCH | Interpolation slider between two prompts | parity holds |
 | S4 | STRETCH | 2–4 step distilled refinement, one tab per step | parity + filmstrip figure |
 | S5 | STRETCH | v48 model + spreadsheet | same gates as v32 |
+| S6 | STRETCH (now priority) | **v2: few-step masked discrete diffusion** in its own sheet (key `diffusion`), with a step filmstrip | A2/A3/A4 parity; v1-vs-v2 comparison figure + metrics; **checked in the real sheet with screenshots** across varied prompts |
+| S7 | STRETCH | **Seeded temperature sampling** (Gumbel-max with per-pixel exact-LCG noise, `LN` added only after multi-engine parity) vs deterministic argmax | side-by-side at temp 0 / 0.5 / 1.0 + metrics; adopt only if clearly better |
+| S8 | STRETCH | **v2b without a style input** (does diffusion pick one coherent drawing on its own?) | comparison vs v2a |
+| S9 | STRETCH | **Per-style quality** (which artists pixelate well) → prefer/drop weak styles | per-style metrics; decision logged |
 
 ## Training strategy (decided 2026-11-04)
 - **One main model** trained on **all sources with a fixed sampling mixture** (start: 45% emoji + variations, 30% PixelGPT, 15% game-icons/Tabler colourised, 10% GameTileNet CC0/CC-BY tiles; tune only if a source clearly hurts held-out metrics; log in decisions.md). A **style id** per source keeps the looks separate. This is the only model compiled into the spreadsheet.
