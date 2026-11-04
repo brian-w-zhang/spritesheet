@@ -77,7 +77,7 @@ class VQNet(nn.Module):
         B, T = codes.shape
         e = self.cfg["e"]
         E = self.p_emb[codes]                                          # [B, T, e]
-        prev = torch.zeros(B, T, (T - 1) * e, device=c.device)
+        prev = torch.zeros(B, T, (T - 1) * e, device=c.device, dtype=c.dtype)
         for t in range(1, T):
             prev[:, t, : t * e] = E[:, :t].reshape(B, t * e)
         pos = torch.eye(T, device=c.device).expand(B, T, T)
@@ -105,7 +105,7 @@ class VQNet(nn.Module):
     def generate(self, ids, uniforms, tau=1.0, guidance=0.0):
         c = self.sn.encode(ids)
         codes = self.sample_codes(c, uniforms, tau, guidance)
-        w = F.one_hot(codes, self.cfg["Kc"]).float()
+        w = F.one_hot(codes, self.cfg["Kc"]).to(c.dtype)
         return self.decode_soft(c, w), codes
 
 

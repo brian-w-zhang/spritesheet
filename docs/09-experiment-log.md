@@ -174,3 +174,18 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **v3_vq6 (6×6 × 256 codes) at 5k steps:** reconstructions through the codes are much better than with 3×3 (val fg accuracy 0.76 vs 0.57) and keep the shapes. Prompt-driven samples are still blobs, so the text→codes prior is the bottleneck (NLL 3.55 nats/code vs 5.5 for uniform).
 - **Size budget** (Brian: use the room): at 24×24, width costs stored weights and multiply-adds more than formulas. 384/192/96/48 with 5×5 kernels = 186k formulas and 158M multiply-adds (2.7× v1-XL); 512/256/128/64 with 5×5 = 236k and 281M (4.8×). The final v3 trains the winning idea at that size for 150k+ steps.
 - **Licence hygiene:** figures and snapshots that show real PixelGPT sprites (ground-truth strips, VQ reconstruction snapshots) are gitignored. Only model outputs are published.
+
+### v3_vq6 result (r4): more structure and variety, still mushy and oversized [metrics/v3_eval_r4.json; figures/v3_lineup_r4_*.png, v3_panel_r4_*.png, v3_seeds_r4_*.png; runs/v3_vq6/]
+- **Setup:** 6×6 grid of 256 codes (288 bits), autoregressive MLP prior, 60k steps (2.4 h), 1,945,282 params total (encoder is training-only).
+- **Validation:** reconstruction through the codes fg accuracy 0.781, all 256 codes used; prior NLL 3.28 nats/code (uniform 5.5).
+- **Numbers vs v3_var16 / v3_base / v1-XL:**
+  - Novel R@5: 0.30 [0.21, 0.39], vs 0.35 / 0.41 / 0.41.
+  - PixelGPT-test R@5: 0.018 [0.010, 0.027], vs 0.033 / 0.027 / 0.013.
+  - Colour-adjective accuracy: **0.971**, vs 0.896 / 0.933 / 0.658.
+  - Seed diversity: **0.604**, vs 0.293 / 0.0 / 0.291.
+  - Mean pixel confidence: 0.866, vs 0.589 / 0.568 / 0.732.
+- **By eye:** the first v3 model with multi-colour interiors: the frog gets a mouth line, the dragon is two-tone, the wizard has a hat shape. Seeds give genuinely different drawings. But sprites fill most of the canvas, and regions are mushy with no outlines. CLIP retrieval does not improve.
+- **Diagnosis:**
+  - The decoder averages *inside* each 4×4 code cell; even reconstructions lose outlines.
+  - The prior is weakly text-conditioned (NLL far above what sharp samples need). Sampled code grids mix several sprites' codes, which gives the oversized, patchy look.
+- **Next:** a critic (hinge GAN) fine-tune of the decoder for crisp cells (running). Then a classifier-free-guided prior (`--cond-drop`) so prompts steer the codes harder.

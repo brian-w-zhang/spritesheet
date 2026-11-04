@@ -1,0 +1,40 @@
+{
+ "name": "v3_vq6",
+ "family": "v3",
+ "args": {
+  "steps": 60000,
+  "batch": 256,
+  "lr": 0.002,
+  "cfg": "{\"C0\":256,\"C1\":128,\"C2\":64,\"C3\":32,\"G\":6,\"Kc\":256,\"e\":16,\"hp\":256}",
+  "emb_noise": 0.15,
+  "bg_weight": 0.5,
+  "prior_weight": 1.0,
+  "usage_weight": 0.1,
+  "tau0": 1.0,
+  "tau1": 0.3,
+  "sample_tau": 0.8,
+  "seed": 0,
+  "out": "artifacts/model/v3_vq6",
+  "note": "VQ latent 6x6 grid of 256 codes (288 bits): code per 4x4 patch; sheet decoder starts at 6x6 from code embeddings; 36-step autoregressive prior samples codes from the seed",
+  "snap_every": 5000
+ },
+ "cfg": {
+  "N": 24,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 8,
+  "e": 16,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "K": 48,
+  "G": 6,
+  "Kc": 256,
+  "hp": 256
+ },
+ "started": "2026-11-04T12:46:28",
+ "strategy": "VQ latent 6x6 grid of 256 codes (288 bits): code per 4x4 patch; sheet decoder starts at 6x6 from code embeddings; 36-step autoregressive prior samples codes from the seed",
+ "data": "PixelGPT-24x24-216K train split, Sampler3 augmentation"
+}
