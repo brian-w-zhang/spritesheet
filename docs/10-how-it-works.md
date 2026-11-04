@@ -106,8 +106,7 @@ Only `SUMPRODUCT, INDEX, MATCH(…,0), MAX, MIN, SUM, EXP, IF, IFERROR, MOD, INT
 | **B2** | the prompt: type, then press Enter |
 | **B3** | seed: picks the drawing style (Noto / Twemoji / OpenMoji / Fluent 3D / Fluent colour / Fluent flat / pixel art) when the prompt doesn't name one. Any number works; it is reduced to an integer 1…2,147,483,646 (`MOD(INT(ABS(seed)),2147483646)+1`). Same prompt + seed → same image; neighbouring seeds are unrelated. It is the only randomness in the model |
 | **B4** | the drawing style the sheet sampled for this seed, by name (read-only; steer the style by writing it in the prompt, e.g. "a cat, 3d") |
-| **C2 · "Showing: …"** | depends on all 1,024 pixels, so it changes to the new prompt only when the sprite is fully computed: the "done" indicator |
-| **C6:AH37** | the 32×32 sprite: square 12 px cells holding class ids, coloured by one conditional-format rule per palette colour, digits hidden, so the image is seamless |
+| **C5:AH36** | the 32×32 sprite: square 12 px cells holding class ids, coloured by one conditional-format rule per palette colour, digits hidden, so the image is seamless |
 
 **Trigger:** press Enter on the prompt cell. (Clickable buttons in Google Sheets need Apps Script, which would break "no code runs".)
 **Latency (honest number for the video):** median 30.6 s per prompt in real Google Sheets for the 309,648-param main model (`artifacts/metrics/parity_sheets.json`). Show it real-time once, then speed up the wait in editing with a label.

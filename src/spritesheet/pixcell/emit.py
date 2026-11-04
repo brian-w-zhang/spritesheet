@@ -15,7 +15,7 @@ from .workbook import Block, Text, Workbook, a1, col_letter, ref, rng
 
 VERSION = "pixcell-0.1"
 BACKGROUND = "#f6f4ef"
-DISPLAY_R0, DISPLAY_C0 = 6, 3          # Prompt display block top-left (row 6, column C)
+DISPLAY_R0, DISPLAY_C0 = 5, 3          # Prompt display block top-left (row 5, right under the inputs; column C)
 GRID0 = 4                               # dense layer output is 4x4xC0 (reference.decode)
 
 
@@ -76,25 +76,22 @@ def _wtab(wb: Workbook, name: str, M, bias=None) -> Block:
     return b
 
 
-def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple", default_seed=1,
-                  render=False, style_names=None) -> Workbook:
-    """Compile weights+config into a Workbook. render=True adds the coloured display + stage bar (Google Sheets).
-    style_names (optional): list of S style names shown in Prompt!B4; defaults to data/build/styles.json if present."""
-    L, d, h, S, e, K = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"], cfg["K"]
-    V = len(vocab_words)
-    C = [cfg["C0"], cfg["C1"], cfg["C2"], cfg["C3"]]
-    assert cfg.get("L", L) == L, "config L must match tokenizer.L"
-    assert w["wordvec"].shape == (V, d), (w["wordvec"].shape, V, d)
-    assert vocab_words[0] == "<pad>" and vocab_words[1] == "<unk>"
-    assert len(palette_hex) == K, (len(palette_hex), K)
-    N = GRID0 * 8
-    wb = Workbook()
-    wb.meta.update({"config": dict(cfg), "version": VERSION, "render": render, "N": N, "V": V})
+def _lin(b: Block, i: int, xrow: str, n: int) -> str:
+    """SUMPRODUCT(x, W^T row i) + b_i for a weight tab b with n inputs and a bias column."""
+    return f"SUMPRODUCT({xrow},{b.row_range(i, 0, n - 1, b.sheet)})+{b.ref(i, n, b.sheet)}"
 
+
+def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", default_seed=1,
+               style_names=None, intro=None) -> dict:
+    """Prompt inputs (B2 prompt, B3 seed, B4 style name), Vocab/WordVec, Tokens, the attention encoder and the
+    Latent tab (c, seeded style, z = [c, style_emb[style]]). Shared by v1 (compile_model) and v2 (emit_mdm)."""
+    L, d, h, S, e = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"]
+    V = len(vocab_words)
+    lin = _lin
     # ---- Prompt (inputs) first, so it is the first tab
     P = "Prompt"
     wb.set(P, 1, 1, Text("SpriteSheet"))
-    wb.set(P, 1, 2, Text("Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style."))
+    wb.set(P, 1, 2, Text(intro or "Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style."))
     wb.set(P, 2, 1, Text("Prompt"))
     wb.set(P, 2, 2, Text(default_prompt))
     wb.set(P, 3, 1, Text("Seed"))
@@ -139,10 +136,6 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     Wo = _wtab(wb, "W_o", w["Wo"].T, w["bo"])
     W1 = _wtab(wb, "W_1", w["W1"].T, w["b1"])
     W2 = _wtab(wb, "W_2", w["W2"].T, w["b2"])
-
-    def lin(b: Block, i: int, xrow: str, n: int) -> str:
-        """SUMPRODUCT(x, W^T row i) + b_i for a weight tab b with n inputs and a bias column."""
-        return f"SUMPRODUCT({xrow},{b.row_range(i, 0, n - 1, b.sheet)})+{b.ref(i, n, b.sheet)}"
 
     # X = wordvec[id] + pos
     X = wb.add_block("X", "X", 1, 1, L, d)
@@ -232,6 +225,61 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     wb.fill(zb, lambda _, k: f"={cb.ref(0, k)}" if k < d
             else f"=INDEX({Wemb.range('W_emb', absolute=True)},{STYLE},{k - d + 1})")
     ZROW = zb.row_range(0, sheet=Lt, absolute=True)
+    return {"PROMPT": PROMPT, "SEED": SEED, "CROW": CROW, "ZROW": ZROW, "STYLE": STYLE, "c": cb, "z": zb}
+
+
+def emit_output(wb: Workbook, px: Block, palette_hex, render: bool, PROMPT: str) -> Block:
+    """Palette, Hex and the 32x32 class-id display (Prompt rows 5..; no extra status cells); returns the display block."""
+    N, K, P = px.nrows, len(palette_hex), "Prompt"
+    pal = wb.add_block("Palette", "Palette", 1, 1, K + 1, 1)
+    for i, hx in enumerate([BACKGROUND] + list(palette_hex)):
+        wb.set("Palette", 1 + i, 1, Text(hx))
+    PAL = pal.range("Palette", absolute=True)
+    hx = wb.add_block("Hex", "Hex", 1, 1, N, N)
+    wb.fill(hx, lambda y, x: f"=INDEX({PAL},{px.ref(y, x, 'Pixels')}+1)")
+
+
+    # ---- render (Google Sheets only)
+    disp = wb.add_block("Display", P, DISPLAY_R0, DISPLAY_C0, N, N)
+    wb.meta["display"] = {"r0": DISPLAY_R0, "c0": DISPLAY_C0, "n": N}
+    if render:
+        # Display = class ids; the Sheets writer colours them with one conditional-format rule per class and hides
+        # the digits (number format ;;;), so the 32x32 block reads as one seamless image. Portable formulas only.
+        wb.fill(disp, lambda y, x: "=" + px.ref(y, x, "Pixels"))
+    wb.meta["palette_hex"] = list(palette_hex)
+    return disp
+
+
+def emit_about(wb: Workbook, w, cfg, vocab_words, palette_hex, spec="src/spritesheet/reference.py", extra=()):
+    """About tab: compiler version, model hash (B2), config, vocab size, spec pointer."""
+    ab = "About"
+    mh = model_hash(w, cfg, vocab_words, palette_hex)
+    wb.meta["model_hash"] = mh
+    rows = [("compiler", VERSION), ("model hash", mh), ("config", str({k: cfg[k] for k in sorted(cfg)})),
+            ("vocab size", str(len(vocab_words))), *extra,
+            ("source", f"github.com: SpriteSheet (Pixcell compiler); spec = {spec}")]
+    for r, (k, v) in enumerate(rows, start=1):
+        wb.set(ab, r, 1, Text(k))
+        wb.set(ab, r, 2, Text(v))
+
+
+def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple", default_seed=1,
+                  render=False, style_names=None) -> Workbook:
+    """Compile weights+config into a Workbook. render=True adds the coloured display + stage bar (Google Sheets).
+    style_names (optional): list of S style names shown in Prompt!B4; defaults to data/build/styles.json if present."""
+    L, d, h, S, e, K = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"], cfg["K"]
+    V = len(vocab_words)
+    C = [cfg["C0"], cfg["C1"], cfg["C2"], cfg["C3"]]
+    assert cfg.get("L", L) == L, "config L must match tokenizer.L"
+    assert w["wordvec"].shape == (V, d), (w["wordvec"].shape, V, d)
+    assert vocab_words[0] == "<pad>" and vocab_words[1] == "<unk>"
+    assert len(palette_hex) == K, (len(palette_hex), K)
+    N = GRID0 * 8
+    wb = Workbook()
+    wb.meta.update({"config": dict(cfg), "version": VERSION, "render": render, "N": N, "V": V})
+    fr = emit_front(wb, w, cfg, vocab_words, default_prompt, default_seed, style_names)
+    CROW, ZROW = fr["CROW"], fr["ZROW"]
+    lin = _lin
 
     # ---- decoder
     Wd = _wtab(wb, "W_d", w["Wd"].T, w["bd"])                    # row j = output unit j (y, x, c) row-major
@@ -285,36 +333,8 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
         r = lg.row_range(y, x * (K + 1), x * (K + 1) + K, "Logits")
         return f"=MATCH(MAX({r}),{r},0)-1"
     wb.fill(px, pixcell)
-    pal = wb.add_block("Palette", "Palette", 1, 1, K + 1, 1)
-    for i, hx in enumerate([BACKGROUND] + list(palette_hex)):
-        wb.set("Palette", 1 + i, 1, Text(hx))
-    PAL = pal.range("Palette", absolute=True)
-    hx = wb.add_block("Hex", "Hex", 1, 1, N, N)
-    wb.fill(hx, lambda y, x: f"=INDEX({PAL},{px.ref(y, x, 'Pixels')}+1)")
-
-    # ---- "Showing:" status (C2). It depends on every pixel, so it only switches to the new prompt once the whole
-    # sprite has been recalculated: a done-indicator for the demo. Portable formula.
-    wb.set(P, 2, DISPLAY_C0, f'="Showing: "&IF(SUMPRODUCT(({px.range("Pixels", absolute=True)}>=0)*1)={N * N},{PROMPT},"")')
-
-    # ---- render (Google Sheets only)
-    disp = wb.add_block("Display", P, DISPLAY_R0, DISPLAY_C0, N, N)
-    wb.meta["display"] = {"r0": DISPLAY_R0, "c0": DISPLAY_C0, "n": N}
-    if render:
-        # Display = class ids; the Sheets writer colours them with one conditional-format rule per class and hides
-        # the digits (number format ;;;), so the 32x32 block reads as one seamless image. Portable formulas only.
-        wb.fill(disp, lambda y, x: "=" + px.ref(y, x, "Pixels"))
-    wb.meta["palette_hex"] = list(palette_hex)
-
-    # ---- About
-    ab = "About"
-    mh = model_hash(w, cfg, vocab_words, palette_hex)
-    wb.meta["model_hash"] = mh
-    rows = [("compiler", VERSION), ("model hash", mh), ("config", str({k: cfg[k] for k in sorted(cfg)})),
-            ("vocab size", str(V)),
-            ("source", "github.com: SpriteSheet (Pixcell compiler); spec = src/spritesheet/reference.py")]
-    for r, (k, v) in enumerate(rows, start=1):
-        wb.set(ab, r, 1, Text(k))
-        wb.set(ab, r, 2, Text(v))
+    emit_output(wb, px, palette_hex, render, fr["PROMPT"])
+    emit_about(wb, w, cfg, vocab_words, palette_hex)
     return wb
 
 
@@ -340,3 +360,36 @@ def tokenizer_rows(prompts, vocab_words):
             wb.set("Tok", r, id_c0 + i, f_id(a1(r, wc), VOCAB))
     wb.meta["tok"] = {"n": len(prompts), "id_c0": id_c0, "L": L}
     return wb
+
+
+# ---------------------------------------------------------------- render spec (shared by sheets.py and xlsx.py)
+DISPLAY_BG = "#d8d4dd"   # class 0 in the rendered display: light grey, so white sprites stay visible
+
+
+def _runs(xs):
+    xs = sorted(set(xs))
+    out = []
+    for x in xs:
+        if out and x == out[-1][1] + 1:
+            out[-1][1] = x
+        else:
+            out.append([x, x])
+    return [tuple(r) for r in out]
+
+
+def render_spec(wb: Workbook) -> dict:
+    """Where the coloured class-id grids are on the Prompt tab and how to colour them.
+
+    grids: [(r0, c0, n)] = the display plus (v2) one thumbnail per denoising step; classes: [(value, hex)] for one
+    conditional-format rule each (0 = background, 1..K = palette, v2 adds MASK = K+1 in the "unknown" colour);
+    pixel_rows / pixel_cols: runs (first, last) of rows/columns to make square; label_rows: filmstrip captions."""
+    d = wb.meta["display"]
+    grids = [(d["r0"], d["c0"], d["n"])] + [(f["r0"], f["c0"], f["n"]) for f in wb.meta.get("filmstrip", [])]
+    classes = list(enumerate([DISPLAY_BG] + list(wb.meta.get("palette_hex", []))))
+    if wb.meta.get("mask_class") is not None:
+        classes.append((wb.meta["mask_class"], wb.meta["mask_colour"]))
+    rows = [r for r0, _, n in grids for r in range(r0, r0 + n)]
+    cols = [c for _, c0, n in grids for c in range(c0, c0 + n)]
+    gap_cols = [c for _, c0, n in grids for c in (c0 - 1,) if c0 - 1 > 2]   # the 1-column gap between thumbnails
+    return {"grids": grids, "classes": classes, "pixel_rows": _runs(rows), "pixel_cols": _runs(cols + gap_cols),
+            "label_rows": [f["label_row"] for f in wb.meta.get("filmstrip", [])]}
