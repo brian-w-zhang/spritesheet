@@ -51,7 +51,8 @@ def generate(net, captions, vocab, seeds, style_override=None):
 # ---------------------------------------------------------------- detectors (applied to output AND target)
 def palette_rgb():
     pal = json.load(open(os.path.join(BUILD, "palette.json")))["colors"]
-    rgb = np.array([[0xF6, 0xF4, 0xEF]] + [[int(h[i:i + 2], 16) for i in (1, 3, 5)] for h in pal], dtype=np.uint8)
+    rgb = np.array([[0xD8, 0xD4, 0xDD]] +  # same light grey as the sheet display (white sprites stay visible)
+            [[int(h[i:i + 2], 16) for i in (1, 3, 5)] for h in pal], dtype=np.uint8)
     return rgb
 
 

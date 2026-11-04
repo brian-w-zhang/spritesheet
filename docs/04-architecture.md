@@ -94,7 +94,7 @@ sixteen tabs `S{t}_…`:
 | `S{t}_Emb` | zero-bordered (N+2)×((N+2)·E): `INDEX(W_tok, x+1, k)` with x from `S{t-1}_Canvas` (step 1: the constant MASK row) |
 | `S{t}_A1` | N×(N·C1): `MAX(0, SUMPRODUCT(3×3E window, kernel) + FiLM1)` |
 | `S{t}_Pool1`, `S{t}_Pool2` | bordered avg2: `(a+b+c+d)/4` |
-| `S{t}_A2`, `S{t}_A3`, `S{t}_A4` | convs at 16×16 / 8×8 (A3 is written straight into a bordered layout, because A4 convolves it) |
+| `S{t}_A2`, `S{t}_A3`, `S{t}_A4` | convs at 16×16 / 8×8 (A3 is written straight into a bordered layout, because A4 convolves it; v2b adds `+GMap!…` after the ReLU, where `GMap` = cond·W_g + bg is computed once, D-44) |
 | `S{t}_P2`, `S{t}_P1` | 1×1 projection per cell before upsampling: `SUMPRODUCT(channel segment, W_p row)` |
 | `S{t}_Up2`, `S{t}_Up1` | nearest ×2 as plain references, bordered |
 | `S{t}_U2`, `S{t}_U1` | `MAX(0, conv + skip (A2 / A1) + FiLM5/6)` |

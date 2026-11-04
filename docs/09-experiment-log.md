@@ -108,3 +108,11 @@ Brian asked whether PixelGPT was really useless. It wasn't shown to be. Two prob
 | *ground-truth PixelGPT sprites* | – | – | *0.147* |
 
 **Read:** (1) longer training dominates; (2) PixelGPT *helps* novel-prompt generalisation at R@5 (0.35 vs 0.29 emoji-only), which reverses the earlier call; (3) the CLIP word table helps (0.35 vs 0.27); (4) free-text captions are hard even for the real sprites. With n=100, differences under ~0.05 are noise.
+
+### Visual line-up (04:05): metrics vs eyes [figures/lineup_greybg_*.png]
+Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × models, seed 1, reviewed by eye:
+- **v1 main (40k steps) is the best row in all three groups.** Recognisable: strawberry, tree, mushroom, pizza, owl (silhouette), sword, *sad penguin* (with face), *pickup truck*, *toad in mud*. Blobs: fox, cat, dog, dragon, knight, "cat wearing a hat".
+- **The 8k-step ablations are visibly blobbier than v1.** Differences *between* them are subtle and mixed, so small metric gaps between ablations should not be over-claimed.
+- **v2a (diffusion) is clearly worst:** fragments, or nothing.
+- **Bug found by looking:** all figures and CLIP scores used a near-white background (#f6f4ef), which made white subjects (ghosts, skeletons, snowmen) invisible. Figures and evaluation now use the sheet's light grey (#d8d4dd). CLIP numbers before 04:05 are biased against white subjects for every model, and will be re-scored.
+**Lesson for the slides:** metrics alone misled us twice tonight (the PixelGPT call, the white-background bug). Every claim now gets a visual check.
