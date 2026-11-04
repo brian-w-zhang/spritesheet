@@ -12,8 +12,8 @@ from .. import tokenizer as T
 from ..oracles import hyperformula as HF
 from ..oracles import libreoffice as LO
 from ..oracles import scan_errors
-from . import emit, emit_mdm, fixtures as F, lint
-from .trace import compare, trace, trace_mdm
+from . import emit, emit_mdm, emit_p, fixtures as F, lint
+from .trace import compare, trace, trace_mdm, trace_p
 
 ENGINES = ("hyperformula", "libreoffice")
 TOL = 1e-12
@@ -85,7 +85,8 @@ def parity(wb, w, cfg, vocab, cases, engines=ENGINES, read=None, batch=None) -> 
     read: sheets to read back (None = all; blocks on unread sheets are skipped)."""
     vi = T.index_vocab(vocab)
     mdm = wb.meta.get("model") == "mdm"
-    traces = [(trace_mdm if mdm else trace)(p, s, w, cfg, vi) for p, s in cases]
+    tfn = {"mdm": trace_mdm, "v3p": trace_p}.get(wb.meta.get("model"), trace)
+    traces = [tfn(p, s, w, cfg, vi) for p, s in cases]
     runs = [{"prompt": p, "seed": s, "read": read} for p, s in cases]
     out = {"cases": len(cases), "engines": {}, "stats": {k: v for k, v in wb.stats().items() if k != "per_sheet"}}
     out["min_margin"] = float(min(t["forward"]["min_margin"] for t in traces))
@@ -224,7 +225,10 @@ def model_type_of(model_dir, requested="auto") -> str:
 
 
 def compile_any(w, cfg, vocab, pal, **kw):
-    """v1 (reference.forward) or v2 (mdm.ref_generate), auto-detected from cfg["model"]."""
+    """v1 (reference.forward), v2 (mdm.ref_generate) or v3-P (reference_p.forward), from cfg["model"]."""
+    if cfg.get("model") == "v3p":
+        kw.pop("style_names", None)
+        return emit_p.compile_p(w, cfg, vocab, pal, **kw)
     return (emit_mdm.compile_mdm if is_mdm(cfg) else emit.compile_model)(w, cfg, vocab, pal, **kw)
 
 

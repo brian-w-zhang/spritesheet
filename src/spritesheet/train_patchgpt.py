@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 
 from . import tokenizer as T
-from .patchgpt import PatchGPT, gumbel, noise_tables
+from .patchgpt import PatchGPT, gumbel
 from .patches import to_patches, from_patches
 from .train_v3 import SNAP_PROMPTS, ROOT
 from .data.v3 import OUT as V3, Sampler3, eval_set3
@@ -71,10 +71,9 @@ def main():
               open(os.path.join(run_dir, "run.json"), "w"), indent=1)
     live = open(os.path.join(run_dir, "train_log.jsonl"), "w")
     rgb = np.concatenate([np.array([[216, 212, 221]], np.uint8), np.array([[int(h[i:i + 2], 16) for i in (1, 3, 5)] for h in pal], np.uint8)])
-    A, B = noise_tables(Tn, Kp)
     snap_ids = torch.tensor([T.encode(p, vocab) for p in SNAP_PROMPTS], device=dev)
-    snap_noise = torch.tensor(np.stack([gumbel(1, A, B)] * len(SNAP_PROMPTS)), dtype=torch.float32, device=dev)
-    frog_noise = torch.tensor(np.stack([gumbel(s, A, B) for s in range(1, 17)]), dtype=torch.float32, device=dev)
+    snap_noise = torch.tensor(np.stack([gumbel(1, Tn, Kp)] * len(SNAP_PROMPTS)), dtype=torch.float32, device=dev)
+    frog_noise = torch.tensor(np.stack([gumbel(s, Tn, Kp) for s in range(1, 17)]), dtype=torch.float32, device=dev)
 
     @torch.no_grad()
     def validate():

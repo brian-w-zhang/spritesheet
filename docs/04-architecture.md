@@ -117,6 +117,18 @@ Same network and Pixcell layout as v1, with these differences:
 - **Training:** `src/spritesheet/train_v3.py`, using winner-takes-all variant assignment and word-vector noise.
 - **Data:** `src/spritesheet/data/v3.py`.
 
+### v3-P (PatchGPT; D-52; `pixcell/emit_p.py`, spec `reference_p.forward`)
+- **Output:** 24×24 = 8×8 patches of 3×3, each copied from a fixed 1024-entry patch dictionary (`W_D`). No conv decoder.
+- **Prior:** causal transformer over 75 rows (12 prompt rows, then 63 image-token rows); row L−1+t predicts patch t. Seeded Gumbel-max picks each patch.
+- **Tabs:**
+  - `Seed` (s0, s1);
+  - `Inputs` (word vectors `WV`, input rows `X0`; image rows read `Out!Codes`);
+  - per block `Blk{l}_QKV` (1/rms, Q, K, Vᵀ), `Blk{l}_Att` (one N×N exp-weight block per head, plus row sums), `Blk{l}_Ctx` (context, residual) and `Blk{l}_MLP` (1/rms, hidden, residual);
+  - `Out` (Codes, final 1/rms);
+  - `Score` (T×K Gumbel scores);
+  - `Pixels` (patch lookup), then `Hex` / `Display` as in v1;
+  - with guidance, the unconditional chain `U_X0`, `U{l}_*`, `U_Out` (LU).
+
 ## Training (CPU/MPS on the M4; a GPU is not needed at this size)
 - The data stream is generated on the fly by `synth.py` (doc 03), with a balanced mix: emoji base and variations, and PixelGPT.
 - Loss: cross-entropy over the K+1 classes per pixel. Weight foreground pixels more (backgrounds dominate). Add a style-head CE and the optional CLIP-distillation loss.

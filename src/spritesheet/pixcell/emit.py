@@ -81,17 +81,14 @@ def _lin(b: Block, i: int, xrow: str, n: int) -> str:
     return f"SUMPRODUCT({xrow},{b.row_range(i, 0, n - 1, b.sheet)})+{b.ref(i, n, b.sheet)}"
 
 
-def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", default_seed=1,
-               style_names=None, intro=None) -> dict:
-    """Prompt inputs (B2 prompt, B3 seed, B4 style name), Vocab/WordVec, Tokens, the attention encoder and the
-    Latent tab (c, seeded style, z = [c, style_emb[style]]). Shared by v1 (compile_model) and v2 (emit_mdm)."""
-    L, d, h, S, e = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"]
+def emit_tokens(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", default_seed=1, intro=None,
+                show_style=True) -> dict:
+    """Prompt inputs (B2 prompt, B3 seed), Vocab/WordVec and the Tokens tab (shared by v1, v2 and v3-P)."""
+    L = T.L
     V = len(vocab_words)
-    lin = _lin
-    # ---- Prompt (inputs) first, so it is the first tab
     P = "Prompt"
     wb.set(P, 1, 1, Text("SpriteSheet"))
-    variants = bool(cfg.get("variants"))  # v3: learned variants, no named styles shown (D-51)
+    variants = not show_style
     if intro is None:
         intro = ("Type a prompt in B2 and press Enter. Change the seed (B3) to get a different drawing." if variants
                  else "Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style.")
@@ -130,8 +127,19 @@ def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", 
         wb.set(Tk, r, 4, f_id(f"C{r}", VOCAB))
         wb.set(Tk, r, 5, f"=IF(D{r}={T.PAD},0,1)")
     wb.set(Tk, 1, 6, f"=MAX(1,SUM({mask_b.range()}))")
-    MASK = mask_b.range(Tk, absolute=True)
-    DENOM = "Tokens!$F$1"
+    return {"PROMPT": PROMPT, "SEED": SEED, "WV": WV, "VOCAB": VOCAB, "MASK": mask_b.range(Tk, absolute=True),
+            "DENOM": "Tokens!$F$1", "variants": variants}
+
+
+def emit_front(wb: Workbook, w, cfg, vocab_words, default_prompt="a red apple", default_seed=1,
+               style_names=None, intro=None) -> dict:
+    """Prompt inputs (B2 prompt, B3 seed, B4 style name), Vocab/WordVec, Tokens, the attention encoder and the
+    Latent tab (c, seeded style, z = [c, style_emb[style]]). Shared by v1 (compile_model) and v2 (emit_mdm)."""
+    L, d, h, S, e = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"]
+    lin = _lin
+    tk = emit_tokens(wb, w, cfg, vocab_words, default_prompt, default_seed, intro, show_style=not cfg.get("variants"))
+    P, PROMPT, SEED, WV, MASK, DENOM, variants = ("Prompt", tk["PROMPT"], tk["SEED"], tk["WV"], tk["MASK"], tk["DENOM"],
+                                                  tk["variants"])
 
     # ---- encoder weights
     pos = _wtab(wb, "W_pos", w["pos"])

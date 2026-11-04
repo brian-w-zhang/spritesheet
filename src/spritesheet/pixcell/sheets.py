@@ -324,7 +324,8 @@ def set_prompt_and_read(prompt, seed, client: Client | None = None, wb: Workbook
     t_write = time.time() - t0
     want_clean = T.clean(prompt)
     want_s0 = int(abs(float(seed))) % (2147483647 - 1) + 1
-    ranges = [f"'Pixels'!{rng(1, 1, N, N)}", "'Tokens'!A1", "'Latent'!A7:D7"]
+    seed_rng = (wb.meta.get("seed_range") if wb else None) or "'Latent'!A7:D7"   # v3-P: 'Seed'!A1:B1 (A = s0)
+    ranges = [f"'Pixels'!{rng(1, 1, N, N)}", "'Tokens'!A1", seed_rng]
     last, reads, first_ok = None, 0, None
     while True:
         got = cl.values_batch_get(ranges)

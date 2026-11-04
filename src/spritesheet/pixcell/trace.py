@@ -149,7 +149,7 @@ def trace_mdm(prompt, seed, w, cfg, vocab_index) -> dict:
     return {"ids": ids, "expected": E, "forward": fwd}
 
 
-DISCRETE = {"Tokens.ids", "Tokens.mask", "Tokens.denom", "s0", "s1", "style", "Pixels"}
+DISCRETE = {"Tokens.ids", "Tokens.mask", "Tokens.denom", "s0", "s1", "style", "Pixels", "Codes", "seed.s0", "seed.s1"}
 
 
 def is_discrete(name: str) -> bool:
@@ -205,3 +205,52 @@ def compare(wb, values: dict, expected: dict, skip_weights=True) -> dict:
         if bad:
             res["fail"].append(name)
     return res
+
+
+def _stack_expected(E, pre, parts_rows, N, H, dh):
+    """parts_rows[n] = list over layers of reference_p._row_forward parts for sequence row n."""
+    layers = len(parts_rows[0])
+    for l in range(layers):
+        p = f"{pre}b{l}."
+        get = lambda key: np.array([parts_rows[n][l][key] for n in range(N)])
+        E[p + "r"] = get("r")[:, None]
+        E[p + "Q"], E[p + "K"], E[p + "VT"] = get("q"), get("k"), get("v").T
+        for h in range(H):
+            M = np.zeros((N, N))
+            for n in range(N):
+                M[n, : n + 1] = parts_rows[n][l]["e"][h]
+            E[p + f"E{h}"] = M
+        E[p + "Z"] = np.array([[parts_rows[n][l]["z"][h] for h in range(H)] for n in range(N)])
+        E[p + "ctx"], E[p + "x1"] = get("ctx"), get("x1")
+        E[p + "r2"], E[p + "hid"], E[p + "x2"] = get("r2")[:, None], get("hid"), get("x2")
+
+
+def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
+    """v3-P: expected value of every block (spec: reference_p.forward; intermediates come from its per-row parts)."""
+    from .. import reference_p as RP
+    ids = T.encode(prompt, vocab_index)
+    out = RP.forward(ids, seed, w, cfg)
+    clean, rests, words = T.split_trace(prompt)
+    m = (np.array(ids) != T.PAD).astype(float)
+    L, Tn, dm, H = len(ids), cfg["T"], cfg["dm"], cfg["H"]
+    N = L + Tn - 1
+    rows = out["rows"]
+    s0 = int(abs(seed)) % (R.M31 - 1) + 1
+    E = {"Tokens.clean": [[clean]], "Tokens.rest": [[r] for r in rests], "Tokens.word": [[x] for x in words],
+         "Tokens.ids": np.array(ids, float)[:, None], "Tokens.mask": m[:, None],
+         "Tokens.denom": np.array([[max(1.0, m.sum())]]),
+         "seed.s0": np.array([[s0]], float), "seed.s1": np.array([[RP.seed_state(seed)]], float),
+         "WV": np.array([rows[n]["wv"] for n in range(L)]), "X0": np.array([r["x0"] for r in rows])}
+    _stack_expected(E, "", [r["parts"] for r in rows], N, H, dm // H)
+    E["rf"] = np.array([[rows[L - 1 + t]["rf"]] for t in range(Tn)])
+    E["Score"] = out["scores"]
+    E["Codes"] = out["codes"].astype(float)[:, None]
+    E["Pixels"] = out["pixels"].astype(float)
+    if cfg.get("guidance"):
+        ur = [rows[L - 1 + t] for t in range(Tn)]
+        E["U.X0"] = np.array([r["ux0"] for r in ur])
+        _stack_expected(E, "U", [r["uparts"] for r in ur], Tn, cfg["U_H"], cfg["U_dm"] // cfg["U_H"])
+        E["U.rf"] = np.array([[r["urf"]] for r in ur])
+        E["LU"] = np.array([r["lu"] for r in ur])
+    out["style"] = 1
+    return {"ids": ids, "expected": E, "forward": out}
