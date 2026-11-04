@@ -89,7 +89,9 @@ def ref_generate(ids, seed, w, cfg, keep_steps=True, temp=None):
         top2 = np.sort(lg, -1)[..., -2:]
         margins.append(float((top2[..., 1] - top2[..., 0])[x == M].min()) if (x == M).any() else None)
         tau = cfg["tau"][t - 1] if t < T else -1.0
-        commit = (x == M) & (conf >= tau)
+        beta = cfg.get("bg_beta", 1.0)  # background confidence penalty (D-49): background commits later
+        score = conf * np.where(am == 0, beta, 1.0) if beta != 1.0 else conf
+        commit = (x == M) & (score >= tau)
         x = np.where(commit, am, x)
         if keep_steps:
             steps.append({"canvas": x.copy(), "conf": conf, "logits": lg})
@@ -189,7 +191,9 @@ class MDMNet(nn.Module):
                 am = (lg + temp * g).argmax(-1)
                 conf = torch.gather(p, -1, am[..., None])[..., 0]
             th = tau[t - 1] if t < T else -1.0
-            commit = (x == M) & (conf >= th)
+            beta = self.cfg.get("bg_beta", 1.0)
+            score = conf * torch.where(am == 0, torch.full_like(conf, beta), torch.ones_like(conf)) if beta != 1.0 else conf
+            commit = (x == M) & (score >= th)
             x = torch.where(commit, am, x)
             hist.append(x.clone())
         return x, hist

@@ -1,0 +1,59 @@
+{
+ "source": "random full-width",
+ "T": 4,
+ "formulas": 830198,
+ "upload_activate_s": 2018.71213889122,
+ "push": {
+  "tabs": 109,
+  "value_requests": 47,
+  "tabs_s": 61.303436040878296,
+  "values_s": 111.38085794448853,
+  "inert": true,
+  "activate_s": 1803.2455451488495,
+  "upload_s": 2018.3733298778534,
+  "requests": 154,
+  "retries": 1,
+  "bytes_sent": 63594136,
+  "format": {
+   "requested_px": 12,
+   "grids": 5,
+   "cf_rules": 34,
+   "row_px": [
+    12,
+    12
+   ],
+   "col_px": [
+    12,
+    12
+   ],
+   "last_grid_row_px": [
+    12,
+    12
+   ],
+   "last_grid_col_px": [
+    12,
+    12
+   ]
+  }
+ },
+ "renders": [
+  {
+   "prompt": "a red apple",
+   "match": true,
+   "first_consistent_s": 35.8605101108551,
+   "stable_s": 59.05583715438843
+  },
+  {
+   "prompt": "a blue fox",
+   "match": true,
+   "first_consistent_s": 98.13678169250488,
+   "stable_s": 117.61266589164734
+  },
+  {
+   "prompt": "a tiny house in the top left",
+   "match": true,
+   "first_consistent_s": 87.51904892921448,
+   "stable_s": 104.28595399856567
+  }
+ ]
+}

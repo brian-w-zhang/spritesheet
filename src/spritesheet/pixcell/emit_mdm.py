@@ -189,8 +189,12 @@ def compile_mdm(w, cfg, vocab_words, palette_hex, default_prompt="a red apple", 
             wb.fill(cfb, lambda y, x: (f"=EXP(INDEX({row(y, x)},1,{amb.ref(y, x)}+1)-{mxb.ref(y, x)})"
                                        f"*(1/SUMPRODUCT(EXP({row(y, x)}-{mxb.ref(y, x)})))"))
         cvb = wb.add_block(B("Canvas"), S("Canvas"), 1, 1, N, N)
-        conf_ref = lambda y, x: cfb.ref(y, x, cs)
         am_ref = lambda y, x: amb.ref(y, x, cs)
+        beta = float(cfg.get("bg_beta", 1.0))
+        if beta != 1.0:  # D-49: background confidence × beta (must equal mdm.ref_generate's score exactly)
+            conf_ref = lambda y, x: f"({cfb.ref(y, x, cs)}*IF({am_ref(y, x)}=0,{beta!r},1))"
+        else:
+            conf_ref = lambda y, x: cfb.ref(y, x, cs)
         if t == TT and canvas is None:            # T = 1: commit everything at once
             fn = lambda y, x: f"={am_ref(y, x)}"
         elif t == TT:                              # last step: commit every pixel still masked
