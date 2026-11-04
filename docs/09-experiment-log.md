@@ -36,7 +36,20 @@ Numbers come from the files cited in brackets under `artifacts/`. Newest entries
 
 ## Phase 3 · Main model and ablations (in progress)
 
-- **`v32_main`** (tier 1: 1,409 concepts, 8,358 emoji bases + 18,000 PixelGPT; C 128/64/48/32; 40,000 steps). Mixture: 45% emoji variations, 30% PixelGPT, 25% plain emoji. *Results pending.*
+- **`v32_main`** (tier 1: 1,409 concepts, 8,358 emoji bases + 18,000 PixelGPT; C 128/64/48/32; **309,648 params**; 40,000 steps, 52 min on the M4). Mixture: 45% emoji variations, 30% PixelGPT, 25% plain emoji. Train-stream fg-pixel acc ended at 0.544. [quality.json, n=300 per set]
+
+| Set | fg-pixel acc (given style) | fg-pixel acc (sampled style) | CLIP score ÷ target's | CLIP concept top-1 (ours / target) | attribute agreement |
+| --- | --- | --- | --- | --- | --- |
+| train_sample | 0.578 | 0.495 | 0.915 | – / – | hue 0.61, size 0.91, pos 0.96, count 0.70, bg 1.00 |
+| heldout_combo | 0.625 | 0.525 | 0.922 | 0.000 / 0.103 | hue 0.85 |
+| heldout_phrase | 0.555 | 0.453 | 0.909 | 0.020 / 0.180 | hue 0.67, size 0.89, pos 0.95, count 0.70, bg 1.00 |
+| unseen_words | 0.145 | 0.073 | 0.936 | 0.000 / 0.203 | hue 0.31 |
+| underspecified | 0.618 | 0.320 | 0.908 | 0.043 / 0.187 | hue 0.54 |
+| pixelgpt_test | 0.127 | 0.125 | 0.846 | – / – | hue 0.37 |
+
+  **Read:** attributes are the strength. Size, position, count and background follow the prompt; colour on held-out (concept, colour) pairs agrees 82% of the time; named styles are honoured. Concept *detail* is the weakness. CLIP rarely names the concept from our 32×32 output, though it also struggles with the ground-truth targets (top-1 ≈ 0.08–0.25 among 1,409 names). **Unseen words fail** (fg acc ≈ 0.07): the frozen CLIP table alone doesn't carry a held-out keyword to the right concept. PixelGPT's free-text captions are barely learned (fg 0.12): at sheet-sized capacity, the 18k one-off creative captions mostly add noise. The C5 ablation tests exactly this.
+  - Eval bug fixed here: evaluation had defaulted to tier-0 test sets; it now follows the model's tier.
+- **`v32_long`**: same architecture, 100,000 steps. Launched 01:51 as the final candidate. *Pending.*
 - **Ablations** (8k steps each, same architecture, uncompiled): `base`, `bow` (bag-of-words encoder), `nocliptable` (learned embeddings instead of the CLIP table), `pg5k` / `pg10k` (data scaling), `emojionly` (mixture). *Results pending.*
 
 ## Bugs found by the verification gates (slide: "checks, not trust")

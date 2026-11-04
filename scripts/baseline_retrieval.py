@@ -37,7 +37,7 @@ def main():
     res = {"bank": len(caps), "sets": {}}
     for name in a.sets.split(","):
         try:
-            data = eval_set(name, a.n)
+            data = eval_set(name, a.n, tier=a.tier)
         except Exception as e:
             res["sets"][name] = {"error": str(e)}
             continue

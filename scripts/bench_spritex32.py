@@ -55,7 +55,7 @@ def main():
            "spritesheet": {"params": cfg.get("params"), "steps": 1}, "sets": {}}
     examples = []
     for s in a.sets.split(","):
-        data = eval_set(s, a.n)
+        data = eval_set(s, a.n, tier=int(cfg.get("tier", 0)))
         caps = [d[0] for d in data]
         metas = [d[3] for d in data]
         t0 = time.time()

@@ -200,7 +200,7 @@ def main():
     res = {"model": a.model, "config": cfg, "sets": {}}
     for s in a.sets.split(","):
         try:
-            data = eval_set(s, a.n) if a.tier is None else eval_set(s, a.n, tier=a.tier)
+            data = eval_set(s, a.n, tier=(a.tier if a.tier is not None else int(cfg.get("tier", 0))))
         except Exception as e:
             res["sets"][s] = {"error": f"{type(e).__name__}: {e}"}
             continue

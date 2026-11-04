@@ -98,7 +98,7 @@ def main():
          sub="colour · direction · size · position · count · background · style", path=os.path.join(FIG, "variations.png"))
 
     # 3. model vs exact target on held-out combos (given the target's style), with diff count
-    data = eval_set("heldout_combo", 8)
+    data = eval_set("heldout_combo", 8, tier=int(cfg.get("tier", 0)))
     caps, tg, sid = [d[0] for d in data], [d[1] for d in data], [d[2] for d in data]
     g, _ = gen(caps, list(range(1, 9)), sid)
     items = []
@@ -114,7 +114,7 @@ def main():
          path=os.path.join(FIG, "vs_target.png"))
 
     # 4. unseen words
-    data = eval_set("unseen_words", 12)
+    data = eval_set("unseen_words", 12, tier=int(cfg.get("tier", 0)))
     caps = [d[0] for d in data]
     g, st = gen(caps, list(range(1, 13)), [d[2] for d in data])
     grid([(E.to_rgb(x, rgb), c, "word never in a training caption") for x, c in zip(g, caps)], 6,
