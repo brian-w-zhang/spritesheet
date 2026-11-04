@@ -1,6 +1,6 @@
 # SpriteSheet
 
-**A text-to-pixel-art neural network that runs entirely in Google Sheets formulas.**
+**A text-to-pixel-art neural network that runs entirely in Google Sheets.**
 
 Type a prompt into a cell, like *"a tiny blue rocket facing left"*, and a 32×32 sprite appears in the sheet's square cells. Every value is computed by native spreadsheet formulas: no Apps Script, add-ons, or external calls.
 
