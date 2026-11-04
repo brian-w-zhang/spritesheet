@@ -1,0 +1,22 @@
+{
+ "N": 24,
+ "L": 12,
+ "d": 64,
+ "h": 128,
+ "S": 16,
+ "e": 8,
+ "C0": 256,
+ "C1": 128,
+ "C2": 64,
+ "C3": 32,
+ "K": 48,
+ "attn_scale": 0.125,
+ "V": 16119,
+ "model": "v3",
+ "steps": 60000,
+ "variants": true,
+ "emb_noise": 0.15,
+ "train_seconds": 7340.0,
+ "data": "PixelGPT-24x24-216K train split",
+ "params": 606593
+}
