@@ -41,16 +41,21 @@ HUE_OK = {"red": {0, 11}, "orange": {0, 1}, "yellow": {1, 2}, "green": {3, 4, 5}
 
 class Model:
     def __init__(self, name):
-        # "dir@g=2,t=0.7": VQ sampling overrides (g = classifier-free guidance weight, t = prior temperature)
+        # "dir@g=2:t=0.7": VQ sampling overrides (g = classifier-free guidance weight, t = prior temperature)
         base, _, opts = name.partition("@")
         d = os.path.join(ROOT, "artifacts", "model", base)
         self.name, self.dir = name, d
-        self.fname = name.replace("@", "_").replace("=", "").replace(",", "_")
+        self.fname = name.replace("@", "_").replace("=", "").replace(":", "_")
         self.cfg = json.load(open(os.path.join(d, "config.json")))
-        for kv in filter(None, opts.split(",")):
+        self.unet_dir = None
+        for kv in filter(None, opts.split(":")):
             k, v = kv.split("=")
+            if k == "u":   # v3-P: unconditional prior dir (for guidance)
+                self.unet_dir = os.path.join(ROOT, "artifacts", "model", v)
+                continue
             self.cfg[{"g": "guidance", "t": "sample_tau"}[k]] = float(v)
-        self.v3 = self.cfg.get("model") in ("v3", "v3vq")
+        self.v3p = self.cfg.get("model") == "v3p"
+        self.v3 = self.cfg.get("model") in ("v3", "v3vq", "v3p")
         self.vq = self.cfg.get("model") == "v3vq"
         self.mdm = self.cfg.get("model") == "mdm"
         vp = os.path.join(d, "vocab.txt")
@@ -61,6 +66,17 @@ class Model:
         if self.mdm:
             from compare_models import load_v2
             self.net, self.c2 = load_v2(d)
+        elif self.v3p:
+            from spritesheet.patchgpt import PatchGPT, UPatchGPT
+            self.net = PatchGPT(self.cfg, np.load(os.path.join(ROOT, "data", "build", "v3", "wordvec.npy")))
+            self.net.load_state_dict(torch.load(os.path.join(d, "model.pt"), map_location="cpu"))
+            self.net = self.net.eval()
+            self.D = np.load(os.path.join(d, "patches.npy"))
+            self.unet = None
+            if self.unet_dir:
+                self.unet = UPatchGPT(json.load(open(os.path.join(self.unet_dir, "config.json"))))
+                self.unet.load_state_dict(torch.load(os.path.join(self.unet_dir, "model.pt"), map_location="cpu"))
+                self.unet = self.unet.eval()
         elif self.vq:
             from spritesheet.vq import VQNet
             self.net = VQNet(self.cfg, np.load(os.path.join(ROOT, "data", "build", "v3", "wordvec.npy")))
@@ -81,6 +97,18 @@ class Model:
             g, _, _ = gen_v2(self.net, self.c2, caps, self.vocab, seeds)
             return np.asarray(g), None
         ids = torch.tensor([T.encode(c, self.vocab) for c in caps])
+        if self.v3p:
+            from spritesheet.patchgpt import sample_guided
+            from spritesheet.patches import from_patches
+            from spritesheet import reference_p as RP
+            Tn, Kp = self.cfg["T"], self.cfg["Kp"]
+            g, tau = self.cfg.get("guidance", 0.0), self.cfg.get("sample_tau", 1.0)
+            out = []
+            for i in range(0, len(caps), 128):
+                nz = torch.tensor(np.stack([RP.gumbel(s, Tn, Kp) for s in seeds[i:i + 128]]), dtype=torch.float32)
+                codes = sample_guided(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau)
+                out.append(from_patches(self.D[codes.numpy()], self.cfg["P"]).astype(np.uint8))
+            return np.concatenate(out), None
         if self.vq:
             from spritesheet.vq import seed_uniforms
             Tn = self.cfg["G"] ** 2

@@ -137,12 +137,28 @@ def build(K=32, top_new_words=4000, d=64):
 
 
 # ---------------------------------------------------------------- training stream
+PREP = {"of", "with", "in", "on", "from", "for", "under", "over", "at", "by", "into", "inside", "behind", "near",
+        "beside", "through", "against", "without", "made"}
+
+
+def shorten(cap, r, p_keep=0.35, p_drop_tail=0.7):
+    """Head-noun-preserving caption dropout: the head noun (last word before the first preposition) is always kept;
+    the prepositional tail is dropped with p_drop_tail; every other word survives with p_keep (order kept)."""
+    w = cap.split()
+    cut = next((i for i, x in enumerate(w) if i > 0 and x.lower() in PREP), len(w))
+    head, tail = w[:cut], w[cut:]
+    keep = [x for x in head[:-1] if r.random() < p_keep] + [head[-1]]
+    if tail and r.random() >= p_drop_tail:
+        keep += tail
+    return " ".join(keep)
+
+
 class Sampler3:
     """Deterministic stream of (caption, 24x24 class grid). Train-time augmentation (D-51):
     colour recolour + adjective ("blue <caption>") with p_colour, named background with p_bg, optional
     leading article. Eval splits ("validation", "test") return verbatim captions."""
 
-    def __init__(self, split="train", seed=0, p_colour=0.25, p_bg=0.08, p_article=0.5):
+    def __init__(self, split="train", seed=0, p_colour=0.25, p_bg=0.08, p_article=0.5, p_short=0.0):
         from .synth import recolor_luts, bg_classes, saturated_mask, COLORS, BG_COLORS, BG_PHRASES, _WORDS_OF
         from .. import tokenizer as T
         z = np.load(os.path.join(OUT, "imgs_24.npz"))
@@ -157,6 +173,7 @@ class Sampler3:
         self.colorable = (sat[self.imgs] & fg).sum((1, 2)) >= 0.5 * np.maximum(1, fg.sum((1, 2)))
         self.COLORS, self.BG, self.BGP, self.WORDS_OF = list(COLORS), list(BG_COLORS), BG_PHRASES, _WORDS_OF
         self.p = (p_colour, p_bg, p_article) if split == "train" else (0.0, 0.0, 0.0)
+        self.p_short = p_short if split == "train" else 0.0
         self.L = T.L
         self.nw = lambda c: len(T.normalize(c))
 
@@ -164,6 +181,8 @@ class Sampler3:
         r = self.rng
         b = int(self.pool[int(r.integers(len(self.pool)))])
         g, cap = self.imgs[b], str(self.caps[b])
+        if self.p_short and r.random() < self.p_short:
+            cap = shorten(cap, r)
         pc, pb, pa = self.p
         if self.colorable[b] and r.random() < pc and self.nw(cap) + 1 <= self.L:
             c = self.COLORS[int(r.integers(len(self.COLORS)))]
