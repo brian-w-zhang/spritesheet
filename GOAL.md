@@ -36,6 +36,7 @@ Read first: `CLAUDE.md` (hard rules), then `docs/00-README-START-HERE.md`, then 
 | A5 | MUST | Data pipeline tests | deterministic normalisation; integer-only scaling for pixel art; transparent padding; palette snap idempotent |
 | B | MUST | Quality metrics (doc 06 §B) | pixel acc, attribute acc, CLIP concept top-1/top-5, CLIP score, seed diversity, on all fixed splits → `artifacts/metrics/quality.json` |
 | C1–C3 | MUST | Retrieval baseline, BoW ablation, no-CLIP-table ablation | same metrics |
+| C5 | MUST | Data-scaling + mixture ablations (numpy/torch eval only, not compiled) | same arch, short runs: PixelGPT 5k / 10k / 18k (does more pixel-art data still help? this decides whether to buy the 216k edition) and emoji-only vs all-sources; curves → `artifacts/metrics/data_scaling.json` + `data_scaling.png` |
 | C4 | MUST | SpriteX32 head-to-head | same prompts, CLIP metrics + size/steps table (read its code before running) |
 | D | MUST | Systems numbers (doc 06 §D) | `artifacts/metrics/systems.json` |
 | E | MUST | Related-work table | `artifacts/metrics/related_work.json`, doc 02 facts only |
@@ -47,6 +48,12 @@ Read first: `CLAUDE.md` (hard rules), then `docs/00-README-START-HERE.md`, then 
 | S3 | STRETCH | Interpolation slider between two prompts | parity holds |
 | S4 | STRETCH | 2–4 step distilled refinement, one tab per step | parity + filmstrip figure |
 | S5 | STRETCH | v48 model + spreadsheet | same gates as v32 |
+
+## Training strategy (decided 2026-11-04)
+- **One main model** trained on **all sources with a fixed sampling mixture** (start: 45% emoji + variations, 30% PixelGPT, 15% game-icons/Tabler colourised, 10% GameTileNet CC0/CC-BY tiles; tune only if a source clearly hurts held-out metrics; log in decisions.md). A **style id** per source keeps the looks separate. This is the only model compiled into the spreadsheet.
+- **Bring-up first:** a tier-0 run (~300 emoji concepts) proves the whole pipeline end to end, including the sheet. Then train the main all-sources model with the same code.
+- **Ablations are cheap and uncompiled:** C1–C3 and C5 are short runs of the same architecture, evaluated with `reference.py`. Parity is proven once, on the compiled main model.
+- **Canvas:** 32×32. PixelGPT is padded 1:1 (after masking `tile_bg` to transparent), emoji/SVG are rendered natively at 32, and GameTileNet is used as-is.
 
 ## Phases (time boxes are guides; at each box's end, commit, push and update PROGRESS.md)
 - **P0 · Check the environment (≤20 min).** Run `uv sync`, check `uv run python -c "import torch; print(torch.backends.mps.is_available())"` and HyperFormula, and run `pytest` on an empty suite. Create `PROGRESS.md` with the DoD table. Commit and push.
