@@ -14,6 +14,8 @@ while [ $# -gt 0 ]; do
   esac
 done
 FAIL=0
+# clean checkout: install the pinned HyperFormula oracle (tools/package-lock.json) if missing
+if [ ! -d tools/node_modules/hyperformula ]; then echo "=== installing tools/ node deps (npm ci)"; npm ci --prefix tools --silent || { echo "npm ci failed"; exit 1; }; fi
 run() { local name=$1; shift; echo "=== $name: $*"; "$@"; local rc=$?
         if [ $rc -eq 0 ]; then echo "--- $name PASS"; elif [ $rc -eq 2 ]; then echo "--- $name NOT RUN"; else echo "--- $name FAIL (rc=$rc)"; FAIL=1; fi; }
 
