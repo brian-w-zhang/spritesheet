@@ -160,7 +160,7 @@ def concept_table(use_openmoji: bool = True) -> tuple[list[dict], dict[str, int]
         paths = {s: p for s, p in idx[cid].items() if use_openmoji or s != "openmoji"}
         kws = clean_words(list(c.get("keywords", [])) + list(f.get("keywords", []))
                           + str(o.get("tags", "")).split(",") + str(o.get("openmoji_tags", "")).split(","))
-        name = name.lower().strip()
+        name = re.sub(r"\s+", " ", name.lower().replace("\u2019", "'").replace("\u201c", "").replace("\u201d", "")).strip()
         concepts.append({"id": cid, "name": name, "keywords": [k for k in kws if k != name],
                          "group": group or "Other", "paths": {s: paths[s] for s in EMOJI_STYLES if s in paths}})
     return concepts, excl

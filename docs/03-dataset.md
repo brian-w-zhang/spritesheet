@@ -57,7 +57,7 @@ General rule: integer scale `k = floor((n − margin)/s)`, nearest-neighbour, th
 Preview figures: `artifacts/figures/preview_pixelate.png` (8 concepts × Noto/Twemoji/Fluent-3D/OpenMoji at 32 and 48) and `artifacts/figures/preview_pixelgpt.png` (PixelGPT at native 24, padded 32, 2× 48). Both look clean.
 
 ## Synthetic variations (each sample has an exact target image)
-Applied by `src/spritesheet/synth.py` on the normalised foreground. Each transform also edits the caption. Unspecified attributes take a **canonical default** (original colours, centred, count 1, no background), so the target is deterministic given the caption **plus a style id**.
+Applied by `src/spritesheet/data/synth.py` on the normalised foreground. Each transform also edits the caption. Unspecified attributes take a **canonical default** (original colours, centred, count 1, no background), so the target is deterministic given the caption **plus a style id**.
 
 | Control | Caption words (vary phrasing) | Implementation |
 | --- | --- | --- |
@@ -73,7 +73,7 @@ Applied by `src/spritesheet/synth.py` on the normalised foreground. Each transfo
 
 **Style is ambiguous** when the prompt doesn't name it (an apple could be drawn by 7 artists), so a **style latent is sampled from the seed** (exact LCG; see doc 04). This avoids training a regressor on a blurry average of the 7 drawings.
 
-## Splits (fixed before training; hashes saved in `data/splits.json`)
+## Splits (fixed before training; saved with the array hash in `data/build/tier{T}/splits.json`)
 - **Held-out (concept × attribute) combinations:** e.g. "blue banana" never seen, though bananas and blue were. This is the main generalisation test.
 - **Held-out synonyms/phrasings:** keywords and templates never used in training captions.
 - **Unseen words:** words in the CLIP word table that never appear in any training caption (e.g. "puppy" if only "dog" is trained).

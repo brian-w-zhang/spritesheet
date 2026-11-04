@@ -3,12 +3,14 @@
 All arrays are numpy. N = 32 (resolution parameter everywhere).
 
 ## Data → model (`src/spritesheet/data/`)
-- `data/build/palette.json`: `{"n": 32, "colors": ["#rrggbb", ...]}` with K colours. **Class id 0 = background/transparent; class id i (1..K) = colors[i-1].**
-- `data/build/concepts.json`: list of `{"id": str, "name": str, "keywords_train": [..], "keywords_test": [..], "group": str, "styles": [style names available]}`.
-- `data/build/bases_{N}.npz`: `imgs` uint8 [M, N, N] class ids (canonical size, centred), `concept` int [M], `style` int [M], plus `small` uint8 [M, N, N] (the same base rendered small, for size/position/count variants).
-- `data/build/styles.json`: ordered list of style names (the style id is the index). Style phrases are in `synth.STYLE_WORDS`.
-- `synth.Sampler(split, seed)` → `.batch(B)` returns `(captions: list[str], targets: uint8 [B,N,N], style_ids: int [B], meta: list[dict])`. Deterministic for the same seed. `meta` holds concept, style and attributes, for the attribute-accuracy metrics.
-- `synth.eval_set(name)` returns a fixed list of `(caption, target [N,N], style_id, meta)` for each split: `train_sample`, `heldout_combo`, `heldout_phrase`, `unseen_words`, `pixelgpt_test`, `underspecified`.
+Built by `uv run python -m spritesheet.data.build --tier 0|1` (seconds). Per-tier files live in `data/build/tier{T}/` (`spritesheet.data.build_dir(T)`); the palette and styles are shared by all tiers and are also at the root (D-16).
+- `data/build/palette.json` (= `tier{T}/palette.json`): `{"n": 32, "colors": ["#rrggbb", ...]}` with K = 32 colours. **Class id 0 = background/transparent; class id i (1..K) = colors[i-1].**
+- `data/build/tier{T}/concepts.json`: list of `{"id": str, "name": str, "keywords_train": [..], "keywords_test": [..], "group": str, "styles": [style names available]}`. `data/build/concepts.json` = the full tier-1 list (tier 0 entries are identical subsets). `data/build/caption_words.txt` = every word a caption can contain (input to `vocab.py`).
+- `data/build/tier{T}/bases_{N}.npz`: `imgs` uint8 [M, N, N] class ids (canonical size, centred), `concept` int32 [M] (index into the tier's concepts.json; −1 = PixelGPT), `style` int32 [M], `small` uint8 [M, N, N] (the same base rendered at round(N/2), centred; zeros for PixelGPT), `has_small` uint8 [M], `split` int8 [M] (PixelGPT 0/1/2 = train/val/test; emoji 0), `pg_caption`, `pg_category`, `key` str [M]. Gitignored (contains PixelGPT images).
+- `data/build/styles.json`: ordered list of style names (the style id is the index): `noto, twemoji, openmoji, fluent_3d, fluent_color, fluent_flat, pixelgpt`. Style phrases are in `synth.STYLE_WORDS`.
+- `data/build/tier{T}/splits.json`: held-out (concept, colour) / (concept, transform) pairs, train/held-out templates, test keywords, PixelGPT split sizes, `arrays_sha256`. `build_report.json`: counts.
+- `synth.Sampler(split, seed, tier=0, mix=None, pixelgpt_n=None)` → `.batch(B)` returns `(captions: list[str], targets: uint8 [B,N,N], style_ids: int [B], meta: list[dict])`. Deterministic for the same seed. `meta` holds concept, style and attributes, for the attribute-accuracy metrics.
+- `synth.eval_set(name, n=300, tier=0)` returns a fixed list of `(caption, target [N,N], style_id, meta)` for each split: `train_sample`, `heldout_combo`, `heldout_phrase`, `unseen_words`, `pixelgpt_test`, `underspecified`.
 
 ## Text
 - `tokenizer.py`: `normalize(prompt) -> list[str]` (≤ L = 12 words) and `encode(prompt, vocab_index) -> list[int]` (length L; PAD = 1, UNK = 2, vocab ids are 1-based **row numbers in the Vocab tab**; row 1 = `<pad>`, row 2 = `<unk>`).

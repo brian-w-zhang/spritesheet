@@ -17,3 +17,7 @@ artifacts/*.log
 !data/wordvec_*.npy
 artifacts/figures/preview_pixelgpt.png
 artifacts/preflight/
+# built base arrays contain PixelGPT images and rendered emoji (rebuild: uv run python -m spritesheet.data.build --tier 0|1)
+data/build/**/bases_*.npz
+data/build/
+artifacts/figures/dataset_samples.png

@@ -27,8 +27,10 @@ def load(model_dir):
 
 
 def lcg_uniform(seed):
+    """Two MINSTD steps (the first output is discarded: one step maps small seeds to u ≈ seed·2.2e-5; D-31)."""
     s0 = int(math.floor(abs(seed))) % (M31 - 1) + 1  # sheet: MOD(INT(ABS(seed)),2147483646)+1
-    return ((LCG_A * s0) % M31) / M31
+    s1 = (LCG_A * s0) % M31                           # sheet: MOD(48271*s0,2147483647)
+    return ((LCG_A * s1) % M31) / M31                 # sheet: MOD(48271*s1,2147483647)/2147483647
 
 
 def seq_sum(v):
