@@ -4,7 +4,15 @@ Deadline: **slides.pdf + private YouTube link due end of Wed Nov 4** (GitLab `mi
 
 ## Tonight, before starting `/goal` (Brian, about 10 min)
 - [ ] Read `GOAL.md` once; edit anything you disagree with.
-- [ ] Google Sheets access for the agent: run `python3 -I scripts/sheets_probe.py`. If it fails, follow the printed fix (re-login with Sheets+Drive scopes, set the quota project, enable the Sheets/Drive APIs), then rerun until PASS. Without a PASS the agent can only verify locally, and gate A4 will be reported NOT RUN.
+- [ ] Google Sheets access, using your personal Google account and a new personal GCP project:
+  1. `gcloud auth login`
+  2. `gcloud projects create <PROJECT_ID> --name=SpriteSheet`
+  3. `gcloud services enable sheets.googleapis.com drive.googleapis.com --project <PROJECT_ID>`
+  4. `gcloud auth application-default login --scopes=https://www.googleapis.com/auth/spreadsheets,https://www.googleapis.com/auth/drive.file,https://www.googleapis.com/auth/cloud-platform`
+  5. `gcloud auth application-default set-quota-project <PROJECT_ID>`
+  6. `python3 -I scripts/sheets_probe.py` → must print PASS
+  - If step 4 says "This app is blocked", create an OAuth Desktop client in the project, download its JSON, and rerun step 4 with `--client-id-file=<json>`.
+  - Without PASS, the agent verifies locally only and A4 is reported NOT RUN.
 - [ ] `uv` works offline? (The agent needs PyPI for numpy/torch/openpyxl the first time.)
 - [ ] Keep the laptop plugged in; disable sleep (`caffeinate -dimsu &`).
 - [ ] Start: paste the `/goal` line at the top of `GOAL.md` (repo is already created and pushed).
