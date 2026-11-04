@@ -41,6 +41,9 @@ def sample(net, ids, sty, seeds, T_, rule, temp, frac_sched="cos"):
         score = torch.where(masked, conf, torch.full_like(conf, -1.0))
         if rule == "fgfirst" and t < T_:
             score = torch.where(am == 0, torch.full_like(conf, -0.5), score)  # background waits for the last step
+        if rule.startswith("bgpen") and t < T_:  # background confidence scaled by beta (sheet: IF(am=0, beta*conf, conf))
+            beta = float(rule[5:])
+            score = torch.where((am == 0) & masked, conf * beta, score)
         for b in range(B):
             n_commit = int(masked[b].sum().item() - round(keep * N * N))
             if n_commit <= 0:
@@ -66,8 +69,9 @@ def main():
     rgb = E.palette_rgb()
     data = eval_set("heldout_combo", a.n, tier=1) + eval_set("train_sample", a.n, tier=1)
     caps, tg, sid = [d[0] for d in data], np.stack([d[1] for d in data]), [d[2] for d in data]
-    variants = [("conf", 0.0, 6), ("fgfirst", 0.0, 6), ("conf", 1.0, 6), ("fgfirst", 1.0, 6), ("fgfirst", 0.5, 6),
-                ("fgfirst", 1.0, 4), ("fgfirst", 1.0, 8), ("fgfirst", 1.0, 12)]
+    import os as _os
+    variants = [tuple(v.split(":")[0:1]) + (float(v.split(":")[1]), int(v.split(":")[2])) for v in
+                _os.environ.get("VARIANTS", "conf:0:6,fgfirst:0:6,conf:1:6,fgfirst:1:6,fgfirst:0.5:6,fgfirst:1:4,fgfirst:1:8,fgfirst:1:12").split(",")]
     res = {}
     for rule, temp, T_ in variants:
         key = f"{rule}_t{temp}_T{T_}"

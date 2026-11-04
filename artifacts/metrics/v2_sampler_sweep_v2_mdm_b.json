@@ -1,0 +1,32 @@
+{
+ "bgpen0.3_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.5477264028528487,
+  "pixel_acc": 0.5494921875,
+  "blank_rate": 0.02,
+  "fg_area_ratio": 1.3737829183820165
+ },
+ "bgpen0.5_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.5271795446271039,
+  "pixel_acc": 0.6029150390625,
+  "blank_rate": 0.045,
+  "fg_area_ratio": 1.1835494440865937
+ },
+ "bgpen0.7_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.479252434163236,
+  "pixel_acc": 0.6516015625,
+  "blank_rate": 0.095,
+  "fg_area_ratio": 0.9160108662167082
+ },
+ "bgpen0.85_t0.0_T6": {
+  "fg_pixel_acc_given_style": 0.41817197374931153,
+  "pixel_acc": 0.6530078125,
+  "blank_rate": 0.115,
+  "fg_area_ratio": 0.7375211209753456
+ },
+ "bgpen0.5_t0.5_T6": {
+  "fg_pixel_acc_given_style": 0.5232307390707704,
+  "pixel_acc": 0.60203125,
+  "blank_rate": 0.015,
+  "fg_area_ratio": 1.1791432118818905
+ }
+}

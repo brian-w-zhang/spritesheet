@@ -43,6 +43,7 @@ def main():
     ap.add_argument("--pixelgpt-n", type=int, default=None)
     ap.add_argument("--bg-weight", type=float, default=0.5)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--pg-shift", action="store_true", help="random placement of PixelGPT sprites (augmentation)")
     a = ap.parse_args()
 
     from .data.synth import Sampler
@@ -62,6 +63,8 @@ def main():
         kw["mix"] = json.loads(a.mix)
     if a.pixelgpt_n is not None and "pixelgpt_n" in sig:
         kw["pixelgpt_n"] = a.pixelgpt_n
+    if a.pg_shift:
+        kw["pg_shift"] = True
     sampler = Sampler(**kw)
     opt = torch.optim.AdamW(net.parameters(), lr=a.lr, weight_decay=1e-4)
     sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=a.lr, total_steps=a.steps, pct_start=0.05)
