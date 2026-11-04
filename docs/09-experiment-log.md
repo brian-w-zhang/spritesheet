@@ -164,7 +164,7 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **Conclusion:** 16 winner-takes-all variants are too few bits. They give seed variety (colour, silhouette) but no structure. The remaining blur is averaging *within* each variant. v1-XL (emoji + PixelGPT, 150k steps) still draws the most detail, because emoji give clean, repeated targets per concept.
 - **Next:** v3_vq (3×3 grid of 64 codes, 54 bits, autoregressive prior); started 12:34.
 
-### Better evaluation + v3 in the real sheet (13:40) [metrics/v3_eval_r3.json, parity_sheets_v3_var16.json; figures/v3_panel_r3_*.png; figures/v3_groundtruth_r3.png is local only (real PixelGPT sprites)]
+### Better evaluation + v3 in the real sheet (13:00) [metrics/v3_eval_r3.json, parity_sheets_v3_var16.json; figures/v3_panel_r3_*.png; figures/v3_groundtruth_r3.png is local only (real PixelGPT sprites)]
 - **Evaluation upgrade** (after Brian asked whether ~30 by-eye prompts are enough): 1,000 held-out PixelGPT test captions, bootstrap 95% CIs, and a 64-prompt × 4-seed panel per model (2 held-out captions from each of the 21 PixelGPT families, plus novel and adjective prompts, ≈256 images). Also a ground-truth strip (real sprite vs each model), kept local because of the licence.
 - **Results:**
   - Novel prompts R@5 (n = 100): v3_base 0.41 [0.32, 0.51], v3_var16 0.35 [0.26, 0.45], v1-XL 0.41 [0.31, 0.50]. **A statistical tie;** the earlier 0.35-vs-0.41 "gap" was noise.
