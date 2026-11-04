@@ -1,0 +1,22 @@
+{
+ "name": "v32_t0",
+ "family": "v1",
+ "strategy": "Tier-0 bring-up: small v1 (C 64/48/32/24), Noto-only concepts, 4k steps",
+ "outcome": "pipeline check; blobs",
+ "model_dir": "artifacts/model/v32_t0",
+ "steps_logged": 4000,
+ "params": 165216,
+ "train_seconds": 142.9,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 64,
+  "C1": 48,
+  "C2": 32,
+  "C3": 24,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

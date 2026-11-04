@@ -1,0 +1,22 @@
+{
+ "name": "abl_nocliptable",
+ "family": "ablation",
+ "strategy": "Ablation C3: learned word embeddings instead of the CLIP table",
+ "outcome": "worse generalisation to unseen words",
+ "model_dir": "artifacts/model/abl_nocliptable",
+ "steps_logged": 8000,
+ "params": 1085264,
+ "train_seconds": 737.3,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

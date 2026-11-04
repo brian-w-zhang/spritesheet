@@ -1,0 +1,22 @@
+{
+ "name": "abl_base",
+ "family": "ablation",
+ "strategy": "Ablation baseline: v1 arch, 8k steps, default mix",
+ "outcome": "reference point for C1-C5",
+ "model_dir": "artifacts/model/abl_base",
+ "steps_logged": 8000,
+ "params": 309648,
+ "train_seconds": 612.4,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

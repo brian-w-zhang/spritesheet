@@ -1,0 +1,22 @@
+{
+ "name": "abl_emojionly",
+ "family": "ablation",
+ "strategy": "Ablation C5: emoji only (no PixelGPT)",
+ "outcome": "worse on novel prompts (CLIP R@5)",
+ "model_dir": "artifacts/model/abl_emojionly",
+ "steps_logged": 8000,
+ "params": 309648,
+ "train_seconds": 804.0,
+ "mix": "{\"emoji_var\":0.6,\"emoji_plain\":0.4}",
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

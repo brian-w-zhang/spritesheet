@@ -1,0 +1,22 @@
+{
+ "name": "v1_small",
+ "family": "v1",
+ "strategy": "First full v1: tier 1 (emoji x7 styles + PixelGPT 20K), C 128/64/48/32, 40k steps",
+ "outcome": "verified in Sheets (A3/A4); blurry, averaged shapes",
+ "model_dir": "artifacts/model/v1_small",
+ "steps_logged": 40000,
+ "params": 309648,
+ "train_seconds": 3151.8,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

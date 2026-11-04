@@ -1,0 +1,23 @@
+{
+ "name": "v2_mdm_a",
+ "family": "v2",
+ "strategy": "v2a masked diffusion (MaskGIT-style), T=6, emoji only",
+ "outcome": "blank outputs (background committed first)",
+ "model_dir": "artifacts/model/v2_mdm_a",
+ "steps_logged": 40000,
+ "params": 232312,
+ "train_seconds": 1513.2,
+ "mix": "{\"emoji_var\":0.6,\"emoji_plain\":0.4}",
+ "arch": {
+  "N": 32,
+  "C1": 24,
+  "C2": 48,
+  "C3": 96,
+  "E": 24,
+  "T": 6,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

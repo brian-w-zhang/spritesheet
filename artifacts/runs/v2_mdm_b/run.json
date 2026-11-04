@@ -1,0 +1,23 @@
+{
+ "name": "v2_mdm_b",
+ "family": "v2",
+ "strategy": "v2b: + global prompt layout map, 30% PixelGPT, 60k steps",
+ "outcome": "no blanks; objects shrunken",
+ "model_dir": "artifacts/model/v2_mdm_b",
+ "steps_logged": 60000,
+ "params": 680824,
+ "train_seconds": 4854.9,
+ "mix": "{\"emoji_var\":0.45,\"pixelgpt\":0.30,\"emoji_plain\":0.25}",
+ "arch": {
+  "N": 32,
+  "C1": 24,
+  "C2": 48,
+  "C3": 96,
+  "E": 24,
+  "T": 6,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

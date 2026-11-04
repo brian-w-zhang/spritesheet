@@ -274,6 +274,7 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     assert w["wordvec"].shape == (V, d), (w["wordvec"].shape, V, d)
     assert vocab_words[0] == "<pad>" and vocab_words[1] == "<unk>"
     assert len(palette_hex) == K, (len(palette_hex), K)
+    GRID0 = cfg.get("N", 32) // 8  # dense output grid (4 for 32x32, 3 for 24x24)
     N = GRID0 * 8
     wb = Workbook()
     wb.meta.update({"config": dict(cfg), "version": VERSION, "render": render, "N": N, "V": V})

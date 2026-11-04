@@ -29,7 +29,8 @@ class SpriteNet(nn.Module):
         self.f1, self.f2 = nn.Linear(d, h), nn.Linear(h, d)
         self.style_head = nn.Linear(d, S)
         self.style_emb = nn.Parameter(torch.randn(S, e) * 0.5)
-        self.dense = nn.Linear(d + e, 16 * C[0])
+        self.G0 = cfg.get("N", 32) // 8  # dense output grid (4 for 32x32, 3 for 24x24)
+        self.dense = nn.Linear(d + e, self.G0 ** 2 * C[0])
         self.convs = nn.ModuleList(nn.Conv2d(C[i], C[i + 1], 3, padding=1) for i in range(3))
         self.films = nn.ModuleList(nn.Linear(d, C[i + 1], bias=False) for i in range(3))
         self.out = nn.Conv2d(C[3], cfg["K"] + 1, 1)
@@ -53,7 +54,7 @@ class SpriteNet(nn.Module):
     def decode(self, c, style_idx):  # style_idx 0-based [B]
         C0 = self.cfg["C0"]
         z = torch.cat([c, self.style_emb[style_idx]], dim=-1)
-        g = F.relu(self.dense(z)).view(-1, 4, 4, C0).permute(0, 3, 1, 2)
+        g = F.relu(self.dense(z)).view(-1, self.G0, self.G0, C0).permute(0, 3, 1, 2)
         for conv, film in zip(self.convs, self.films):
             g = F.interpolate(g, scale_factor=2, mode="nearest")
             g = F.relu(conv(g) + film(c)[..., None, None])

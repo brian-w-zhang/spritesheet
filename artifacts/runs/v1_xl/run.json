@@ -1,0 +1,22 @@
+{
+ "name": "v1_xl",
+ "family": "v1",
+ "strategy": "v1-XL: C 256/128/64/32 (736k params), 150k steps, 50% PixelGPT, random sprite placement",
+ "outcome": "best v1; deployed as artifacts/model/v32 (D-50)",
+ "model_dir": "artifacts/model/v1_xl",
+ "steps_logged": 150000,
+ "params": 736224,
+ "train_seconds": 10833.7,
+ "mix": "{\"pixelgpt\":0.50,\"emoji_var\":0.35,\"emoji_plain\":0.15}",
+ "arch": {
+  "N": 32,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

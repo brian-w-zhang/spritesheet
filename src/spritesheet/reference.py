@@ -95,7 +95,8 @@ def pick_style(c, seed, w, cfg):
 def decode(c, style, w, cfg):
     C0 = cfg["C0"]
     z = np.concatenate([c, w["style_emb"][style - 1]])
-    g = np.maximum(0.0, z @ w["Wd"] + w["bd"]).reshape(4, 4, C0)
+    G0 = cfg.get("N", 32) // 8  # dense output grid: 4x4 for 32x32, 3x3 for 24x24
+    g = np.maximum(0.0, z @ w["Wd"] + w["bd"]).reshape(G0, G0, C0)
     acts = [g]
     for i in (1, 2, 3):
         g = upsample2(g)
@@ -130,7 +131,7 @@ def random_weights(cfg, seed=0, scale=0.3):
          "bq": g(d), "bk": g(d), "bv": g(d), "bo": g(d),
          "W1": g(d, h), "b1": g(h), "W2": g(h, d), "b2": g(d),
          "Ws": g(d, S), "bs": g(S), "style_emb": g(S, e),
-         "Wd": g(d + e, 16 * C[0]), "bd": g(16 * C[0]),
+         "Wd": g(d + e, (cfg.get("N", 32) // 8) ** 2 * C[0]), "bd": g((cfg.get("N", 32) // 8) ** 2 * C[0]),
          "Wout": g(C[3], K + 1), "bout": g(K + 1)}
     w["wordvec"][0] = 0.0
     for i in (1, 2, 3):

@@ -110,6 +110,14 @@ def main():
     for p, s in cases:
         r = SH.set_prompt_and_read(p, s, cl, wb, timeout=a.timeout)
         ref_cls, ref_style, info = check(cl, wb, w, cfg, vi, p, s, r)
+        # Sheets can serve intermediate tabs mid-recalculation even after the pixels read stable; re-read
+        # (no new input) before judging, and record how many re-reads were needed.
+        info["rereads"] = 0
+        while info["rereads"] < 3 and max(info["logits_max_rel"], info["c_max_rel"], info.get("conf_max_rel", 0.0)) > 1e-9:
+            time.sleep(20)
+            info["rereads"] += 1
+            ref_cls, ref_style, info2 = check(cl, wb, w, cfg, vi, p, s, r)
+            info = {**info2, "rereads": info["rereads"]}
         px_ok = bool(np.array_equal(np.array(r["classes"]), ref_cls)) and not info.get("canvas_mismatch_steps")
         st_ok = r["style"] == ref_style
         worst = max(worst, info["logits_max_rel"], info["c_max_rel"], info.get("conf_max_rel", 0.0))

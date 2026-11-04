@@ -1,0 +1,36 @@
+{
+ "name": "v3_base",
+ "family": "v3",
+ "args": {
+  "steps": 60000,
+  "batch": 256,
+  "lr": 0.003,
+  "S": 1,
+  "cfg": "{\"C0\":256,\"C1\":128,\"C2\":64,\"C3\":32}",
+  "emb_noise": 0.15,
+  "bg_weight": 0.5,
+  "prior_weight": 0.2,
+  "eps_floor": 0.05,
+  "refresh": 0.15,
+  "seed": 0,
+  "out": "artifacts/model/v3_base",
+  "note": "v3 control: 24x24 PixelGPT-216K only, plain one-shot (no variants), word-noise 0.15, C 256/128/64/32",
+  "snap_every": 5000
+ },
+ "cfg": {
+  "N": 24,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 1,
+  "e": 8,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
+  "C3": 32,
+  "K": 48
+ },
+ "started": "2026-11-04T09:25:25",
+ "strategy": "v3 control: 24x24 PixelGPT-216K only, plain one-shot (no variants), word-noise 0.15, C 256/128/64/32",
+ "data": "PixelGPT-24x24-216K train split (195,154 sprites), Sampler3 augmentation"
+}

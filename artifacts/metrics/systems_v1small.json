@@ -1,0 +1,245 @@
+{
+ "model_hash": "8b3c09aed16a19ab",
+ "model_dir": "artifacts/model/v32",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "K": 32,
+  "attn_scale": 0.125,
+  "V": 12119,
+  "tier": 1,
+  "steps": 40000,
+  "bow": false,
+  "learn_wordvec": false,
+  "mix": null,
+  "pixelgpt_n": null,
+  "train_seconds": 3151.8,
+  "params": 309648
+ },
+ "trainable_params_excl_wordtable": 309648,
+ "wordtable_values": 775616,
+ "total_cells": 1282295,
+ "formula_cells": 169526,
+ "value_cells": 1112769,
+ "formula_chars": 6135399,
+ "tabs": 45,
+ "cell_limit_google_sheets": 20000000,
+ "share_of_cell_limit": 0.06411475,
+ "value_cell_groups": {
+  "weights (W_*, WordVec, style/palette tables)": 1085264,
+  "vocabulary": 12119
+ },
+ "xlsx_bytes": 14598011,
+ "compile_s": 0.3531792163848877,
+ "numpy_forward_s": 0.00761265754699707,
+ "per_tab": {
+  "Prompt": {
+   "formulas": 1025,
+   "values": 7
+  },
+  "Vocab": {
+   "formulas": 0,
+   "values": 12119
+  },
+  "WordVec": {
+   "formulas": 0,
+   "values": 775616
+  },
+  "Tokens": {
+   "formulas": 51,
+   "values": 31
+  },
+  "W_pos": {
+   "formulas": 0,
+   "values": 768
+  },
+  "W_q": {
+   "formulas": 0,
+   "values": 4160
+  },
+  "W_k": {
+   "formulas": 0,
+   "values": 4160
+  },
+  "W_v": {
+   "formulas": 0,
+   "values": 4160
+  },
+  "W_o": {
+   "formulas": 0,
+   "values": 4160
+  },
+  "W_1": {
+   "formulas": 0,
+   "values": 8320
+  },
+  "W_2": {
+   "formulas": 0,
+   "values": 8256
+  },
+  "X": {
+   "formulas": 768,
+   "values": 0
+  },
+  "Q": {
+   "formulas": 768,
+   "values": 0
+  },
+  "K": {
+   "formulas": 768,
+   "values": 0
+  },
+  "VT": {
+   "formulas": 768,
+   "values": 0
+  },
+  "Scores": {
+   "formulas": 144,
+   "values": 1
+  },
+  "Softmax": {
+   "formulas": 312,
+   "values": 0
+  },
+  "Ctx": {
+   "formulas": 768,
+   "values": 0
+  },
+  "Resid": {
+   "formulas": 768,
+   "values": 0
+  },
+  "MLP": {
+   "formulas": 1536,
+   "values": 0
+  },
+  "H": {
+   "formulas": 768,
+   "values": 0
+  },
+  "W_s": {
+   "formulas": 0,
+   "values": 455
+  },
+  "W_emb": {
+   "formulas": 0,
+   "values": 56
+  },
+  "Latent": {
+   "formulas": 170,
+   "values": 0
+  },
+  "About": {
+   "formulas": 0,
+   "values": 18
+  },
+  "W_d": {
+   "formulas": 0,
+   "values": 149504
+  },
+  "Dense": {
+   "formulas": 2048,
+   "values": 0
+  },
+  "W_f1": {
+   "formulas": 0,
+   "values": 4160
+  },
+  "FiLM": {
+   "formulas": 144,
+   "values": 0
+  },
+  "W_c1": {
+   "formulas": 0,
+   "values": 73728
+  },
+  "Up_1": {
+   "formulas": 8192,
+   "values": 4608
+  },
+  "Conv_1": {
+   "formulas": 4096,
+   "values": 0
+  },
+  "W_f2": {
+   "formulas": 0,
+   "values": 3120
+  },
+  "W_c2": {
+   "formulas": 0,
+   "values": 27648
+  },
+  "Up_2": {
+   "formulas": 16384,
+   "values": 4352
+  },
+  "Conv_2": {
+   "formulas": 12288,
+   "values": 0
+  },
+  "W_f3": {
+   "formulas": 0,
+   "values": 2080
+  },
+  "W_c3": {
+   "formulas": 0,
+   "values": 13824
+  },
+  "Up_3": {
+   "formulas": 49152,
+   "values": 6336
+  },
+  "Conv_3": {
+   "formulas": 32768,
+   "values": 0
+  },
+  "W_out": {
+   "formulas": 0,
+   "values": 1089
+  },
+  "Logits": {
+   "formulas": 33792,
+   "values": 0
+  },
+  "Pixels": {
+   "formulas": 1024,
+   "values": 0
+  },
+  "Palette": {
+   "formulas": 0,
+   "values": 33
+  },
+  "Hex": {
+   "formulas": 1024,
+   "values": 0
+  }
+ },
+ "local": {
+  "same_model": true,
+  "hyperformula_build_s": 990.855,
+  "hyperformula_median_prompt_s": 5.064,
+  "libreoffice_wall_s": 2690.9211888313293,
+  "libreoffice_cases": 400
+ },
+ "sheets": {
+  "same_model": true,
+  "upload_s": 208.26284503936768,
+  "upload_bytes": 28555280,
+  "upload_requests": 27,
+  "latency_s": {
+   "median": 30.637271881103516,
+   "max": 36.74503302574158,
+   "min": 12.484953165054321
+  },
+  "cases": 20,
+  "slowdown_vs_numpy_median": 4024.517284793516
+ }
+}

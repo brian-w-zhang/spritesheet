@@ -1,0 +1,22 @@
+{
+ "name": "abl_pgmajor",
+ "family": "ablation",
+ "strategy": "Ablation C5: 70% PixelGPT mixture",
+ "outcome": "mixture point",
+ "model_dir": "artifacts/model/abl_pgmajor",
+ "steps_logged": 8000,
+ "params": 309648,
+ "train_seconds": 752.0,
+ "mix": "{\"pixelgpt\":0.70,\"emoji_var\":0.20,\"emoji_plain\":0.10}",
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

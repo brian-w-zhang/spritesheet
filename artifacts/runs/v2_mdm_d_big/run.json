@@ -1,0 +1,12 @@
+{
+ "name": "v2_mdm_d_big",
+ "family": "v2",
+ "strategy": "v2d: wider (C3=192), T=6, 120k steps planned",
+ "outcome": "stopped at 30k: undeployable size (D-47)",
+ "model_dir": null,
+ "steps_logged": 30000,
+ "params": null,
+ "train_seconds": null,
+ "mix": null,
+ "arch": {}
+}

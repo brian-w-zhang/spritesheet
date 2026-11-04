@@ -1,0 +1,23 @@
+{
+ "name": "v2_mdm_c_pgmajor",
+ "family": "v2",
+ "strategy": "v2c: layout map, 70% PixelGPT, 60k steps",
+ "outcome": "most sprite-like (outlines); deployed re-calibrated T=4, beta=0.6 (v2c_T4_b06)",
+ "model_dir": "artifacts/model/v2_mdm_c_pgmajor",
+ "steps_logged": 60000,
+ "params": 680824,
+ "train_seconds": 4833.0,
+ "mix": "{\"pixelgpt\":0.70,\"emoji_var\":0.20,\"emoji_plain\":0.10}",
+ "arch": {
+  "N": 32,
+  "C1": 24,
+  "C2": 48,
+  "C3": 96,
+  "E": 24,
+  "T": 6,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

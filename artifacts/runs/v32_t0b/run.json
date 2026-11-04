@@ -1,0 +1,22 @@
+{
+ "name": "v32_t0b",
+ "family": "v1",
+ "strategy": "Tier-0 bring-up, wider (C 96/64/48/32), 15k steps",
+ "outcome": "pipeline check",
+ "model_dir": "artifacts/model/v32_t0b",
+ "steps_logged": 15000,
+ "params": 253840,
+ "train_seconds": 726.2,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 96,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

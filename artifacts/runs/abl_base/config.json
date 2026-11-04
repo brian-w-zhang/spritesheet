@@ -1,0 +1,23 @@
+{
+ "N": 32,
+ "L": 12,
+ "d": 64,
+ "h": 128,
+ "S": 7,
+ "e": 8,
+ "C0": 128,
+ "C1": 64,
+ "C2": 48,
+ "C3": 32,
+ "K": 32,
+ "attn_scale": 0.125,
+ "V": 12119,
+ "tier": 1,
+ "steps": 8000,
+ "bow": false,
+ "learn_wordvec": false,
+ "mix": null,
+ "pixelgpt_n": null,
+ "train_seconds": 612.4,
+ "params": 309648
+}

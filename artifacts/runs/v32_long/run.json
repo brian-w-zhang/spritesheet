@@ -1,0 +1,12 @@
+{
+ "name": "v32_long",
+ "family": "v1",
+ "strategy": "v1 at 100k steps (same arch as v1_small)",
+ "outcome": "stopped at 45.8k steps (superseded by v1-XL)",
+ "model_dir": null,
+ "steps_logged": 45800,
+ "params": null,
+ "train_seconds": null,
+ "mix": null,
+ "arch": {}
+}

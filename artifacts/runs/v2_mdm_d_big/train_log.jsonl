@@ -1,0 +1,61 @@
+{"step": 1, "loss": 2.6877, "masked_acc": 0.0032, "s": 4.3, "val_loss": 2.5216}
+{"step": 500, "loss": 1.513, "masked_acc": 0.6397, "s": 72.2}
+{"step": 1000, "loss": 1.1422, "masked_acc": 0.7414, "s": 120.0}
+{"step": 1500, "loss": 0.9842, "masked_acc": 0.7609, "s": 167.4}
+{"step": 2000, "loss": 0.9487, "masked_acc": 0.7678, "s": 213.1, "val_loss": 0.7588}
+{"step": 2500, "loss": 0.7952, "masked_acc": 0.8169, "s": 258.9}
+{"step": 3000, "loss": 0.7243, "masked_acc": 0.8103, "s": 305.4}
+{"step": 3500, "loss": 0.6859, "masked_acc": 0.8176, "s": 351.9}
+{"step": 4000, "loss": 0.6425, "masked_acc": 0.8249, "s": 398.4, "val_loss": 0.5989}
+{"step": 4500, "loss": 0.621, "masked_acc": 0.8282, "s": 445.2}
+{"step": 5000, "loss": 0.5691, "masked_acc": 0.8249, "s": 491.1}
+{"step": 5500, "loss": 0.5394, "masked_acc": 0.8387, "s": 537.4}
+{"step": 6000, "loss": 0.5351, "masked_acc": 0.8457, "s": 584.0, "val_loss": 0.5199}
+{"step": 6500, "loss": 0.6666, "masked_acc": 0.8188, "s": 631.7}
+{"step": 7000, "loss": 0.5182, "masked_acc": 0.8412, "s": 680.5}
+{"step": 7500, "loss": 0.5694, "masked_acc": 0.835, "s": 731.1}
+{"step": 8000, "loss": 0.5138, "masked_acc": 0.8458, "s": 780.0, "val_loss": 0.5086}
+{"step": 8500, "loss": 0.4866, "masked_acc": 0.844, "s": 829.1}
+{"step": 9000, "loss": 0.5282, "masked_acc": 0.8409, "s": 878.9}
+{"step": 9500, "loss": 0.616, "masked_acc": 0.8177, "s": 928.3}
+{"step": 10000, "loss": 0.605, "masked_acc": 0.8247, "s": 977.3, "val_loss": 0.4865}
+{"step": 10500, "loss": 0.4916, "masked_acc": 0.8435, "s": 1026.3}
+{"step": 11000, "loss": 0.565, "masked_acc": 0.8323, "s": 1085.9}
+{"step": 11500, "loss": 0.4938, "masked_acc": 0.8506, "s": 1146.6}
+{"step": 12000, "loss": 0.5594, "masked_acc": 0.8364, "s": 1206.6, "val_loss": 0.4835}
+{"step": 12500, "loss": 0.555, "masked_acc": 0.8328, "s": 1267.3}
+{"step": 13000, "loss": 0.4266, "masked_acc": 0.8601, "s": 1328.0}
+{"step": 13500, "loss": 0.5353, "masked_acc": 0.8374, "s": 1390.2}
+{"step": 14000, "loss": 0.5117, "masked_acc": 0.843, "s": 1452.1, "val_loss": 0.4779}
+{"step": 14500, "loss": 0.5386, "masked_acc": 0.8365, "s": 1513.8}
+{"step": 15000, "loss": 0.5492, "masked_acc": 0.8287, "s": 1577.1}
+{"step": 15500, "loss": 0.5516, "masked_acc": 0.8242, "s": 1638.7}
+{"step": 16000, "loss": 0.5466, "masked_acc": 0.8392, "s": 1700.8, "val_loss": 0.4847}
+{"step": 16500, "loss": 0.5289, "masked_acc": 0.8355, "s": 1764.8}
+{"step": 17000, "loss": 0.5303, "masked_acc": 0.8356, "s": 1830.0}
+{"step": 17500, "loss": 0.5067, "masked_acc": 0.8445, "s": 1893.9}
+{"step": 18000, "loss": 0.554, "masked_acc": 0.8337, "s": 1957.3, "val_loss": 0.471}
+{"step": 18500, "loss": 0.449, "masked_acc": 0.8444, "s": 2020.8}
+{"step": 19000, "loss": 0.6093, "masked_acc": 0.8142, "s": 2085.0}
+{"step": 19500, "loss": 0.519, "masked_acc": 0.8373, "s": 2148.6}
+{"step": 20000, "loss": 0.5383, "masked_acc": 0.8278, "s": 2211.7, "val_loss": 0.4614}
+{"step": 20500, "loss": 0.5182, "masked_acc": 0.839, "s": 2275.3}
+{"step": 21000, "loss": 0.4896, "masked_acc": 0.8498, "s": 2332.6}
+{"step": 21500, "loss": 0.5236, "masked_acc": 0.8398, "s": 2383.6}
+{"step": 22000, "loss": 0.5363, "masked_acc": 0.8257, "s": 2434.9, "val_loss": 0.4779}
+{"step": 22500, "loss": 0.4576, "masked_acc": 0.8543, "s": 2485.9}
+{"step": 23000, "loss": 0.514, "masked_acc": 0.8421, "s": 2535.1}
+{"step": 23500, "loss": 0.4827, "masked_acc": 0.835, "s": 2584.4}
+{"step": 24000, "loss": 0.4951, "masked_acc": 0.8436, "s": 2633.9, "val_loss": 0.4679}
+{"step": 24500, "loss": 0.4967, "masked_acc": 0.8414, "s": 2684.5}
+{"step": 25000, "loss": 0.5029, "masked_acc": 0.8513, "s": 2735.1}
+{"step": 25500, "loss": 0.5486, "masked_acc": 0.8287, "s": 2785.7}
+{"step": 26000, "loss": 0.4781, "masked_acc": 0.851, "s": 2835.7, "val_loss": 0.466}
+{"step": 26500, "loss": 0.4553, "masked_acc": 0.8535, "s": 2886.0}
+{"step": 27000, "loss": 0.5016, "masked_acc": 0.8358, "s": 2936.2}
+{"step": 27500, "loss": 0.4484, "masked_acc": 0.855, "s": 2986.3}
+{"step": 28000, "loss": 0.5437, "masked_acc": 0.8321, "s": 3036.8, "val_loss": 0.4606}
+{"step": 28500, "loss": 0.5327, "masked_acc": 0.8318, "s": 3086.5}
+{"step": 29000, "loss": 0.5094, "masked_acc": 0.8391, "s": 3138.2}
+{"step": 29500, "loss": 0.5937, "masked_acc": 0.8274, "s": 3188.9}
+{"step": 30000, "loss": 0.4419, "masked_acc": 0.8472, "s": 3239.7, "val_loss": 0.4609}

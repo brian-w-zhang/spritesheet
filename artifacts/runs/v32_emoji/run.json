@@ -1,0 +1,12 @@
+{
+ "name": "v32_emoji",
+ "family": "v1",
+ "strategy": "v1 trained on emoji only",
+ "outcome": "stopped at 15.2k steps",
+ "model_dir": null,
+ "steps_logged": 15200,
+ "params": null,
+ "train_seconds": null,
+ "mix": null,
+ "arch": {}
+}

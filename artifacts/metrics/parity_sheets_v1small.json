@@ -1,0 +1,292 @@
+{
+ "gate": "A4",
+ "model": {
+  "source": "trained",
+  "model_dir": "artifacts/model/v32",
+  "vocab": "/Users/junzhang/Projects/spritesheet/data/build/vocab.txt",
+  "palette": "/Users/junzhang/Projects/spritesheet/data/build/palette.json"
+ },
+ "model_hash": "8b3c09aed16a19ab",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "K": 32,
+  "attn_scale": 0.125,
+  "V": 12119,
+  "tier": 1,
+  "steps": 40000,
+  "bow": false,
+  "learn_wordvec": false,
+  "mix": null,
+  "pixelgpt_n": null,
+  "train_seconds": 3151.8,
+  "params": 309648
+ },
+ "cells": 1282287,
+ "formulas": 169525,
+ "when": "2026-11-04T01:53:37-0500",
+ "upload": {
+  "tabs": 45,
+  "value_requests": 21,
+  "tabs_s": 72.8104510307312,
+  "values_s": 118.67314004898071,
+  "upload_s": 208.26284503936768,
+  "requests": 27,
+  "retries": 0,
+  "bytes_sent": 28555280,
+  "format": {
+   "requested_px": 12,
+   "row_px": [
+    12,
+    12
+   ],
+   "col_px": [
+    12,
+    12
+   ]
+  }
+ },
+ "cases": 20,
+ "pixels_mismatch": 0,
+ "style_mismatch": 0,
+ "max_rel": 5.861977570020827e-14,
+ "latency_s": {
+  "median": 30.637271881103516,
+  "max": 36.74503302574158,
+  "min": 12.484953165054321
+ },
+ "min_margin": 3.647103789528039e-05,
+ "rows": [
+  {
+   "prompt": "the shelter bins with a fted",
+   "seed": 1,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.6478819137309983e-14,
+   "c_max_rel": 4.440892098500626e-16,
+   "latency_s": 33.29332518577576,
+   "stable_s": 41.86787986755371,
+   "min_margin": 0.0012380941195826445
+  },
+  {
+   "prompt": "ORAL Performance!!",
+   "seed": 503554,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.2101430968414206e-14,
+   "c_max_rel": 6.106226635438361e-16,
+   "latency_s": 36.74503302574158,
+   "stable_s": 43.486326932907104,
+   "min_margin": 0.005787444376728956
+  },
+  {
+   "prompt": "calipers poisonous in make style",
+   "seed": 254531,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 5.695444116327053e-14,
+   "c_max_rel": 5.551115123125783e-16,
+   "latency_s": 28.463477849960327,
+   "stable_s": 35.48985195159912,
+   "min_margin": 0.005256111996413182
+  },
+  {
+   "prompt": "a big spy absolutely",
+   "seed": 779858,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.0796918914479647e-14,
+   "c_max_rel": 3.885780586188048e-16,
+   "latency_s": 30.12460970878601,
+   "stable_s": 34.30621290206909,
+   "min_margin": 0.00044625196778813603
+  },
+  {
+   "prompt": "two winks fernlikes",
+   "seed": 836138,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 4.285460875053104e-14,
+   "c_max_rel": 2.3592239273284576e-16,
+   "latency_s": 26.37801694869995,
+   "stable_s": 36.4132878780365,
+   "min_margin": 0.014298798699694082
+  },
+  {
+   "prompt": "ano and apply",
+   "seed": 423926,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.4432899320127035e-14,
+   "c_max_rel": 3.0531133177191805e-16,
+   "latency_s": 34.09071683883667,
+   "stable_s": 38.069045066833496,
+   "min_margin": 0.0025048434193122304
+  },
+  {
+   "prompt": "a tiny aigis looney, facing left",
+   "seed": 434439,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 5.861977570020827e-14,
+   "c_max_rel": 3.3306690738754696e-16,
+   "latency_s": 25.19422173500061,
+   "stable_s": 32.220813035964966,
+   "min_margin": 0.0024326322403460665
+  },
+  {
+   "prompt": "a big woozy armed",
+   "seed": 697034,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.1760371282653068e-14,
+   "c_max_rel": 3.885780586188048e-16,
+   "latency_s": 33.8921320438385,
+   "stable_s": 38.87307405471802,
+   "min_margin": 0.035079574406767566
+  },
+  {
+   "prompt": "PPY Scissorses!!",
+   "seed": 181411,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.5411956116747533e-14,
+   "c_max_rel": 8.326672684688674e-16,
+   "latency_s": 23.933661937713623,
+   "stable_s": 29.83022713661194,
+   "min_margin": 0.000578731853495551
+  },
+  {
+   "prompt": "truffles extinguish in handcuff style",
+   "seed": 384957,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.3877787807814457e-14,
+   "c_max_rel": 8.881784197001252e-16,
+   "latency_s": 30.443963050842285,
+   "stable_s": 34.622896909713745,
+   "min_margin": 0.0004699302543300643
+  },
+  {
+   "prompt": "a mom sculpted",
+   "seed": 575457,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.532107773982716e-14,
+   "c_max_rel": 4.440892098500626e-16,
+   "latency_s": 33.61039185523987,
+   "stable_s": 40.44793677330017,
+   "min_margin": 0.0013280569331519665
+  },
+  {
+   "prompt": "the superhero wn with a headset",
+   "seed": 925611,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 4.091171845743702e-14,
+   "c_max_rel": 2.7755575615628914e-16,
+   "latency_s": 31.27147889137268,
+   "stable_s": 35.74625587463379,
+   "min_margin": 0.001597040553534157
+  },
+  {
+   "prompt": "watson and product",
+   "seed": 737191,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.8207657603852567e-14,
+   "c_max_rel": 4.440892098500626e-16,
+   "latency_s": 29.846992015838623,
+   "stable_s": 36.70645308494568,
+   "min_margin": 0.00029723724560248854
+  },
+  {
+   "prompt": "a tiny transform drug, facing left",
+   "seed": 813524,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 3.341771304121721e-14,
+   "c_max_rel": 4.0939474033052647e-16,
+   "latency_s": 30.799588203430176,
+   "stable_s": 35.007235050201416,
+   "min_margin": 0.018994409827669312
+  },
+  {
+   "prompt": "PUJA Manuel!!",
+   "seed": 707249,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 2.4424906541753444e-14,
+   "c_max_rel": 6.106226635438361e-16,
+   "latency_s": 30.618327856063843,
+   "stable_s": 38.66081166267395,
+   "min_margin": 3.647103789528039e-05
+  },
+  {
+   "prompt": "",
+   "seed": 774075,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 7.327471962526033e-15,
+   "c_max_rel": 0.0,
+   "latency_s": 27.866005897521973,
+   "stable_s": 32.088361978530884,
+   "min_margin": 0.0008826840482125675
+  },
+  {
+   "prompt": " ",
+   "seed": 392904,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 7.327471962526033e-15,
+   "c_max_rel": 0.0,
+   "latency_s": 12.484953165054321,
+   "stable_s": 20.900712966918945,
+   "min_margin": 0.0008826840482125675
+  },
+  {
+   "prompt": "     ",
+   "seed": 90667,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 7.993605777301127e-15,
+   "c_max_rel": 0.0,
+   "latency_s": 33.00049686431885,
+   "stable_s": 38.392499923706055,
+   "min_margin": 0.0013089572140634331
+  },
+  {
+   "prompt": "a red apple",
+   "seed": 460284,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.6264767310758543e-14,
+   "c_max_rel": 2.220446049250313e-16,
+   "latency_s": 31.155601978302002,
+   "stable_s": 38.549216747283936,
+   "min_margin": 0.00363041940667852
+  },
+  {
+   "prompt": "A RED APPLE",
+   "seed": 696000,
+   "pixels_match": true,
+   "style_match": true,
+   "logits_max_rel": 1.832636142965739e-14,
+   "c_max_rel": 2.220446049250313e-16,
+   "latency_s": 30.65621590614319,
+   "stable_s": 37.106427907943726,
+   "min_margin": 0.01648075722856568
+  }
+ ],
+ "requests": 107,
+ "retries": 0,
+ "pass": true
+}

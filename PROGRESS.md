@@ -8,8 +8,8 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
 | --- | --- | --- | --- | --- |
 | A1 | MUST | Tokenizer parity | PASS | `uv run pytest -q` + `artifacts/metrics/parity_tokenizer.json` → 320 prompts, 0 mismatches in HyperFormula 3.5.0 and LibreOffice 26.8 |
 | A2 | MUST | Op parity (HyperFormula + LibreOffice) | PASS | `artifacts/metrics/parity_ops.json` → pass=true; per-block max_rel ≤ 4.2e-13 in both engines (v1); v2 ops: `parity_ops_mdm*.json` |
-| A3 | MUST | End-to-end parity (local) | PASS (v1 main) | `scripts/verify_e2e.py --model artifacts/model/v32 --prompts 200 --seeds 2` → `A3 hyperformula: cases=400 max_rel=1.5e-13 … pixel_mismatch=0`; `A3 libreoffice: cases=400 max_rel=1.06e-13 … pixel_mismatch=0 → PASS` |
-| A4 | MUST* | End-to-end parity (Google Sheets) | PASS (v1 main) | `scripts/verify_sheets.py --model artifacts/model/v32 --prompts 20` → `A4 sheets: cases=20 max_rel=5.86e-14 pixel_mismatch=0 style_mismatch=0 latency median=30.6s -> PASS` |
+| A3 | MUST | End-to-end parity (local) | PASS (v1_small); re-running on v1-XL (now artifacts/model/v32, D-50) | `scripts/verify_e2e.py --model artifacts/model/v32 --prompts 200 --seeds 2` → `A3 hyperformula: cases=400 max_rel=1.5e-13 … pixel_mismatch=0`; `A3 libreoffice: cases=400 max_rel=1.06e-13 … pixel_mismatch=0 → PASS` |
+| A4 | MUST* | End-to-end parity (Google Sheets) | PASS (v1_small); re-running on v1-XL | `scripts/verify_sheets.py --model artifacts/model/v32 --prompts 20` → `A4 sheets: cases=20 max_rel=5.86e-14 pixel_mismatch=0 style_mismatch=0 latency median=30.6s -> PASS` |
 | A5 | MUST | Data pipeline tests | PASS | `uv run pytest -q tests/test_data.py` → `9 passed` |
 | B | MUST | Quality metrics | PASS | `spritesheet.evaluate --model artifacts/model/v32` → `artifacts/metrics/quality.json` (6 sets incl. pixel, attribute, CLIP concept, seed diversity); generalisation R-precision → `generalization.json` |
 | C1–C3 | MUST | Retrieval / BoW / no-CLIP-table | PASS | `baseline_retrieval.json`; `abl_bow.json`, `abl_nocliptable.json`, summarised in `ablations.json` + `generalization.json` |

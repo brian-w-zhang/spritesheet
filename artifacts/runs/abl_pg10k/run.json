@@ -1,0 +1,22 @@
+{
+ "name": "abl_pg10k",
+ "family": "ablation",
+ "strategy": "Ablation C5: only 10k PixelGPT sprites",
+ "outcome": "data-scaling point",
+ "model_dir": "artifacts/model/abl_pg10k",
+ "steps_logged": 8000,
+ "params": 309648,
+ "train_seconds": 781.6,
+ "mix": null,
+ "arch": {
+  "N": 32,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "S": 7,
+  "K": 32,
+  "d": 64,
+  "h": 128
+ }
+}

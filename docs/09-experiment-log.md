@@ -132,3 +132,14 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 ### Diffusion in the real sheet (05:40)
 - **Inert upload (D-48) works.** The full-width T=4 v2 random build (830k formulas): text upload 111 s, tab-by-tab activation 1,803 s. All 3 test prompts matched the reference pixel for pixel; API-measured latency 36–98 s (first consistent read) [spike_inert_upload.json].
 - **v2c_T4_b06**: v2c's weights re-calibrated for **4 steps** with background penalty **β = 0.6** (no retraining; tau [0.713, 0.600, 0.492]). By eye: full-size objects again; mushroom (red cap, white stem), slim tree, strawberry, pink potion bottle, lighthouse, knight figure read well; treasure chest (black square), house and sword are misses. **Comparable to v1, not clearly better.** It is the v2 demo model (with filmstrip) [figures/lineup_v2cT4_*.png].
+
+### Trained v2 live in Google Sheets (07:00) [metrics/sheets_v2c_T4_b06.json]
+- `v2c_T4_b06` pushed to the diffusion sheet with the inert upload: 836,342 formulas, 3,631 s to upload and activate. **5/5 prompts** (mushroom, red apple, lighthouse, potion bottle, blue fox) matched the numpy reference pixel for pixel. API-measured time to the first consistent read: 119–163 s. The filmstrip (step 1 → 4) renders under the image.
+
+### v1-XL (08:00): longer + wider wins, and becomes the final v1 [figures/lineup_xl_*.png, metrics/quality.json, quality_v1small.json, generalization_v1xl.json]
+- **Setup:** C 256/128/64/32 (736,224 params, 2.4× v1), 150k steps at batch 256 (3.75× v1's steps), 50% PixelGPT with random placement (`--pg-shift`). 3 h on the laptop GPU.
+- **By eye:** the clearest gain so far on trained concepts. Fox (ears, white muzzle), cat, rocket (body + window + flame), mushroom (spotted cap), penguin (black/white with face) are all sharper than v1. Novel prompts are mixed (castle and potion bottle better; dragon is a green blob; robot dog worse).
+- **Numbers (old v1 → v1-XL):** held-out combos, fg pixel acc given style 0.625 → 0.676; train sample 0.578 → 0.639; hue agreement on PixelGPT captions 0.367 → 0.460; CLIP score up on every set (held-out combos 0.267 → 0.274). Novel-prompt CLIP R@5 0.40 → 0.41 (a tie at n=100).
+- **Cost:** 220,806 formulas (vs 169,526), still under the ~250k normal-upload ceiling.
+- **Decision:** v1-XL becomes `artifacts/model/v32` (deployed v1). The old v1 is kept as `artifacts/model/v1_small`, with its metrics in `*_v1small.json`. A3 and A4 are re-run on the new model.
+- **Lesson:** training length and width were the biggest levers again. Changing the architecture (diffusion) helped less than training the simple model longer and wider.
