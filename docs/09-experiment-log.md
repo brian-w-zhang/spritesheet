@@ -143,3 +143,11 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **Cost:** 220,806 formulas (vs 169,526), still under the ~250k normal-upload ceiling.
 - **Decision:** v1-XL becomes `artifacts/model/v32` (deployed v1). The old v1 is kept as `artifacts/model/v1_small`, with its metrics in `*_v1small.json`. A3 and A4 are re-run on the new model.
 - **Lesson:** training length and width were the biggest levers again. Changing the architecture (diffusion) helped less than training the simple model longer and wider.
+
+### v3 begins (09:00–09:40): fixing mode averaging [decisions D-51; artifacts/runs/]
+- **Why:** even v1-XL draws the per-pixel *average* of all training sprites for a prompt (fuzzy edges, mixed colours). Diffusion avoids this, but at sheet size it was worse and 4× slower (v2). The plan is to keep the one-shot network and make it **commit to one drawing first**.
+- **Data:** PixelGPT 216K, native 24×24 (no padding), one style, no emoji. Captions average 3.3 words: specific noun phrases ("rusty shovel blade", "pouncing leopard"); 130k distinct captions; colour words in only 3.1%, so colour adjectives come from recolour augmentation [data/build/v3/report.json, gitignored].
+- **Idea (multiple choice learning):** 16 learned variants; each sprite trains only the variant that already fits it best. The seed picks a variant at run time, so a different seed gives a different but whole frog. In the sheet this costs the same formulas as v1's style.
+- **Prior art read:** "The Five-Dollar Model" (feed-forward text → pixel art, 8×8 to 16×16, ≤ 900 images). Its outputs look clean mostly because it memorises tiny datasets. It doesn't address averaging. We took its word-vector noise and its "wider kernels matter" result.
+- **Baseline on the new 216K test captions (v1-XL):** novel-prompt CLIP R@5 0.41; PixelGPT-test R@5 0.057; colour-adjective accuracy 0.658; mean per-pixel confidence 0.73 [metrics/v3_eval_v1ref.json].
+- **Ops lesson:** two trainings in parallel on the laptop GPU exhausted unified memory, and both stalled at step 1 (archived as `*_aborted_*`). Runs now go one at a time through a queue.

@@ -108,6 +108,15 @@ thumbnail per step canvas (`=S{t}_Canvas!…`), two per row, on the same 12 px g
 colour rules (openpyxl `CellIsRule`, number format `;;;`), so the .xlsx also renders in Excel / LibreOffice.
 Size and Sheets cost per step count: `artifacts/metrics/spikes_v2.json`.
 
+### v3 (24×24, learned variants; D-51)
+Same network and Pixcell layout as v1, with these differences:
+- **Canvas:** `N=24`, so the dense layer outputs a 3×3 grid, upsampled three times to 24×24.
+- **Kernels:** optional per-block kernel sizes `k1..k3` (odd; zero border = k//2).
+- **Colours:** K=48 palette classes.
+- **Variants:** S=16 unnamed variants replace the 7 named styles. The variant head and seeded pick are the same formulas as v1's style; the Prompt tab shows no style row (`cfg.variants`).
+- **Training:** `src/spritesheet/train_v3.py`, using winner-takes-all variant assignment and word-vector noise.
+- **Data:** `src/spritesheet/data/v3.py`.
+
 ## Training (CPU/MPS on the M4; a GPU is not needed at this size)
 - The data stream is generated on the fly by `synth.py` (doc 03), with a balanced mix: emoji base and variations, and PixelGPT.
 - Loss: cross-entropy over the K+1 classes per pixel. Weight foreground pixels more (backgrounds dominate). Add a style-head CE and the optional CLIP-distillation loss.
