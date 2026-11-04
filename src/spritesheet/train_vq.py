@@ -30,6 +30,8 @@ def main():
     ap.add_argument("--tau0", type=float, default=1.0)
     ap.add_argument("--tau1", type=float, default=0.3)
     ap.add_argument("--sample-tau", type=float, default=0.8)
+    ap.add_argument("--cond-drop", type=float, default=0.0, help="share of prior training rows with the prompt blanked (enables guidance)")
+    ap.add_argument("--init", default=None, help="warm-start from a v3vq model.pt (e.g. to continue training)")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", required=True)
     ap.add_argument("--note", default="")
@@ -44,6 +46,8 @@ def main():
     cfg.update(json.loads(a.cfg))
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
     net = VQNet(cfg, wv).to(dev)
+    if a.init:
+        net.load_state_dict(torch.load(a.init, map_location=dev))
     net.sn.__class__ = Net3   # word-vector noise in the text encoder (training only)
     net.sn.emb_noise = a.emb_noise
     sampler = Sampler3("train", seed=a.seed)
@@ -119,7 +123,11 @@ def main():
         rec = net.decode_soft(c, w)
         loss_rec = F.cross_entropy(rec, tgt, weight=cw)
         codes = w.argmax(-1).detach()
-        loss_pr = F.cross_entropy(net.prior_logits(c, codes).flatten(0, 1), codes.flatten())
+        cp = c
+        if a.cond_drop > 0:
+            keep = (torch.rand(len(c), 1, device=dev) >= a.cond_drop).to(c.dtype)
+            cp = c * keep
+        loss_pr = F.cross_entropy(net.prior_logits(cp, codes).flatten(0, 1), codes.flatten())
         pm = torch.softmax(lg, -1).mean(0)                        # [T, Kc] batch usage per position
         usage_ent = -(pm * torch.log(pm + 1e-9)).sum(-1).mean()
         loss = loss_rec + a.prior_weight * loss_pr - a.usage_weight * usage_ent
@@ -143,7 +151,7 @@ def main():
             torch.save(net.state_dict(), os.path.join(run_dir, f"ckpt_{step:06d}.pt"))
     net.eval()
     net = net.cpu()
-    cfg_out = dict(net.cfg, model="v3vq", steps=a.steps, sample_tau=a.sample_tau, train_seconds=round(time.time() - t0, 1),
+    cfg_out = dict(net.cfg, model="v3vq", steps=a.steps, sample_tau=a.sample_tau, cond_drop=a.cond_drop, train_seconds=round(time.time() - t0, 1),
                    params_sheet=int(sum(p.numel() for n_, p in net.named_parameters() if not n_.startswith("enc.") and "dense" not in n_.split(".")[1:2])),
                    params_total=int(sum(p.numel() for p in net.parameters())))
     json.dump(cfg_out, open(os.path.join(a.out, "config.json"), "w"), indent=1)

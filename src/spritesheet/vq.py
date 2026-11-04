@@ -87,19 +87,24 @@ class VQNet(nn.Module):
         return self.p2(F.relu(self.p1(self.prior_inputs(c, codes))))  # [B, T, Kc]
 
     @torch.no_grad()
-    def sample_codes(self, c, uniforms, tau=1.0):
-        """uniforms [B, T] in (0,1): inverse-CDF pick per position (sheet: SUMPRODUCT((cum<u)*1)+1)."""
+    def sample_codes(self, c, uniforms, tau=1.0, guidance=0.0):
+        """uniforms [B, T] in (0,1): inverse-CDF pick per position (sheet: SUMPRODUCT((cum<u)*1)+1).
+        guidance w > 0: classifier-free guidance, logits = l(c) + w * (l(c) - l(0)) (needs a --cond-drop prior)."""
         B, T = uniforms.shape
         codes = torch.zeros(B, T, dtype=torch.long, device=c.device)
+        c0 = torch.zeros_like(c)
         for t in range(T):
-            lg = self.prior_logits(c, codes)[:, t] / tau
+            lg = self.prior_logits(c, codes)[:, t]
+            if guidance:
+                lg = lg + guidance * (lg - self.prior_logits(c0, codes)[:, t])
+            lg = lg / tau
             cum = torch.softmax(lg, -1).cumsum(-1)
             codes[:, t] = (cum < uniforms[:, t:t + 1]).sum(-1).clamp(max=self.cfg["Kc"] - 1)
         return codes
 
-    def generate(self, ids, uniforms, tau=1.0):
+    def generate(self, ids, uniforms, tau=1.0, guidance=0.0):
         c = self.sn.encode(ids)
-        codes = self.sample_codes(c, uniforms, tau)
+        codes = self.sample_codes(c, uniforms, tau, guidance)
         w = F.one_hot(codes, self.cfg["Kc"]).float()
         return self.decode_soft(c, w), codes
 
