@@ -11,9 +11,9 @@ from test_pixcell import ENGINES, _save
 
 def test_a2_v3_shapes():
     res = {"gate": "A2-v3", "models": []}
-    for wseed, scale, ks in ((0, 0.3, (5, 5, 3)), (1, 0.6, (3, 5, 5))):
+    for wseed, scale, ks, fz in ((0, 0.3, (5, 5, 3), False), (1, 0.6, (3, 5, 5), True)):
         cfg = F.make_cfg()
-        cfg.update(N=24, S=16, K=48, k1=ks[0], k2=ks[1], k3=ks[2])
+        cfg.update(N=24, S=16, K=48, k1=ks[0], k2=ks[1], k3=ks[2], film_z=fz)
         w = R.random_weights(cfg, seed=wseed, scale=scale)
         vocab, pal = F.vocab_words(cfg["V"], wseed), F.palette(cfg["K"], wseed)
         wb = emit.compile_model(w, cfg, vocab, pal, style_names=[f"v{i + 1}" for i in range(16)])

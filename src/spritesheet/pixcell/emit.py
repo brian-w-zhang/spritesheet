@@ -303,7 +303,8 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
         # FiLM shift per output channel: c . F_i[:, o] + bc_i[o], in FiLM!row i
         Wf = _wtab(wb, f"W_f{i}", w[f"F{i}"].T, w[f"bc{i}"])
         fb = wb.add_block(f"FiLM{i}", "FiLM", i, 1, 1, Cout)
-        wb.fill(fb, lambda _, o, Wf=Wf: "=" + lin(Wf, o, CROW, d))
+        fz = np.asarray(w[f"F{i}"]).shape[0] == d + e  # film_z: FiLM reads z = [c, variant emb]
+        wb.fill(fb, lambda _, o, Wf=Wf, fz=fz: "=" + lin(Wf, o, ZROW if fz else CROW, d + e if fz else d))
         # conv weights: block o = rows k*o+1..k*o+k, element [ky, kx*Cin+ci] = Wc[ky, kx, ci, o]
         Wc = np.asarray(w[f"Wc{i}"], np.float64)                  # [k,k,Cin,Cout], k odd
         k = Wc.shape[0]

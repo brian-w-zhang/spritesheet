@@ -103,7 +103,8 @@ def decode(c, style, w, cfg):
     acts = [g]
     for i in (1, 2, 3):
         g = upsample2(g)
-        g = np.maximum(0.0, conv3x3(g, w[f"Wc{i}"], w[f"bc{i}"]) + c @ w[f"F{i}"])
+        cond = z if w[f"F{i}"].shape[0] == len(z) else c  # film_z (v3): FiLM also sees the variant
+        g = np.maximum(0.0, conv3x3(g, w[f"Wc{i}"], w[f"bc{i}"]) + cond @ w[f"F{i}"])
         acts.append(g)
     logits = g @ w["Wout"] + w["bout"]
     return logits, acts
@@ -141,5 +142,5 @@ def random_weights(cfg, seed=0, scale=0.3):
         k = cfg.get(f"k{i}", 3)
         w[f"Wc{i}"] = g(k, k, C[i - 1], C[i]) / math.sqrt(k * k * C[i - 1]) * 3
         w[f"bc{i}"] = g(C[i])
-        w[f"F{i}"] = g(d, C[i])
+        w[f"F{i}"] = g(d + e if cfg.get("film_z") else d, C[i])
     return {k: round15(v) for k, v in w.items()}

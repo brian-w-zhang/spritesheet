@@ -51,7 +51,9 @@ def trace(prompt, seed, w, cfg, vocab_index) -> dict:
     for i, g in enumerate(acts):
         E[f"G{i}"] = g.reshape(g.shape[0], -1)
     for i in (1, 2, 3):
-        E[f"FiLM{i}"] = (c @ w[f"F{i}"] + w[f"bc{i}"])[None, :]
+        zz = np.concatenate([c, w["style_emb"][out["style"] - 1]])
+        cond = zz if w[f"F{i}"].shape[0] == len(zz) else c
+        E[f"FiLM{i}"] = (cond @ w[f"F{i}"] + w[f"bc{i}"])[None, :]
         up = R.upsample2(acts[i - 1])
         pk = np.asarray(w[f"Wc{i}"]).shape[0] // 2  # zero border = kernel radius
         E[f"Up_{i}"] = np.pad(up, ((pk, pk), (pk, pk), (0, 0))).reshape(up.shape[0] + 2 * pk, -1)

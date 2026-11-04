@@ -33,7 +33,8 @@ class SpriteNet(nn.Module):
         self.dense = nn.Linear(d + e, self.G0 ** 2 * C[0])
         ks = [cfg.get(f"k{i + 1}", 3) for i in range(3)]  # odd kernel sizes per block (default 3)
         self.convs = nn.ModuleList(nn.Conv2d(C[i], C[i + 1], ks[i], padding=ks[i] // 2) for i in range(3))
-        self.films = nn.ModuleList(nn.Linear(d, C[i + 1], bias=False) for i in range(3))
+        self.film_z = bool(cfg.get("film_z"))  # v3 option: FiLM reads [c, variant embedding] instead of c
+        self.films = nn.ModuleList(nn.Linear(d + e if self.film_z else d, C[i + 1], bias=False) for i in range(3))
         self.out = nn.Conv2d(C[3], cfg["K"] + 1, 1)
 
     def encode(self, ids):  # ids: [B, L] 1-based
@@ -58,7 +59,7 @@ class SpriteNet(nn.Module):
         g = F.relu(self.dense(z)).view(-1, self.G0, self.G0, C0).permute(0, 3, 1, 2)
         for conv, film in zip(self.convs, self.films):
             g = F.interpolate(g, scale_factor=2, mode="nearest")
-            g = F.relu(conv(g) + film(c)[..., None, None])
+            g = F.relu(conv(g) + film(z if self.film_z else c)[..., None, None])
         return self.out(g)  # [B, K+1, N, N]
 
     def forward(self, ids, style_idx):
