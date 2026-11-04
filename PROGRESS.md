@@ -19,7 +19,7 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
 | E | MUST | Related-work table | PASS | `scripts/related_work.py` → `related_work.json` |
 | F | MUST | Figures | PASS | hero_grid, variations, vs_target, unseen_words, seeds, vs_spritex32 (local only), network_tabs, pipeline.svg, latency_cells (+ data_scaling, line-ups) |
 | G | MUST | `scripts/verify_all.sh` | TODO | |
-| H | MUST | `scripts/check_claims.py` | TODO | |
+| H | MUST | `scripts/check_claims.py` | PASS | `uv run python scripts/check_claims.py` → `checked 26 numbers in claims blocks … PASS` (README Results section) |
 | S1–S5 | STRETCH | see GOAL.md | TODO | |
 
 ## Log

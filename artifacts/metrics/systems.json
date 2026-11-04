@@ -1,5 +1,5 @@
 {
- "model_hash": "8b3c09aed16a19ab",
+ "model_hash": "1de22262759583fe",
  "model_dir": "artifacts/model/v32",
  "config": {
   "N": 32,
@@ -8,38 +8,38 @@
   "h": 128,
   "S": 7,
   "e": 8,
-  "C0": 128,
-  "C1": 64,
-  "C2": 48,
+  "C0": 256,
+  "C1": 128,
+  "C2": 64,
   "C3": 32,
   "K": 32,
   "attn_scale": 0.125,
   "V": 12119,
   "tier": 1,
-  "steps": 40000,
+  "steps": 150000,
   "bow": false,
   "learn_wordvec": false,
-  "mix": null,
+  "mix": "{\"pixelgpt\":0.50,\"emoji_var\":0.35,\"emoji_plain\":0.15}",
   "pixelgpt_n": null,
-  "train_seconds": 3151.8,
-  "params": 309648
+  "train_seconds": 10833.7,
+  "params": 736224
  },
- "trainable_params_excl_wordtable": 309648,
+ "trainable_params_excl_wordtable": 736224,
  "wordtable_values": 775616,
- "total_cells": 1282295,
- "formula_cells": 169526,
- "value_cells": 1112769,
- "formula_chars": 6135399,
+ "total_cells": 1771223,
+ "formula_cells": 220806,
+ "value_cells": 1550417,
+ "formula_chars": 7281150,
  "tabs": 45,
  "cell_limit_google_sheets": 20000000,
- "share_of_cell_limit": 0.06411475,
+ "share_of_cell_limit": 0.08856115,
  "value_cell_groups": {
-  "weights (W_*, WordVec, style/palette tables)": 1085264,
+  "weights (W_*, WordVec, style/palette tables)": 1511840,
   "vocabulary": 12119
  },
- "xlsx_bytes": 14598011,
- "compile_s": 0.3531792163848877,
- "numpy_forward_s": 0.00761265754699707,
+ "xlsx_bytes": 20248818,
+ "compile_s": 0.4362180233001709,
+ "numpy_forward_s": 0.010694611072540283,
  "per_tab": {
   "Prompt": {
    "formulas": 1025,
@@ -143,46 +143,46 @@
   },
   "W_d": {
    "formulas": 0,
-   "values": 149504
+   "values": 299008
   },
   "Dense": {
-   "formulas": 2048,
+   "formulas": 4096,
    "values": 0
   },
   "W_f1": {
    "formulas": 0,
-   "values": 4160
+   "values": 8320
   },
   "FiLM": {
-   "formulas": 144,
+   "formulas": 224,
    "values": 0
   },
   "W_c1": {
    "formulas": 0,
-   "values": 73728
+   "values": 294912
   },
   "Up_1": {
-   "formulas": 8192,
-   "values": 4608
+   "formulas": 16384,
+   "values": 9216
   },
   "Conv_1": {
-   "formulas": 4096,
+   "formulas": 8192,
    "values": 0
   },
   "W_f2": {
    "formulas": 0,
-   "values": 3120
+   "values": 4160
   },
   "W_c2": {
    "formulas": 0,
-   "values": 27648
+   "values": 73728
   },
   "Up_2": {
-   "formulas": 16384,
-   "values": 4352
+   "formulas": 32768,
+   "values": 8704
   },
   "Conv_2": {
-   "formulas": 12288,
+   "formulas": 16384,
    "values": 0
   },
   "W_f3": {
@@ -191,11 +191,11 @@
   },
   "W_c3": {
    "formulas": 0,
-   "values": 13824
+   "values": 18432
   },
   "Up_3": {
-   "formulas": 49152,
-   "values": 6336
+   "formulas": 65536,
+   "values": 8448
   },
   "Conv_3": {
    "formulas": 32768,
@@ -223,7 +223,7 @@
   }
  },
  "local": {
-  "same_model": true,
+  "same_model": false,
   "hyperformula_build_s": 990.855,
   "hyperformula_median_prompt_s": 5.064,
   "libreoffice_wall_s": 2690.9211888313293,
@@ -231,15 +231,15 @@
  },
  "sheets": {
   "same_model": true,
-  "upload_s": 208.26284503936768,
-  "upload_bytes": 28555280,
-  "upload_requests": 27,
+  "upload_s": null,
+  "upload_bytes": null,
+  "upload_requests": null,
   "latency_s": {
-   "median": 30.637271881103516,
-   "max": 36.74503302574158,
-   "min": 12.484953165054321
+   "median": 38.26293587684631,
+   "max": 48.96719479560852,
+   "min": 14.989553213119507
   },
   "cases": 20,
-  "slowdown_vs_numpy_median": 4024.517284793516
+  "slowdown_vs_numpy_median": 3577.7772204443286
  }
 }

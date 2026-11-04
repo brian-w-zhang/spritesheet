@@ -73,8 +73,9 @@ def main():
                                 "hyperformula_median_prompt_s": float(np.median(hf["per_run_eval_s"])) if hf.get("per_run_eval_s") else None,
                                 "libreoffice_wall_s": lo.get("wall_s"), "libreoffice_cases": d["engines"]["libreoffice"].get("cases")}
             else:
-                out["sheets"] = {"same_model": same, "upload_s": d["upload"]["upload_s"], "upload_bytes": d["upload"]["bytes_sent"],
-                                 "upload_requests": d["upload"]["requests"], "latency_s": d["latency_s"], "cases": d["cases"]}
+                up = d.get("upload") or {}  # None when A4 ran with --skip-push (model already in the sheet)
+                out["sheets"] = {"same_model": same, "upload_s": up.get("upload_s"), "upload_bytes": up.get("bytes_sent"),
+                                 "upload_requests": up.get("requests"), "latency_s": d["latency_s"], "cases": d["cases"]}
                 if same and out["numpy_forward_s"] > 0:
                     out["sheets"]["slowdown_vs_numpy_median"] = d["latency_s"]["median"] / out["numpy_forward_s"]
     json.dump(out, open(os.path.join(M, "systems.json"), "w"), indent=1)
