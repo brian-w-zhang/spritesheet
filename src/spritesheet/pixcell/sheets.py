@@ -100,10 +100,23 @@ def _json_value(v):
     return float(v)
 
 
-def _value_ranges(wb: Workbook):
-    """Yield (option, sheet, r0, c0, rows) rectangles. Text cells go RAW, numbers/formulas USER_ENTERED."""
+INERT = "#="  # inert-formula marker for push(inert=True); must never occur in real cell text
+
+
+def _value_ranges(wb: Workbook, inert: bool = False):
+    """Yield (option, sheet, r0, c0, rows) rectangles. Text cells go RAW, numbers/formulas USER_ENTERED.
+    inert=True: everything goes RAW and formulas are written as text "#=..." (no recalculation during upload);
+    push() then switches each tab on with one findReplace "#=" → "=" (D-48)."""
     for name, cells in wb.sheets.items():
         if not cells:
+            continue
+        if inert:
+            r_min = min(r for r, _ in cells); c_min = min(c for _, c in cells)
+            r_max = max(r for r, _ in cells); c_max = max(c for _, c in cells)
+            grid = [[None] * (c_max - c_min + 1) for _ in range(r_max - r_min + 1)]
+            for (r, c), v in cells.items():
+                grid[r - r_min][c - c_min] = ("#" + v) if is_formula(v) else _json_value(v)
+            yield "RAW", name, r_min, c_min, grid
             continue
         nr, nc = wb.dims(name)
         texts = {k: v for k, v in cells.items() if isinstance(v, str) and not is_formula(v)}
@@ -140,12 +153,12 @@ def _value_ranges(wb: Workbook):
             yield opt, name, r_min, c_min, grid
 
 
-def _chunks(wb: Workbook, max_bytes=MAX_BYTES):
+def _chunks(wb: Workbook, max_bytes=MAX_BYTES, inert: bool = False):
     """Pack value ranges into requests [(option, [ValueRange,...])] of ≤ max_bytes JSON each."""
     pending = {"RAW": [], "USER_ENTERED": []}
     size = {"RAW": 0, "USER_ENTERED": 0}
     order = []
-    for opt, sheet, r0, c0, rows in _value_ranges(wb):
+    for opt, sheet, r0, c0, rows in _value_ranges(wb, inert=inert):
         i = 0
         while i < len(rows):
             # take as many rows as fit
@@ -173,7 +186,7 @@ def _chunks(wb: Workbook, max_bytes=MAX_BYTES):
 
 
 # ---------------------------------------------------------------- push
-def push(wb: Workbook, client: Client | None = None, log=print, key="v32") -> dict:
+def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert: bool = False) -> dict:
     """Replace every tab of the shared spreadsheet sheet_ids[key] (v32 = v1 demo, diffusion = v2) with the
     workbook's tabs, write all cells, format Prompt. A given client wins over key."""
     cl = client or Client(key)
@@ -211,14 +224,25 @@ def push(wb: Workbook, client: Client | None = None, log=print, key="v32") -> di
            for r in rep["replies"] if "addSheet" in r}
     t_tabs = time.time() - t0
     log(f"tabs: {len(ids)} created in {t_tabs:.1f}s")
-    chunks = _chunks(wb)
+    chunks = _chunks(wb, inert=inert)
     t1 = time.time()
     for k, (opt, data) in enumerate(chunks):
         cl.values_batch_update(data, opt)
         log(f"  values {k + 1}/{len(chunks)} ({opt}, {len(data)} ranges) t={time.time() - t1:.1f}s")
     t_values = time.time() - t1
+    t_activate = 0.0
+    if inert:  # switch formulas on tab by tab, upstream first (workbook order), so each request computes one tab
+        t2 = time.time()
+        for name in wb.sheets:
+            if not any(is_formula(v) for v in wb.sheets[name].values()):
+                continue
+            ta = time.time()
+            cl.batch_update([{"findReplace": {"find": INERT, "replacement": "=", "sheetId": ids[name], "matchCase": True}}])
+            log(f"  activate {name}: {time.time() - ta:.1f}s")
+        t_activate = time.time() - t2
     fmt = format_prompt(cl, wb, ids["Prompt"])
     return {"tabs": len(ids), "value_requests": len(chunks), "tabs_s": t_tabs, "values_s": t_values,
+            "inert": inert, "activate_s": t_activate,
             "upload_s": time.time() - t0, "requests": cl.requests, "retries": cl.retries,
             "bytes_sent": cl.bytes_sent, "format": fmt}
 
