@@ -16,6 +16,7 @@ KEY = os.path.join(CFG_DIR, "sa-key.json")
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 API = "https://sheets.googleapis.com/v4/spreadsheets"
 MAX_BYTES = 1_800_000
+DISPLAY_BG = "#d8d4dd"  # class 0 in the sheet: light grey, so white sprites stay visible
 PIXEL = 12
 
 
@@ -93,6 +94,8 @@ def _json_value(v):
         return v
     if isinstance(v, str):
         return str(v)
+    if isinstance(v, bool):  # e.g. the Generate checkbox: must stay a real TRUE/FALSE for the checkbox UI
+        return v
     return float(v)
 
 
@@ -218,11 +221,31 @@ def format_prompt(cl: Client, wb: Workbook, gid: int, pixel=PIXEL) -> dict:
                                                "properties": {"pixelSize": 320}, "fields": "pixelSize"}})
     reqs.append({"updateSheetProperties": {"properties": {"sheetId": gid, "gridProperties": {"hideGridlines": True}},
                                            "fields": "gridProperties.hideGridlines"}})
-    # B5 "Generate" as a native checkbox (data validation BOOLEAN; still a plain TRUE/FALSE cell)
-    reqs.append({"setDataValidation": {"range": {"sheetId": gid, "startRowIndex": 4, "endRowIndex": 5,
-                                                 "startColumnIndex": 1, "endColumnIndex": 2},
-                                       "rule": {"condition": {"type": "BOOLEAN"}, "showCustomUi": True}}})
+    # Seamless sprite: hide the class-id digits and colour each cell by conditional formatting (one rule per class).
+    def grid(r0, c0, nr, nc):
+        return {"sheetId": gid, "startRowIndex": r0 - 1, "endRowIndex": r0 - 1 + nr,
+                "startColumnIndex": c0 - 1, "endColumnIndex": c0 - 1 + nc}
+
+    def rgb(h):
+        h = h.lstrip("#")
+        return {"red": int(h[0:2], 16) / 255, "green": int(h[2:4], 16) / 255, "blue": int(h[4:6], 16) / 255}
+
+    disp_rng = grid(d["r0"], d["c0"], d["n"], d["n"])
+    hide = {"userEnteredFormat": {"numberFormat": {"type": "NUMBER", "pattern": ";;;"}}}
+    reqs.append({"repeatCell": {"range": disp_rng, "cell": hide, "fields": "userEnteredFormat.numberFormat"}})
+    colours = [DISPLAY_BG] + list(wb.meta.get("palette_hex", []))
+    for k, hx in enumerate(colours):
+        reqs.append({"addConditionalFormatRule": {"index": k, "rule": {"ranges": [disp_rng], "booleanRule": {
+            "condition": {"type": "NUMBER_EQ", "values": [{"userEnteredValue": str(k)}]},
+            "format": {"backgroundColor": rgb(hx)}}}}})
     pr = wb.meta.get("progress")
+    if pr:
+        bar = grid(pr["r0"], pr["c0"], 1, len(pr["stages"]))
+        reqs.append({"repeatCell": {"range": bar, "cell": hide, "fields": "userEnteredFormat.numberFormat"}})
+        for k, hx in ((1, "#e8705b"), (0, "#e6e3ea")):
+            reqs.append({"addConditionalFormatRule": {"index": 0, "rule": {"ranges": [bar], "booleanRule": {
+                "condition": {"type": "NUMBER_EQ", "values": [{"userEnteredValue": str(k)}]},
+                "format": {"backgroundColor": rgb(hx)}}}}})
     if pr:  # square stage-bar cells (same pixel size as the display)
         reqs.append({"updateDimensionProperties": {"range": {"sheetId": gid, "dimension": "ROWS",
                                                              "startIndex": pr["r0"] - 1, "endIndex": pr["r0"]},

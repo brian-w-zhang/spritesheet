@@ -50,9 +50,30 @@ Numbers come from the files cited in brackets under `artifacts/`. Newest entries
   **Read:** attributes are the strength. Size, position, count and background follow the prompt; colour on held-out (concept, colour) pairs agrees 82% of the time; named styles are honoured. Concept *detail* is the weakness. CLIP rarely names the concept from our 32×32 output, though it also struggles with the ground-truth targets (top-1 ≈ 0.08–0.25 among 1,409 names). **Unseen words fail** (fg acc ≈ 0.07): the frozen CLIP table alone doesn't carry a held-out keyword to the right concept. PixelGPT's free-text captions are barely learned (fg 0.12): at sheet-sized capacity, the 18k one-off creative captions mostly add noise. The C5 ablation tests exactly this.
   - Eval bug fixed here: evaluation had defaulted to tier-0 test sets; it now follows the model's tier.
 - **`v32_long`**: same architecture, 100,000 steps. Launched 01:51 as the final candidate. *Pending.*
-- **Ablations** (8k steps each, same architecture, uncompiled): `base`, `bow` (bag-of-words encoder), `nocliptable` (learned embeddings instead of the CLIP table), `pg5k` / `pg10k` (data scaling), `emojionly` (mixture). *Results pending.*
+- **Ablations** (8k steps each, same architecture as main, uncompiled; fg-pixel accuracy given the target's style, n=300 per set) [ablations.json]:
+
+| Run | held-out combo | held-out phrasing | unseen words | PixelGPT test |
+| --- | --- | --- | --- | --- |
+| all sources (PixelGPT 18k) | 0.548 | 0.527 | 0.154 | 0.125 |
+| bag-of-words encoder (C2) | 0.551 | 0.506 | 0.141 | 0.108 |
+| learned embeddings, no CLIP table (C3) | 0.604 | 0.415 | 0.060 | 0.143 |
+| PixelGPT 5k (C5) | 0.546 | 0.529 | 0.159 | 0.104 |
+| PixelGPT 10k (C5) | 0.545 | 0.540 | 0.142 | 0.128 |
+| emoji only (C5 mixture) | 0.558 | 0.542 | 0.162 | 0.064 |
+
+  **What we learned:**
+  1. **The CLIP word table is what buys generalisation to new wording.** Without it, held-out phrasings drop 0.527 → 0.415 and unseen words 0.154 → 0.060. But learned embeddings fit *trained* vocabulary better (held-out combos 0.604 vs 0.548). A real trade-off; we keep the table because "type anything" is the point.
+  2. **Attention barely beats bag-of-words here** (0.548 vs 0.551 on combos; 0.527 vs 0.506 on phrasings). Our captions are short, and binding cases are rare in the test sets. Honest result: the encoder's attention is cheap insurance, not the source of quality.
+  3. **More PixelGPT data doesn't help at this capacity.** 5k / 10k / 18k give PixelGPT-test fg 0.104 / 0.128 / 0.125. **So buying the 216k edition is not worth it for v32.** Revisit for bigger models (v48/v64).
+  4. **Emoji-only is as good or slightly better on every emoji set** (combo 0.558, phrasing 0.542), and only loses on PixelGPT prompts. The pixel-art data mostly competes for capacity.
 
 ## Bugs found by the verification gates (slide: "checks, not trust")
 - **D-30:** the fixed-width word split broke when the first words summed to ≥100 characters (found by A1).
 - **D-31:** one LCG step mapped every seed < ~1000 to style 1 (u ≈ seed·2.2e-5). Fixed with two steps.
 - **D-32:** HyperFormula treats `\` in string literals as an escape, so a single cell broke the whole sheet.
+
+## Phase 4 · Demo surface in real Google Sheets (02:30–02:45)
+- The first sheet render used SPARKLINE bars, which leave a gap around every cell. **Switched to conditional formatting**: each display cell holds a class id with its digits hidden, and one rule per palette colour gives a seamless 32×32 image. Background changed to light grey so white sprites stay visible.
+- Tried a "Generate" checkbox; Brian preferred plain Enter, so it was removed. Kept a "Showing: …" done-indicator and a 9-stage bar.
+- An interrupted push left the sheet half-uploaded (tabs created, formatting missing): an important lesson for the demo. A full push takes ~2.5 min; always let it finish.
+- Verified in Chrome: the apple renders seamlessly. Render matched the reference exactly.

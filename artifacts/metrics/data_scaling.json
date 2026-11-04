@@ -1,0 +1,17 @@
+[
+ {
+  "run": "all sources (PixelGPT 18k)",
+  "pixelgpt_test_fg": 0.12450026851244107,
+  "pixelgpt_test_clip_rel": 0.8158333476103843
+ },
+ {
+  "run": "PixelGPT 5k (C5)",
+  "pixelgpt_test_fg": 0.10413807506414464,
+  "pixelgpt_test_clip_rel": 0.8436660292620334
+ },
+ {
+  "run": "PixelGPT 10k (C5)",
+  "pixelgpt_test_fg": 0.1280356823199475,
+  "pixelgpt_test_clip_rel": 0.8317793069929976
+ }
+]

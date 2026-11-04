@@ -1,0 +1,56 @@
+[
+ {
+  "run": "base",
+  "label": "all sources (PixelGPT 18k)",
+  "heldout_combo_fg": 0.5483499848622464,
+  "heldout_phrase_fg": 0.5273277059907326,
+  "unseen_words_fg": 0.1537242573123234,
+  "pixelgpt_test_fg": 0.12450026851244107,
+  "pixelgpt_test_clip_rel": 0.8158333476103843
+ },
+ {
+  "run": "bow",
+  "label": "bag-of-words encoder (C2)",
+  "heldout_combo_fg": 0.5510808356039963,
+  "heldout_phrase_fg": 0.5055243038765005,
+  "unseen_words_fg": 0.14059516839345265,
+  "pixelgpt_test_fg": 0.10835968733217972,
+  "pixelgpt_test_clip_rel": 0.8242320374290671
+ },
+ {
+  "run": "nocliptable",
+  "label": "learned embeddings, no CLIP table (C3)",
+  "heldout_combo_fg": 0.6044504995458674,
+  "heldout_phrase_fg": 0.41537868261420463,
+  "unseen_words_fg": 0.06008324211490976,
+  "pixelgpt_test_fg": 0.14304254430455277,
+  "pixelgpt_test_clip_rel": 0.8379256037064136
+ },
+ {
+  "run": "pg5k",
+  "label": "PixelGPT 5k (C5)",
+  "heldout_combo_fg": 0.545691795337572,
+  "heldout_phrase_fg": 0.5288763474098513,
+  "unseen_words_fg": 0.1591591782704987,
+  "pixelgpt_test_fg": 0.10413807506414464,
+  "pixelgpt_test_clip_rel": 0.8436660292620334
+ },
+ {
+  "run": "pg10k",
+  "label": "PixelGPT 10k (C5)",
+  "heldout_combo_fg": 0.5454072055706933,
+  "heldout_phrase_fg": 0.5403350696888639,
+  "unseen_words_fg": 0.14200799327953567,
+  "pixelgpt_test_fg": 0.1280356823199475,
+  "pixelgpt_test_clip_rel": 0.8317793069929976
+ },
+ {
+  "run": "emojionly",
+  "label": "emoji only (C5 mixture)",
+  "heldout_combo_fg": 0.5580199818346957,
+  "heldout_phrase_fg": 0.5415348077052562,
+  "unseen_words_fg": 0.1619211872820304,
+  "pixelgpt_test_fg": 0.06439823378483203,
+  "pixelgpt_test_clip_rel": 0.8553378600168613
+ }
+]

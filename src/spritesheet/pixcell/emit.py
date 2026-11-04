@@ -4,6 +4,9 @@ Every step of reference.forward is one formula per cell, using only the allowed 
 SUMPRODUCT, INDEX, MATCH(…,0), MAX, MIN, SUM, EXP, IF, IFERROR, MOD, INT, ABS, + - * /, and for the
 tokenizer LOWER, SUBSTITUTE, TRIM, MID, REPT. SPARKLINE appears only in the Prompt display (render=True).
 """
+import json
+import os
+
 import numpy as np
 
 from .. import tokenizer as T
@@ -74,8 +77,9 @@ def _wtab(wb: Workbook, name: str, M, bias=None) -> Block:
 
 
 def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple", default_seed=1,
-                  render=False) -> Workbook:
-    """Compile weights+config into a Workbook. render=True adds the SPARKLINE display (Google Sheets only)."""
+                  render=False, style_names=None) -> Workbook:
+    """Compile weights+config into a Workbook. render=True adds the coloured display + stage bar (Google Sheets).
+    style_names (optional): list of S style names shown in Prompt!B4; defaults to data/build/styles.json if present."""
     L, d, h, S, e, K = T.L, cfg["d"], cfg["h"], cfg["S"], cfg["e"], cfg["K"]
     V = len(vocab_words)
     C = [cfg["C0"], cfg["C1"], cfg["C2"], cfg["C3"]]
@@ -90,20 +94,13 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     # ---- Prompt (inputs) first, so it is the first tab
     P = "Prompt"
     wb.set(P, 1, 1, Text("SpriteSheet"))
-    wb.set(P, 1, 2, Text("type a prompt in B2 and a seed in B3"))
+    wb.set(P, 1, 2, Text("Type a prompt in B2 and press Enter. Change the seed (B3) to re-roll the drawing style."))
     wb.set(P, 2, 1, Text("Prompt"))
     wb.set(P, 2, 2, Text(default_prompt))
     wb.set(P, 3, 1, Text("Seed"))
     wb.set(P, 3, 2, float(default_seed))
-    wb.set(P, 4, 1, Text("Style"))
-    # Generate checkbox (B5, a native checkbox in the Sheets build): the model reads the prompt only while it is
-    # ticked, so "type, tick Generate, watch" works with formulas alone (no scripts, no iterative calc).
-    wb.set(P, 5, 1, Text("Generate"))
-    wb.set(P, 5, 2, True)
-    GEN_R = DISPLAY_R0 + 8 * GRID0 + 2           # a row below the display block
-    wb.set(P, GEN_R, 1, Text("model input"))
-    wb.set(P, GEN_R, 2, '=IF(Prompt!$B$5,Prompt!$B$2&"","")')  # &"" keeps an empty B2 as text, not 0
-    PROMPT, SEED = f"Prompt!$B${GEN_R}", "Prompt!$B$3"
+    wb.set(P, 4, 1, Text("Style (picked)"))
+    PROMPT, SEED = "Prompt!$B$2", "Prompt!$B$3"
     wb.meta["inputs"] = {"prompt": (P, 2, 2), "seed": (P, 3, 2)}
 
     # ---- Vocab + WordVec (values)
@@ -219,7 +216,18 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     wb.set(Lt, 7, 3, f"=MOD({LCG_A}*B7,{M31})/{M31}")
     wb.set(Lt, 7, 4, f"=MIN({S},1+SUMPRODUCT(({cum.range()}<C7)*1))")
     STYLE = "Latent!$D$7"
-    wb.set(P, 4, 2, f"={STYLE}")
+    if style_names is None:
+        sj = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))),
+                          "data", "build", "styles.json")
+        style_names = json.load(open(sj)) if os.path.exists(sj) else None
+    if style_names and len(style_names) == S:
+        SR = 20  # style-name lookup table on the About tab (rows 20..), out of the demo's sight
+        wb.set("About", SR - 1, 1, Text("style names"))
+        for i, nm in enumerate(style_names):
+            wb.set("About", SR + i, 1, Text(str(nm)))
+        wb.set(P, 4, 2, f"=INDEX(About!$A${SR}:$A${SR + S - 1},{STYLE})")
+    else:
+        wb.set(P, 4, 2, f"={STYLE}")
     zb = wb.add_block("z", Lt, 8, 1, 1, d + e)
     wb.fill(zb, lambda _, k: f"={cb.ref(0, k)}" if k < d
             else f"=INDEX({Wemb.range('W_emb', absolute=True)},{STYLE},{k - d + 1})")
@@ -289,19 +297,21 @@ def compile_model(w, cfg, vocab_words, palette_hex, default_prompt="a red apple"
     wb.set(P, 2, DISPLAY_C0, f'="Showing: "&IF(SUMPRODUCT(({px.range("Pixels", absolute=True)}>=0)*1)={N * N},{PROMPT},"")')
     # ---- stage bar (C4:K4, Sheets only): one square per pipeline stage, each depending on that stage's last cell.
     stages = ["Tokens.ids", "H", "z", "G0", "G1", "G2", "G3", "Logits", "Pixels"]
-    prog = wb.add_block("Progress", P, 4, DISPLAY_C0, 1, len(stages))
-    wb.meta["progress"] = {"r0": 4, "c0": DISPLAY_C0, "stages": stages}
+    prog = wb.add_block("Progress", P, 5, DISPLAY_C0, 1, len(stages))
+    wb.meta["progress"] = {"r0": 5, "c0": DISPLAY_C0, "stages": stages}
 
     # ---- render (Google Sheets only)
     disp = wb.add_block("Display", P, DISPLAY_R0, DISPLAY_C0, N, N)
     wb.meta["display"] = {"r0": DISPLAY_R0, "c0": DISPLAY_C0, "n": N}
     if render:
-        wb.fill(disp, lambda y, x: '=SPARKLINE(1,{"charttype","bar";"max",1;"color1",' + hx.ref(y, x, "Hex") + "})")
+        # Display = class ids; the Sheets writer colours them with one conditional-format rule per class and hides
+        # the digits (number format ;;;), so the 32x32 block reads as one seamless image. Portable formulas only.
+        wb.fill(disp, lambda y, x: "=" + px.ref(y, x, "Pixels"))
         for i, name in enumerate(stages):
             b = wb.blocks[name]
             last = b.ref(b.nrows - 1, b.ncols - 1, b.sheet)
-            wb.set(P, 4, DISPLAY_C0 + i, '=SPARKLINE(1,{"charttype","bar";"max",1;"color1",IF(ABS(' + last +
-                   ')>=0,"#e8705b","#e6e3ea")})')
+            wb.set(P, 5, DISPLAY_C0 + i, f"=IF(ABS({last})>=0,1,0)")
+    wb.meta["palette_hex"] = list(palette_hex)
 
     # ---- About
     ab = "About"

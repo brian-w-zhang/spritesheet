@@ -1,0 +1,224 @@
+{
+ "model": "artifacts/model/abl_nocliptable",
+ "config": {
+  "N": 32,
+  "L": 12,
+  "d": 64,
+  "h": 128,
+  "S": 7,
+  "e": 8,
+  "C0": 128,
+  "C1": 64,
+  "C2": 48,
+  "C3": 32,
+  "K": 32,
+  "attn_scale": 0.125,
+  "V": 12119,
+  "tier": 1,
+  "steps": 8000,
+  "bow": false,
+  "learn_wordvec": true,
+  "mix": null,
+  "pixelgpt_n": null,
+  "train_seconds": 737.3,
+  "params": 1085264
+ },
+ "sets": {
+  "train_sample": {
+   "n": 300,
+   "pixel_acc": 0.7303157552083334,
+   "fg_pixel_acc": 0.5252730053711806,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.66,
+    "size": 0.9107142857142857,
+    "pos": 1.0,
+    "count": 0.8,
+    "bg": 1.0
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 56,
+    "pos": 25,
+    "count": 10,
+    "bg": 38
+   },
+   "clip_score": 0.2571888267993927,
+   "clip_score_target": 0.28063318133354187,
+   "clip_score_rel": 0.9164590786351641,
+   "given_style": {
+    "pixel_acc": 0.7700227864583333,
+    "fg_pixel_acc": 0.5958026535766372,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.98,
+   "named_style_acc": 0.9746835443037974
+  },
+  "heldout_combo": {
+   "n": 300,
+   "pixel_acc": 0.6634537760416667,
+   "fg_pixel_acc": 0.52650923402967,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.8766666666666667,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.2651107907295227,
+   "clip_score_target": 0.29000306129455566,
+   "clip_score_rel": 0.9141654903437384,
+   "clip_concept_top1": 0.0,
+   "clip_concept_top5": 0.006666666828095913,
+   "clip_concept_top1_target": 0.10333333164453506,
+   "clip_concept_top5_target": 0.2266666740179062,
+   "given_style": {
+    "pixel_acc": 0.7081087239583334,
+    "fg_pixel_acc": 0.6044504995458674,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.95,
+   "named_style_acc": 0.5555555555555556
+  },
+  "heldout_phrase": {
+   "n": 300,
+   "pixel_acc": 0.5678287760416667,
+   "fg_pixel_acc": 0.35623649529592516,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.49333333333333335,
+    "size": 0.8,
+    "pos": 0.7619047619047619,
+    "count": 0.5,
+    "bg": 0.9772727272727273
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 70,
+    "pos": 21,
+    "count": 20,
+    "bg": 44
+   },
+   "clip_score": 0.243717223405838,
+   "clip_score_target": 0.2721412777900696,
+   "clip_score_rel": 0.8955540496647556,
+   "clip_concept_top1": 0.009999999776482582,
+   "clip_concept_top5": 0.02666666731238365,
+   "clip_concept_top1_target": 0.18000000715255737,
+   "clip_concept_top5_target": 0.33000001311302185,
+   "given_style": {
+    "pixel_acc": 0.59318359375,
+    "fg_pixel_acc": 0.41537868261420463,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.8,
+   "named_style_acc": 0.9325842696629213
+  },
+  "unseen_words": {
+   "n": 300,
+   "pixel_acc": 0.4002766927083333,
+   "fg_pixel_acc": 0.033360486724537335,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.22333333333333333,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.24132829904556274,
+   "clip_score_target": 0.26086312532424927,
+   "clip_score_rel": 0.9251146506260515,
+   "clip_concept_top1": 0.0033333334140479565,
+   "clip_concept_top5": 0.0033333334140479565,
+   "clip_concept_top1_target": 0.20333333313465118,
+   "clip_concept_top5_target": 0.40666666626930237,
+   "given_style": {
+    "pixel_acc": 0.4123763020833333,
+    "fg_pixel_acc": 0.06008324211490976,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.96
+  },
+  "underspecified": {
+   "n": 300,
+   "pixel_acc": 0.5731770833333333,
+   "fg_pixel_acc": 0.3301571301512007,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.53,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.2553623616695404,
+   "clip_score_target": 0.28180959820747375,
+   "clip_score_rel": 0.9061521087068781,
+   "clip_concept_top1": 0.02666666731238365,
+   "clip_concept_top5": 0.07000000029802322,
+   "clip_concept_top1_target": 0.18666666746139526,
+   "clip_concept_top5_target": 0.3733333349227905,
+   "given_style": {
+    "pixel_acc": 0.72841796875,
+    "fg_pixel_acc": 0.5944500444707975,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.9933333333333333,
+   "seed_pixel_diversity": 0.3831987653459822,
+   "distinct_styles_per_8_seeds": 4.525
+  },
+  "pixelgpt_test": {
+   "n": 300,
+   "pixel_acc": 0.7500065104166667,
+   "fg_pixel_acc": 0.1430276269467152,
+   "pixel_perfect": 0.0,
+   "attribute_agreement": {
+    "hue": 0.38333333333333336,
+    "size": null,
+    "pos": null,
+    "count": null,
+    "bg": null
+   },
+   "attribute_n": {
+    "hue": 300,
+    "size": 0,
+    "pos": 0,
+    "count": 0,
+    "bg": 0
+   },
+   "clip_score": 0.23758740723133087,
+   "clip_score_target": 0.28354236483573914,
+   "clip_score_rel": 0.8379256037064136,
+   "given_style": {
+    "pixel_acc": 0.7552604166666667,
+    "fg_pixel_acc": 0.14304254430455277,
+    "pixel_perfect": 0.0
+   },
+   "sampled_style_valid": 0.9733333333333334,
+   "named_style_acc": 0.9733333333333334
+  }
+ }
+}
