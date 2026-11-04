@@ -225,3 +225,12 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - Activating `Score` one row at a time works: 17–49 s per row, each roughly one full recalc of the sheet.
   - Measuring a real prompt change once every row is live (in progress).
 - **Data finding:** of 653 captions containing "frog", only 296 have "frog" as the head noun ("frog foot imprint" and "frog leg skewer rack" are not frogs). So short prompts map to mixtures of frog-related objects. Added head-noun-preserving caption dropout (`data.v3.shorten`, `--p-short`).
+
+### PatchGPT temperature sweep at 30k steps (r6) [metrics/v3_eval_r6.json; figures/v3_lineup_r6_*.png, v3_panel_r6_*.png]
+- **Novel R@5 / PixelGPT-test R@5 / speckle / fg components / seed diversity:**
+  - t=1.0: 0.35 / 0.028 / 0.051 / 3.89 / 0.48
+  - **t=0.8: 0.38 [0.29, 0.47] / 0.027 / 0.025 / 2.02 / 0.39**
+  - t=0.6: 0.25 / 0.030 / 0.009 / 0.88 / 0.27
+  - References: v3_vq6_pg@g=3 0.45 / 0.045 / 0.018 / 1.52 / 0.41; v1-XL 0.41 / 0.013 / 0.028 / 1.40 / 0.29.
+- **By eye, t=0.8 is the best-looking v3 so far:** crisp outlined pixel art. A sword, a corked red potion, a golden key, a spotted mushroom, a rooted tree, a shield ring, a lantern. A black cat silhouette with ears, a black owl with yellow eyes. t=1.0 scatters patches; t=0.6 collapses many creatures to tiny or blank sprites (the background mode wins).
+- **Next:** guidance with the small unconditional prior (queued), head-noun caption dropout, and the full 60k steps.
