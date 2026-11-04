@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+.DS_Store
+# raw datasets and models (licences; re-fetch with scripts/fetch_data.sh)
+data/raw/
+data/models/
+# course material is not published (course guide §15)
+docs/course/
+# large / generated
+artifacts/tmp/
+artifacts/lo_profile*/
+artifacts/workbooks/*.xlsx
+artifacts/*.log
+*.npy
+!data/wordvec_*.npy
+artifacts/figures/preview_pixelgpt.png
