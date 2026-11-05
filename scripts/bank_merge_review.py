@@ -4,15 +4,19 @@
 Rebuilds artifacts/bank/index.html and index_local.html from scripts/bank_viewer.html with DATA.review filled in,
 and writes artifacts/metrics/bank_review.json (verdict counts per model, good picks, prompts missing a review).
 """
-import collections, glob, json, os, re
+import collections, glob, json, os, re, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BANK = os.path.join(ROOT, "artifacts", "bank")
+REVIEW = os.path.join(BANK, "review")
 
 
 def main():
+    global BANK
+    if len(sys.argv) > 1:   # another bank folder (reviews still come from artifacts/bank/review)
+        BANK = sys.argv[1]
     rows = []
-    for f in sorted(glob.glob(os.path.join(BANK, "review", "agent_*.json"))):
+    for f in sorted(glob.glob(os.path.join(REVIEW, "agent_*.json"))):
         rows += json.load(open(f))
     tpl = open(os.path.join(ROOT, "scripts", "bank_viewer.html")).read()
     summary = {}
@@ -23,19 +27,25 @@ def main():
         data = json.loads(re.search(r"const DATA = (\{.*?\});\n", open(path).read(), re.S).group(1))
         P = len(data["prompts"])
         rev = {k: {} for k in data["models"]}
-        for r in rows:
-            i = int(r["i"])
-            if not 0 <= i < P or r.get("prompt", data["prompts"][i]["prompt"]) != data["prompts"][i]["prompt"]:
-                print("skipping mismatched row", r.get("i"), r.get("prompt"))
+        pidx = {p["prompt"]: i for i, p in enumerate(data["prompts"])}
+        for r in rows:   # matched by prompt text (indices can shift when the bank is regenerated)
+            i = pidx.get(r.get("prompt"))
+            j = r.get("i")
+            if i is None and isinstance(j, int) and 0 <= j < P and (data["prompts"][j]["prompt"].startswith(str(r.get("prompt", ""))[:12])
+                    or data["prompts"][j]["prompt"].split()[-1:] == str(r.get("prompt", "")).split()[-1:]):
+                i = j   # truncated prompt text on the sheet: trust the row number
+            if i is None:
+                print("skipping row with unknown prompt", r.get("i"), r.get("prompt"))
                 continue
             for k in rev:
                 if isinstance(r.get(k), dict):
                     rev[k][i] = r[k]
-        sl = os.path.join(BANK, "review", "shortlist.json")
+        sl = os.path.join(REVIEW, "shortlist.json")
         if os.path.exists(sl):
-            for k, ids in json.load(open(sl)).items():
-                for i in ids if k in rev else []:
-                    if i in rev[k]:
+            for k, names in json.load(open(sl)).items():
+                for nm in names if k in rev else []:
+                    i = pidx.get(nm)
+                    if i is not None and i in rev[k]:
                         rev[k][i]["shortlist"] = True
         data["review"] = rev
         open(path, "w").write(tpl.replace("/*DATA*/null", json.dumps(data)))
@@ -49,7 +59,8 @@ def main():
                                     "shortlist": sum(bool(v.get("shortlist")) for v in d.values()),
                                     "missing": [data["prompts"][i]["prompt"] for i in range(P) if i not in d][:50],
                                     "good_prompts": [p for p, _ in good]}
-    json.dump(summary, open(os.path.join(ROOT, "artifacts", "metrics", "bank_review.json"), "w"), indent=1)
+    if len(sys.argv) == 1:
+        json.dump(summary, open(os.path.join(ROOT, "artifacts", "metrics", "bank_review.json"), "w"), indent=1)
     print(json.dumps({k: {kk: v[kk] for kk in ("reviewed", "verdicts", "good_sprites", "shortlist")} for k, v in summary["models"].items()}, indent=1))
 
 

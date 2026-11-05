@@ -43,8 +43,9 @@
   <label>Sort <select id="sort">
     <option value="verdict">Agent verdict</option><option value="score">CLIP score</option><option value="clip_real">Closest to real sprites</option>
     <option value="clip_text">Closest to the prompt text</option><option value="n_train">Most training data</option>
-    <option value="prompt">Prompt A–Z</option><option value="worst">Worst score</option></select></label>
+    <option value="group">Noun, with its variants</option><option value="prompt">Prompt A–Z</option><option value="worst">Worst score</option></select></label>
   <label>Category <select id="cat"><option value="">All</option></select></label>
+  <label>Adjective <select id="axis"><option value="">Any</option><option value="plain">None (base nouns)</option><option value="seen">Seen with this noun in training</option><option value="common">Common caption adjective</option><option value="colour">Colour</option><option value="material">Material</option><option value="state">State</option><option value="size">Size</option><option value="pose">Pose</option></select></label>
   <input id="q" type="search" placeholder="Filter prompts">
   <button id="export">Export starred (JSON)</button>
   <span class="count" id="count"></span>
@@ -52,13 +53,14 @@
 <main id="main"></main>
 <div id="tip"></div>
 <script>
+(async () => {
 const DATA = /*DATA*/null;
 const $ = (id) => document.getElementById(id);
 const KEYS = Object.keys(DATA.models);
-const dec = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const inflate = async (s) => new Uint8Array(await new Response(new Blob([Uint8Array.from(atob(s), (c) => c.charCodeAt(0))]).stream().pipeThrough(new DecompressionStream("gzip"))).arrayBuffer());
 const M = {};
-for (const k of KEYS) { const m = DATA.models[k]; M[k] = { ...m, px: dec(m.sprites), rgb: m.palette.map(hex) }; }
-const REAL = DATA.real ? DATA.real.sprites.map((s) => (s ? dec(s) : null)) : null;
+for (const k of KEYS) { const m = DATA.models[k]; M[k] = { ...m, px: await inflate(m.sprites), rgb: m.palette.map(hex) }; }
+const REAL = DATA.real ? await Promise.all(DATA.real.sprites.map((s) => (s ? inflate(s) : null))) : null;
 const S = DATA.seeds.length, P = DATA.prompts.length;
 const REV = DATA.review || {};   // REV[k][i] = {best_seed, verdict, good_seeds, note} from the visual review agents
 const rv = (k, i) => (REV[k] && REV[k][i]) || null;
@@ -69,7 +71,7 @@ const stars = new Set(JSON.parse(localStorage.getItem("bank-stars") || "[]"));
 const saveStars = () => localStorage.setItem("bank-stars", JSON.stringify([...stars]));
 function hex(h) { return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); }
 
-$("model").innerHTML = `<option value="all">Both</option>` + KEYS.map((k) => `<option value="${k}">${M[k].label}</option>`).join("");
+$("model").innerHTML = `<option value="all">All models</option>` + KEYS.map((k) => `<option value="${k}">${M[k].label}</option>`).join("");
 [...new Set(DATA.prompts.map((p) => p.category))].sort().forEach((c) => $("cat").insertAdjacentHTML("beforeend", `<option>${c}</option>`));
 
 function draw(buf, off, n, rgb) {
@@ -98,70 +100,75 @@ const val = (k, j, s) => {
 };
 function bestOf(k, i, s) { let b = i * S; for (let j = i * S; j < i * S + S; j++) if (val(k, j, s) > val(k, b, s)) b = j; return b; }
 
-let page = 0;
 function render() {
-  const view = $("view").value, mk = $("model").value, s = $("sort").value, cat = $("cat").value, q = $("q").value.toLowerCase();
+  const view = $("view").value, mk = $("model").value, s = $("sort").value, cat = $("cat").value, ax = $("axis").value, q = $("q").value.toLowerCase();
   const keys = mk === "all" ? KEYS : [mk];
-  const okP = (i) => (!cat || DATA.prompts[i].category === cat) && (!q || DATA.prompts[i].prompt.includes(q));
+  const AX = (p) => (p.axis === "base" || p.axis === "demo" ? "plain" : p.axis);
+  const okP = (i) => (!cat || DATA.prompts[i].category === cat) && (!ax || AX(DATA.prompts[i]) === ax) && (!q || DATA.prompts[i].prompt.includes(q) || (DATA.prompts[i].base || "") === q);
   const main = $("main"); main.innerHTML = "";
   let items;
   if (view === "rows") {
     items = [...Array(P).keys()].filter(okP);
-    const key = (i) => s === "prompt" ? DATA.prompts[i].prompt : s === "n_train" ? -DATA.prompts[i].n_train
+    const AXO = { plain: 0, seen: 1, common: 2, colour: 3, material: 4, state: 5, size: 6, pose: 7 };
+    const key = (i) => s === "group" ? `${DATA.prompts[i].base || DATA.prompts[i].prompt}|${AXO[AX(DATA.prompts[i])]}|${DATA.prompts[i].prompt}`
+      : s === "prompt" ? DATA.prompts[i].prompt : s === "n_train" ? -DATA.prompts[i].n_train
       : -Math.max(...keys.map((k) => val(k, bestOf(k, i, s), s)));
     items.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
   } else {
     items = [];
     for (const k of keys) for (let j = 0; j < P * S; j++)
       if (okP(Math.floor(j / S)) && (view !== "stars" || stars.has(`${k}|${j}`)) && (view !== "picks" || isPick(k, j)) && (view !== "short" || isShort(k, j))) items.push([k, j]);
-    const key = ([k, j]) => s === "prompt" ? DATA.prompts[Math.floor(j / S)].prompt
+    const key = ([k, j]) => s === "prompt" || s === "group" ? DATA.prompts[Math.floor(j / S)].prompt
       : s === "n_train" ? -DATA.prompts[Math.floor(j / S)].n_train : -val(k, j, s);
     items.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
   }
-  const per = view === "rows" ? 40 : 300, pages = Math.max(1, Math.ceil(items.length / per));
-  page = Math.min(page, pages - 1);
   $("count").textContent = `${items.length} ${view === "rows" ? "prompts" : "sprites"} · ${stars.size} starred · blue border = agent says good, yellow = your star`;
-  const slice = items.slice(page * per, page * per + per);
-  if (view === "rows") {
-    for (const i of slice) {
-      const p = DATA.prompts[i], row = document.createElement("div"); row.className = "row";
-      row.innerHTML = `<div><h2>${p.prompt}</h2><div class="meta">${p.category.replace(/^\d+_/, "").replaceAll("_", " ")}<br>${p.n_train} training captions</div></div>`;
-      const sets = document.createElement("div"); sets.className = "sets";
-      for (const k of keys) {
-        const set = document.createElement("div"); set.className = "set";
-        set.innerHTML = `<span class="lab">${k}</span>`;
-        const b = bestOf(k, i, s);
-        for (let j = i * S; j < i * S + S; j++) { const c = sprite(k, j); if (j === b) c.classList.add("best"); set.appendChild(c); }
-        const r = rv(k, i);
-        if (r) set.insertAdjacentHTML("beforeend", `<span class="note"><span class="v-${r.verdict}">${r.verdict}</span>${r.shortlist ? " · shortlist" : ""}${r.best_seed ? `, best seed ${r.best_seed}` : ""}<br>${r.note || ""}</span>`);
-        sets.appendChild(set);
-      }
-      if (REAL && REAL[i]) {
-        const set = document.createElement("div"); set.className = "set real";
-        set.innerHTML = `<span class="lab">real</span>`;
-        const n = DATA.real.n, rgb = DATA.real.palette.map(hex);
-        for (let r = 0; r < REAL[i].length / (n * n); r++) set.appendChild(draw(REAL[i], r * n * n, n, rgb));
-        sets.appendChild(set);
-      }
-      row.appendChild(sets); main.appendChild(row);
+  const rowEl = (i) => {
+    const p = DATA.prompts[i], row = document.createElement("div"); row.className = "row";
+    row.innerHTML = `<div><h2>${p.prompt}</h2><div class="meta">${p.axis === "base" || p.axis === "demo" ? p.category.replace(/^\d+_/, "").replaceAll("_", " ") : `${{ seen: "seen in training", common: "common adjective" }[p.axis] || p.axis} variant of <a href="#" data-base="${p.base}">${p.base}</a>`}<br>${p.n_train} training captions</div></div>`;
+    const sets = document.createElement("div"); sets.className = "sets";
+    for (const k of keys) {
+      const set = document.createElement("div"); set.className = "set";
+      set.innerHTML = `<span class="lab">${k}</span>`;
+      const b = bestOf(k, i, s);
+      for (let j = i * S; j < i * S + S; j++) { const c = sprite(k, j); if (j === b) c.classList.add("best"); set.appendChild(c); }
+      const r = rv(k, i);
+      if (r) set.insertAdjacentHTML("beforeend", `<span class="note"><span class="v-${r.verdict}">${r.verdict}</span>${r.shortlist ? " · shortlist" : ""}${r.best_seed ? `, best seed ${r.best_seed}` : ""}<br>${r.note || ""}</span>`);
+      sets.appendChild(set);
     }
-  } else {
-    const g = document.createElement("div"); g.className = "grid";
-    for (const [k, j] of slice) {
-      const f = document.createElement("figure"); f.appendChild(sprite(k, j));
-      f.insertAdjacentHTML("beforeend", `<figcaption>${k} · ${DATA.prompts[Math.floor(j / S)].prompt}</figcaption>`);
-      g.appendChild(f);
+    if (REAL && REAL[i]) {
+      const set = document.createElement("div"); set.className = "set real";
+      set.innerHTML = `<span class="lab">real</span>`;
+      const n = DATA.real.n, rgb = DATA.real.palette.map(hex);
+      for (let r = 0; r < REAL[i].length / (n * n); r++) set.appendChild(draw(REAL[i], r * n * n, n, rgb));
+      sets.appendChild(set);
     }
-    main.appendChild(g);
-  }
-  const pg = document.createElement("div"); pg.className = "pager";
-  pg.innerHTML = `<button ${page ? "" : "disabled"} id="prev">Previous</button><span>Page ${page + 1} of ${pages}</span><button ${page < pages - 1 ? "" : "disabled"} id="next">Next</button>`;
-  main.appendChild(pg);
-  $("prev").onclick = () => { page--; render(); scrollTo(0, 0); };
-  $("next").onclick = () => { page++; render(); scrollTo(0, 0); };
+    row.appendChild(sets); return row;
+  };
+  const figEl = ([k, j]) => {
+    const f = document.createElement("figure"); f.appendChild(sprite(k, j));
+    f.insertAdjacentHTML("beforeend", `<figcaption>${k} · ${DATA.prompts[Math.floor(j / S)].prompt}</figcaption>`);
+    return f;
+  };
+  // one continuous scroll: append the next chunk whenever the bottom comes near the viewport
+  const box = document.createElement("div"); if (view !== "rows") box.className = "grid";
+  main.appendChild(box);
+  const sentinel = document.createElement("div"); sentinel.style.height = "1px"; main.appendChild(sentinel);
+  const chunk = view === "rows" ? 25 : 240; let done = 0;
+  const more = () => {
+    const end = Math.min(items.length, done + chunk), frag = document.createDocumentFragment();
+    for (; done < end; done++) frag.appendChild(view === "rows" ? rowEl(items[done]) : figEl(items[done]));
+    box.appendChild(frag);
+    if (done >= items.length && obs) obs.disconnect();
+  };
+  if (obs) obs.disconnect();
+  obs = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) more(); }, { rootMargin: "2000px" });
+  more(); obs.observe(sentinel);
 }
-for (const id of ["view", "model", "sort", "cat"]) $(id).onchange = () => { page = 0; render(); };
-$("q").oninput = () => { page = 0; render(); };
+let obs = null;
+for (const id of ["view", "model", "sort", "cat", "axis"]) $(id).onchange = () => { render(); scrollTo(0, 0); };
+$("q").oninput = () => render();
+document.addEventListener("click", (e) => { const b = e.target.dataset && e.target.dataset.base; if (b) { e.preventDefault(); $("q").value = b; $("sort").value = "group"; render(); scrollTo(0, 0); } });
 $("export").onclick = () => {
   const out = [...stars].map((id) => { const [k, j] = id.split("|"); const jj = +j;
     return { model: k, spec: k, prompt: DATA.prompts[Math.floor(jj / S)].prompt, seed: DATA.seeds[jj % S], score: M[k].score[jj] }; });
@@ -173,6 +180,7 @@ const tip = $("tip");
 document.addEventListener("mouseover", (e) => { const t = e.target.dataset && e.target.dataset.tip; tip.style.display = t ? "block" : "none"; if (t) tip.textContent = t; });
 document.addEventListener("mousemove", (e) => { tip.style.left = e.clientX + 12 + "px"; tip.style.top = e.clientY + 12 + "px"; });
 render();
+})();
 </script>
 </body>
 </html>

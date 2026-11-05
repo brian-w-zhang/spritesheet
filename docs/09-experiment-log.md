@@ -387,3 +387,29 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 **Visual review:** five agents judged every row by eye on contact sheets, with real training sprites as reference (local only), using one rubric: good / ok / blob for the best seed. v3 had 170 good, 512 ok and 58 blob; v1 had 22 good, 96 ok and 622 blob (`artifacts/metrics/bank_review.json`). Reviewer strictness varied (8 to 47 good v3 rows per 150). A second pass by the main session cut v3's "good" to a 64-sprite slide shortlist (`artifacts/figures/bank_shortlist_v3.png`). Plain shapes (circle, slate, dune) were dropped as too easy.
 
 **Learned:** v3 is good at simple, well-defined objects: bottles, potions, fruit, candles, keys, helmets, flames, drops. It is weak on animals beyond a silhouette, abstract prompts and actions. v1 usually draws one shape for all 8 seeds, and its good rows are emoji-like shapes (face, heart, star, clock).
+
+## Bank round 2: adjective variants, all three sheet models, full visual review (2026-11-05)
+
+**What:** the bank grew to 7,006 prompts × 8 seeds × {v3, v2, v1-XL}, about 168k sprites. It has 744 base prompts and 6,262 adjective variants.
+- **Seen with the noun** (2,982 variants): modifiers that appear before the noun in at least 2 training captions ("poison apple", "locked chest").
+- **Common caption adjectives** (1,930 variants): about 90 frequent ones (cracked, ghostly, carved), rotated over 180 nouns.
+- **Hand axes:** colour, material, state, size, pose.
+
+Batched twins against the float64 specs: 24/24 pixel-exact for each model. Speed per sprite: v3 44 ms, v2 7 ms, v1 2.3 ms (`artifacts/metrics/bank_summary.json`).
+
+**Seed diversity:** v3 gives 8.0 distinct sprites per 8 seeds. v2 and v1 give about 2.0, and for about 5,000 prompts all 8 seeds give the identical sprite. Their seed only picks one of 7 styles, and the drawing is deterministic given the style.
+
+**Visual review:** 28 agents judged every row and model by eye, using one rubric ("good" needs the adjective visible too). The main session reviewed the 4 new demo rows and re-checked all 807 v3 variant "good" picks, which gave a 459-sprite v3 shortlist (`artifacts/metrics/bank_review.json`).
+
+| Model | good | ok | blob |
+|---|---|---|---|
+| v3 | 980 | 5,336 | 690 |
+| v2 | 5 | 235 | 6,766 |
+| v1 | 60 | 451 | 6,495 |
+
+**Learned:**
+- v3 shows many attributes: colour, burning, frozen, crystal, ice, poison and lava all show.
+- Abstract caption adjectives mostly don't show ("silk whale", "folded octopus"), though the noun is drawn.
+- v2 and v1 almost never show an adjective, and usually draw the same sprite for every seed.
+
+**Sheets galleries:** each demo sheet now has a "Gallery" tab right after Prompt (v3: 800 sprites, v1: 136, v2: 160 including "ok"), drawn as cells with prompt/seed/verdict labels. The first version painted cells with 49 conditional-format rules. That was slow to render at 800 sprites, so the tabs now use static fills: about 13 min to upload for v3, but they open instantly.

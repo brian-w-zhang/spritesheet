@@ -1,5 +1,7 @@
 {
- "prompts": 740,
+ "prompts": 7006,
+ "base_prompts": 744,
+ "variant_prompts": 6262,
  "seeds": [
   1,
   2,
@@ -13,31 +15,50 @@
  "models": {
   "v3": {
    "spec": "v3p_a@g=0.75:t=0.8:u=v3p_u48",
-   "sprites": 5920,
-   "seconds": 251.0,
-   "ms_per_sprite": 42.39,
+   "sprites": 56048,
+   "seconds": 2492.4,
+   "distinct_per_prompt_mean": 8.0,
+   "prompts_all_seeds_identical": 0,
+   "ms_per_sprite": 44.47,
    "parity_vs_spec": {
     "spec_model": "v3p_a_g1_sheet",
     "pairs": 24,
     "pixel_exact": 24
    },
-   "mean_clip_text": 0.3117,
-   "mean_clip_real": 0.9182
+   "mean_clip_text": 0.3204,
+   "mean_clip_real": 0.9121
+  },
+  "v2": {
+   "spec": "v2c_T4_b06",
+   "sprites": 56048,
+   "seconds": 398.8,
+   "distinct_per_prompt_mean": 1.97,
+   "prompts_all_seeds_identical": 5066,
+   "ms_per_sprite": 7.11,
+   "parity_vs_spec": {
+    "spec_model": "v2c_T4_b06",
+    "pairs": 24,
+    "pixel_exact": 24
+   },
+   "mean_clip_text": 0.3035,
+   "mean_clip_real": 0.8687
   },
   "v1": {
    "spec": "v1_xl",
-   "sprites": 5920,
-   "seconds": 13.7,
+   "sprites": 56048,
+   "seconds": 129.9,
+   "distinct_per_prompt_mean": 1.98,
+   "prompts_all_seeds_identical": 4797,
    "ms_per_sprite": 2.32,
    "parity_vs_spec": {
     "spec_model": "v1_xl",
     "pairs": 24,
     "pixel_exact": 24
    },
-   "mean_clip_text": 0.3003,
-   "mean_clip_real": 0.8966
+   "mean_clip_text": 0.3036,
+   "mean_clip_real": 0.885
   }
  },
- "time": "2026-11-05 10:45",
- "real_refs_per_prompt_mean": 31.2
+ "time": "2026-11-05 11:39",
+ "real_refs_per_prompt_mean": 13.5
 }

@@ -1,12 +1,13 @@
 """Generation bank: thousands of sprites from the deployed sheet models, generated headless, for picking slide images.
 
-  uv run python scripts/gen_bank.py                      # ~700 prompts x 8 seeds x {v3 deployed, v1-XL}
+  uv run python scripts/gen_bank.py                      # 740 prompts x 8 seeds x {v3, v2, v1-XL} as deployed
   uv run python scripts/gen_bank.py --per-cat 5 --seeds 2  # quick run
 
 Prompts come from the training captions: per dataset category, the most frequent words and two-word phrases
 (generic words like "shape" or "corner" dropped), so the bank covers what the data shows most.
 
 Models (the exact configurations on the Google Sheets):
+  v2: masked diffusion v2c_T4_b06, 4 steps (sheet "diffusion")
   v3: PatchGPT v3p_a + guidance chain v3p_u48, guidance 0.75, temperature 0.8 (sheet "v3")
   v1: v1-XL, one pass (sheet "v32")
 Generation uses the batched PyTorch twins; a sample is checked against the float64 specs (reference_p.forward /
@@ -14,7 +15,7 @@ reference.forward), which the sheets match pixel for pixel (parity_sheets_v3p.js
 
 Scores per sprite (higher is better), to sort by "looks like the thing":
   clip_text:  CLIP similarity to "pixel art of <prompt>"
-  clip_real:  CLIP similarity to the mean embedding of up to 32 real training sprites whose caption contains the prompt
+  clip_real:  CLIP similarity to the mean embedding of up to 16 real training sprites whose caption contains the prompt
   score:      mean of the two, each z-scored over the whole bank
 Real sprites are only embedded, never written out, unless --with-real (local-only viewer, gitignored, never commit).
 
@@ -22,7 +23,7 @@ Outputs:
   artifacts/bank/bank.npz, artifacts/bank/index.html (viewer: sort, filter, star favourites, export JSON)
   artifacts/metrics/bank_summary.json (timing, parity, counts)
 """
-import argparse, base64, collections, json, os, re, sys, time
+import argparse, base64, collections, gzip, json, os, re, sys, time
 
 import numpy as np
 import torch
@@ -34,8 +35,9 @@ from spritesheet import evaluate as E, tokenizer as T  # noqa: E402
 from eval_v3 import Model  # noqa: E402
 
 OUT = os.path.join(ROOT, "artifacts", "bank")
-MODELS = {"v3": "v3p_a@g=0.75:t=0.8:u=v3p_u48", "v1": "v1_xl"}
-SPEC = {"v3": "v3p_a_g1_sheet", "v1": "v1_xl"}
+MODELS = {"v3": "v3p_a@g=0.75:t=0.8:u=v3p_u48", "v2": "v2c_T4_b06", "v1": "v1_xl"}
+SPEC = {"v3": "v3p_a_g1_sheet", "v2": "v2c_T4_b06", "v1": "v1_xl"}
+LABEL = {"v3": "v3 (sheet: guidance 0.75)", "v2": "v2 diffusion (4 steps)", "v1": "v1-XL"}
 STOP = set("""a an the of and with in on for to from at by or its it is as into over under out up off no not
 small large big tiny little old new open closed full empty half single double round square side top end corner shape
 line point patch strip piece part edge front back left right view icon sprite pixel art style simple glow glowing
@@ -49,9 +51,93 @@ sealed folded smashed melted frozen cracked dried wrapped patched spiked floatin
 space power garden miniature geometric color split""".split())
 
 
-DEMO = ["black cat", "cat", "dog", "frog", "fox", "owl", "red apple", "potion", "health potion", "sword", "shield",
+DEMO = ["red potion", "golden crown", "blue slime", "red frog", "black cat", "cat", "dog", "frog", "fox", "owl", "red apple", "potion", "health potion", "sword", "shield",
         "treasure chest", "dragon", "ghost", "slime", "wizard", "knight", "mushroom", "tree", "house", "castle",
         "rocket", "heart", "star", "skull", "goose", "duck", "fish", "pizza", "cake"]
+
+
+# adjective variants: base nouns x attribute axes, to see what the models learn about colour, material, state, size, pose
+NOUNS = {
+    "creature": """cat dog frog fox owl bird fish snake turtle rabbit bear wolf mouse horse pig cow chicken duck goose bat
+        spider crab snail butterfly bee beetle lizard dragon slime ghost golem demon skeleton zombie wizard knight robot
+        goblin unicorn octopus shark whale penguin deer lion tiger monkey elephant squirrel jellyfish worm fairy imp witch
+        king princess pirate ninja""",
+    "object": """sword shield axe bow dagger hammer potion bottle jar cup bowl key ring crown coin gem crystal orb amulet
+        candle lantern lamp book scroll map chest box barrel bag basket chair table bed door helmet boot hat glove mask
+        bell clock mirror wand staff flag anchor wheel rocket car boat ship house castle tower tent bridge gate fence
+        ladder rope chain skull bone heart star umbrella teapot guitar drum trophy feather egg""",
+    "plant": "tree flower mushroom cactus leaf rose vine tulip sunflower bush log acorn seed",
+    "food": "apple pear cake pizza bread cheese cookie carrot banana cherry grape pie burger donut candy strawberry watermelon",
+    "nature": "rock cloud flame sun moon mountain volcano planet snowflake island",
+}
+AXES = {
+    "colour": ["red", "blue", "green", "golden", "purple", "black", "white", "pink"],
+    "material": ["wooden", "stone", "iron", "glass", "crystal", "ice", "gold"],
+    "state": {"object": ["broken", "burning", "frozen", "rusty", "glowing", "cracked", "ancient", "magic"],
+              "food": ["rotten", "frozen", "sliced", "burnt", "glowing", "giant slice of"],
+              "plant": ["dead", "glowing", "frozen", "burning", "flowering"],
+              "nature": ["burning", "frozen", "glowing", "dark", "floating"],
+              "creature": ["angry", "happy", "baby", "armored", "skeleton", "zombie", "ghost", "robot"]},
+    "size": ["tiny", "giant"],
+    "pose": ["sleeping", "flying", "running", "sitting", "jumping"],
+}
+# per kind: how many adjectives to draw from each axis
+QUOTA = {"creature": {"colour": 3, "material": 1, "state": 3, "size": 1, "pose": 2},
+         "object": {"colour": 3, "material": 3, "state": 3, "size": 1},
+         "plant": {"colour": 3, "material": 1, "state": 3, "size": 1},
+         "food": {"colour": 2, "material": 1, "state": 3, "size": 1},
+         "nature": {"colour": 3, "material": 1, "state": 3, "size": 1}}
+
+
+# frequent caption modifiers (mined: words that precede >= 60 different words and start >= 40 captions;
+# kept the adjectives and materials, dropped nouns)
+COMMON = """wooden stone iron metal broken frozen steel glass crystal wrapped copper cracked hollow leather plastic clay
+baby giant folded brass red bamboo paper silver floating tin ice torn bronze woven ghostly canvas ceramic cute dried
+blue green white rusty black obsidian bent golden happy marble silk miniature wax friendly cotton rainbow fabric cloth
+coral hanging spiral split sleepy soft rusted concrete cursed rubber mini smashed twisted carved frayed melted wool
+smiling sealed cheerful stacked chipped straw cardboard candy shattered neon shadow lava snow moss jade glowing ancient
+burnt tiny old magic""".split()
+
+
+def caption_modifiers(caps, nouns, min_count=2, top=20):
+    """Per noun: words that come right before it in training captions (e.g. 'poison apple', 'locked chest')."""
+    pre = collections.defaultdict(collections.Counter)
+    for c in caps:
+        t = re.findall(r"[a-z][a-z'-]+", str(c).lower())
+        for x, y in zip(t, t[1:]):
+            if y in nouns and x not in STOP and x != y:
+                pre[y][x] += 1
+    return {n: [(w, c) for w, c in pre[n].most_common(top) if c >= min_count] for n in nouns}
+
+
+def variant_prompts(seen, caps=None, n_common=12):
+    out = []
+    nouns = [(kind, w) for kind, ws in NOUNS.items() for w in ws.split()]
+    if caps is not None:   # 1) modifiers seen with this noun in the training captions
+        mods = caption_modifiers(caps, {w for _, w in nouns})
+        for kind, noun in nouns:
+            for w, c in mods[noun]:
+                p = f"{w} {noun}"
+                if p not in seen:
+                    seen.add(p)
+                    out.append({"prompt": p, "category": f"v_{kind}", "base": noun, "axis": "seen", "n_train": int(c)})
+    for n, (kind, noun) in enumerate(nouns):   # 2) frequent caption adjectives, rotated over the nouns
+        for t in range(n_common):
+            p = f"{COMMON[(n * n_common + t) % len(COMMON)]} {noun}"
+            if p not in seen:
+                seen.add(p)
+                out.append({"prompt": p, "category": f"v_{kind}", "base": noun, "axis": "common"})
+    for kind, words in NOUNS.items():
+        for n, noun in enumerate(words.split()):
+            for axis, q in QUOTA[kind].items():
+                pool = AXES[axis][kind] if axis == "state" else AXES[axis]
+                for t in range(q):   # rotate through the pool so every adjective appears across nouns
+                    adj = pool[(n * q + t) % len(pool)]
+                    p = f"{adj} {noun}"
+                    if p not in seen:
+                        seen.add(p)
+                        out.append({"prompt": p, "category": f"v_{kind}", "base": noun, "axis": axis})
+    return out
 
 
 def pick_prompts(caps, cats, per_cat, min_count=8):
@@ -59,7 +145,7 @@ def pick_prompts(caps, cats, per_cat, min_count=8):
     for c, k in zip(caps, cats):
         by[k.split("/")[0]].append(c)
     low = [c.lower() for c in caps]
-    out = [{"prompt": p, "category": "00_demo", "n_train": sum(bool(re.search(rf"\b{p}\b", c)) for c in low)}
+    out = [{"prompt": p, "category": "00_demo", "base": p.split()[-1], "axis": "demo", "n_train": sum(bool(re.search(rf"\b{p}\b", c)) for c in low)}
            for p in DEMO]
     seen = set(DEMO)
     for k in sorted(by):
@@ -78,19 +164,33 @@ def pick_prompts(caps, cats, per_cat, min_count=8):
                 if p in seen:
                     continue
                 seen.add(p)
-                out.append({"prompt": p, "category": k, "n_train": int(cnt)})
+                out.append({"prompt": p, "category": k, "base": p.split()[-1], "axis": "base", "n_train": int(cnt)})
                 got += 1
     return out
 
 
-def real_ids(prompts, caps, cap_n=32, seed=0):
-    rng = np.random.default_rng(seed)
-    low = np.char.lower(caps.astype(str))
+def real_ids(prompts, caps, cap_n=16, seed=0):
+    """Up to cap_n training sprites whose caption contains the prompt as a phrase (falls back to the base noun)."""
+    rank = np.random.default_rng(seed).permutation(len(caps))
+    low = [c.lower() for c in caps.astype(str)]
+    widx = collections.defaultdict(set)
+    for i, c in enumerate(low):
+        for w in set(re.findall(r"[a-z][a-z'-]*", c)):
+            widx[w].add(i)
+
+    def hits(phrase):
+        ws = phrase.split()
+        cand = set.intersection(*[widx.get(w, set()) for w in ws]) if ws else set()
+        pat = re.compile(rf"\b{re.escape(phrase)}\b")
+        return sorted(i for i in cand if pat.search(low[i]))
     res = []
     for p in prompts:
-        pat = re.compile(rf"\b{re.escape(p['prompt'])}\b")
-        hit = np.array([i for i, c in enumerate(low) if pat.search(c)])
-        res.append(rng.choice(hit, min(cap_n, len(hit)), replace=False) if len(hit) else np.zeros(0, int))
+        h = hits(p["prompt"])
+        p.setdefault("n_train", len(h))
+        if len(h) < 4 and p.get("base") and p["base"] != p["prompt"]:
+            h = hits(p["base"])
+        h = sorted(h, key=lambda i: rank[i])[:cap_n]   # fixed order: variants falling back to a noun share its set
+        res.append(np.array(h, int))
     return res
 
 
@@ -108,6 +208,9 @@ def check_parity(key, m, prompts, seeds, n):
         if key == "v3":
             from spritesheet import reference_p as RP
             ref = RP.forward(T.encode(p, vix), s, w, dict(cfg, guidance=0.75), keep=False)["pixels"]
+        elif key == "v2":
+            from spritesheet import mdm
+            ref = mdm.ref_generate(T.encode(p, vix), s, w, cfg, keep_steps=False)["classes"]
         else:
             from spritesheet import reference as R
             ref = R.forward(T.encode(p, vix), s, w, cfg)["classes"]
@@ -144,7 +247,8 @@ def clip_on(clip, dev):
 
 
 def b64(a):
-    return base64.b64encode(np.ascontiguousarray(a, np.uint8).tobytes()).decode()
+    """gzip + base64 (the viewer inflates it with DecompressionStream; ~10x smaller than raw)."""
+    return base64.b64encode(gzip.compress(np.ascontiguousarray(a, np.uint8).tobytes(), 9)).decode()
 
 
 def main():
@@ -152,6 +256,8 @@ def main():
     ap.add_argument("--per-cat", type=int, default=34)
     ap.add_argument("--seeds", type=int, default=8)
     ap.add_argument("--parity", type=int, default=24)
+    ap.add_argument("--max-variants", type=int, default=None)
+    ap.add_argument("--no-variants", action="store_true", help="base prompts only (no adjective variants)")
     ap.add_argument("--with-real", action="store_true", help="also write index_local.html with 4 real sprites per prompt")
     a = ap.parse_args()
     os.makedirs(OUT, exist_ok=True)
@@ -159,10 +265,13 @@ def main():
     tr = z["split"] == 0
     caps, cats, imgs = z["caption"][tr], z["category"][tr], z["imgs"][tr]
     prompts = pick_prompts(caps, cats, a.per_cat)
+    if not a.no_variants:
+        prompts += variant_prompts({p["prompt"] for p in prompts}, caps)[: a.max_variants]
     seeds = list(range(1, a.seeds + 1))
     print(f"{len(prompts)} prompts x {len(seeds)} seeds", flush=True)
 
-    summary = {"prompts": len(prompts), "seeds": seeds, "models": {}, "time": time.strftime("%Y-%m-%d %H:%M")}
+    summary = {"prompts": len(prompts), "base_prompts": sum(p["axis"] in ("base", "demo") for p in prompts),
+               "variant_prompts": sum(p["axis"] not in ("base", "demo") for p in prompts), "seeds": seeds, "models": {}, "time": time.strftime("%Y-%m-%d %H:%M")}
     caps_all = [p["prompt"] for p in prompts for _ in seeds]
     seeds_all = [s for _ in prompts for s in seeds]
     grids, rgbpal = {}, {}
@@ -170,11 +279,15 @@ def main():
         m = Model(spec)
         m.generate(caps_all[:16], seeds_all[:16])  # warm-up
         t0 = time.time()
-        g, _ = m.generate(caps_all, seeds_all)
+        g = np.concatenate([m.generate(caps_all[i:i + 1024], seeds_all[i:i + 1024])[0]
+                            for i in range(0, len(caps_all), 1024)])   # chunks: v2 would otherwise hold all logits
         dt = time.time() - t0
         grids[key], rgbpal[key] = g, m.rgb
         par = check_parity(key, m, prompts, seeds, a.parity)
+        dist = [len({x.tobytes() for x in g[i * len(seeds):(i + 1) * len(seeds)]}) for i in range(len(prompts))]
         summary["models"][key] = {"spec": spec, "sprites": len(g), "seconds": round(dt, 1),
+                                  "distinct_per_prompt_mean": round(float(np.mean(dist)), 2),
+                                  "prompts_all_seeds_identical": int(sum(d == 1 for d in dist)),
                                   "ms_per_sprite": round(1000 * dt / len(g), 2), "parity_vs_spec": par}
         print(key, summary["models"][key], flush=True)
 
@@ -185,7 +298,8 @@ def main():
     flat = np.concatenate(rid)
     BG = rgbpal["v3"][0]
     rpal = rgbpal["v3"]  # dataset sprites use the v3 48-colour palette (index 0 = background)
-    r_emb = img([rpal[imgs[i]] for i in flat])
+    uniq, inv = np.unique(flat, return_inverse=True)
+    r_emb = img([rpal[imgs[i]] for i in uniq])[torch.from_numpy(inv.reshape(-1))] if len(flat) else torch.zeros(0, 512)
     cent, k = [], 0
     for r in rid:
         e = r_emb[k:k + len(r)].mean(0) if len(r) else torch.zeros(r_emb.shape[1])
@@ -211,7 +325,7 @@ def main():
         ct, cr = scores[key]
         sc = (zt(ct) + zr(cr)) / 2
         n = grids[key].shape[1]
-        data["models"][key] = {"label": "v3 (sheet: guidance 0.75)" if key == "v3" else "v1-XL", "n": int(n),
+        data["models"][key] = {"label": LABEL[key], "n": int(n),
                                "palette": ["#%02x%02x%02x" % tuple(c) for c in rgbpal[key]],
                                "sprites": b64(grids[key].reshape(len(grids[key]), -1)),
                                "clip_text": np.round(ct, 4).tolist(), "clip_real": np.round(cr, 4).tolist(),
