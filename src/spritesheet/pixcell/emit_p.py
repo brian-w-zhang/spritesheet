@@ -90,6 +90,16 @@ def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, ml
     return x
 
 
+def _guidance_cell(wb, g):
+    """Guidance weight as an editable input (Prompt!B4; the display starts at row 5). Default = the exported g;
+    0 turns guidance off (the unconditional chain still computes)."""
+    if not g:
+        return None
+    wb.set("Prompt", 4, 1, Text("Guidance"))
+    wb.set("Prompt", 4, 2, float(g))
+    return "Prompt!$B$4"
+
+
 def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", default_seed=1, render=False) -> Workbook:
     L, T, Kp, dm, P = T_L(cfg), cfg["T"], cfg["Kp"], cfg["dm"], cfg["P"]
     N = L + T - 1
@@ -134,8 +144,9 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
     keymask = lambda m: f"Tokens!$E${1 + m}" if m < L else None
     xf = emit_stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask)
 
-    # ---- optional unconditional chain (classifier-free guidance)
+    # ---- optional unconditional chain (classifier-free guidance); its weight g is a live input cell (Prompt!B4)
     LU = None
+    GC = _guidance_cell(wb, g)
     if g:
         U0 = wb.add_block("U.X0", "U_X0", 1, 1, T, cfg["U_dm"])
         UE = _wtab(wb, "U_W_E", w["U_E"])
@@ -162,7 +173,7 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
 
     def score(t, k):
         lc = _lin(Wout, k, xr(t), dm, rf.ref(t, 0, "Out"))
-        lg = f"({1.0 + g!r}*({lc})-{g!r}*({LU(t, k)}))" if g else f"({lc})"
+        lg = f"((1+{GC})*({lc})-{GC}*({LU(t, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
         return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
     wb.fill(Sc, score)
@@ -235,6 +246,7 @@ def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", de
                     is_q=lambda n: n >= L and rows[n - L][0] == "q")
 
     LU = None
+    GC = _guidance_cell(wb, g)
     if g:
         U0 = wb.add_block("U.X0", "U_X0", 1, 1, R + 1, cfg["U_dm"])     # row 0 = learned start row
         UE = _wtab(wb, "U_W_E", w["U_E"])
@@ -268,7 +280,7 @@ def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", de
 
     def score(p, k):
         lc = _lin(Wout, k, xr(p), dm, rf.ref(p, 0, "Out"))
-        lg = f"({1.0 + g!r}*({lc})-{g!r}*({LU(p, k)}))" if g else f"({lc})"
+        lg = f"((1+{GC})*({lc})-{GC}*({LU(p, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{p * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
         return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
     wb.fill(Sc, score)
