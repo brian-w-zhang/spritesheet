@@ -312,3 +312,19 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **Result:** the "a red potion" seed-1 render read back from Sheets **matches the reference pixel for pixel**.
 - **Prompt-change latency:** 45.1 s to the first consistent read, 60.3 s until stable. The random-weight model of the same shape took 128 / 148 s (D-53). Trained weights give sparse attention and peaked scores, but the cause of the difference was not investigated.
 - **Role:** this is the working fallback on the sheet. Next is the same model plus the in-sheet guidance chain (D-55).
+
+### Small unconditional chain for in-sheet guidance (r14) [metrics/v3_eval_r14.json; figures/v3_lineup_r14_*.png, v3_seeds_r14_*.png]
+- **Setup:** U chain `v3p_u48` (causal, dm48 L2, 20k steps, 61,120 formulas) against the r13 prior `v3p_u` (dm96 L3, ~180k formulas), both with `v3p_a` at t=0.8.
+
+  | Setting | Novel R@5 | PixelGPT-test R@5 | Colour adj. | Speckle | Fg components |
+  |---|---|---|---|---|---|
+  | **g=1, u48** | **0.55** [0.45, 0.64] (best so far) | 0.069 | 0.97 | 0.048 | 4.18 |
+  | g=1, u96 | 0.51 | 0.078 | — | 0.042 | 3.41 |
+  | g=1.5, u48 | 0.42 | — | 0.88 | — | 7.67 |
+
+- **By eye at g=1 with u48:**
+  - Objects are clean and specific: a red-and-white spotted mushroom, a corked red potion in a glass flask, a lantern with a handle, a crown, a sword, a key.
+  - Creatures: a fox with ears and a white face, a frog on grass, a wizard with a hat.
+  - Remaining flaw: stray specks on some creatures (owl, ghost, skeleton).
+  - g=1.5 breaks the drawings into multicolour noise.
+- **Decision:** push `v3p_a` + u48 at g=1 to the v3 sheet (492,956 formulas). The guidance weight is now a live cell (Prompt!B4), so it can be tuned in the sheet without a re-push.

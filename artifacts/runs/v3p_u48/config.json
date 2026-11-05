@@ -1,0 +1,26 @@
+{
+ "model": "v3p_u",
+ "N": 24,
+ "L": 12,
+ "T": 64,
+ "Kp": 1024,
+ "P": 3,
+ "K": 48,
+ "d": 64,
+ "dm": 48,
+ "H": 2,
+ "mlp": 96,
+ "layers": 2,
+ "steps": 20000,
+ "train_seconds": 1046.7,
+ "dict_dir": "artifacts/model/patchdict_k1024_p3",
+ "params": 140176,
+ "final_log": {
+  "step": 20000,
+  "loss": 2.0086,
+  "lr": 0.0,
+  "s": 1046.3,
+  "val_nll": 2.103,
+  "val_tok_acc": 0.5399
+ }
+}
