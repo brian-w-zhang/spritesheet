@@ -31,3 +31,6 @@ artifacts/tmp_sx_examples.npy
 artifacts/figures/v3_groundtruth_*.png
 artifacts/runs/*vq*/snapshots/*.png
 *_local.png
+# generation bank (large; index_local.html embeds real PixelGPT sprites: never commit)
+artifacts/bank/
+docs/slides/deck/private/

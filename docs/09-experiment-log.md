@@ -379,3 +379,11 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   PixelGPT-test R@5 is 0.068–0.074 for all four.
 - **By eye:** mixed. `v3p_a2` draws cats with ears on some seeds, cleaner skeletons and clearer owls, but stranger knights and wizards.
 - **Decision:** no clear win, so the deployed model stays. The re-push costs ~70 min.
+
+## Generation bank and visual review (2026-11-05)
+
+**What:** `scripts/gen_bank.py` generated 740 prompts × 8 seeds with both sheet models headless (v3: v3p_a + v3p_u48, g 0.75, t 0.8; v1: v1-XL). Prompts are the most frequent words and two-word phrases per dataset category, plus 30 demo prompts. Parity of the batched twins against the float64 specs: 24/24 pixel-exact for each model. Speed: v3 42 ms per sprite, v1 2.3 ms per sprite, against 2–3 min per prompt on the sheet (`artifacts/metrics/bank_summary.json`).
+
+**Visual review:** five agents judged every row by eye on contact sheets, with real training sprites as reference (local only), using one rubric: good / ok / blob for the best seed. v3 had 170 good, 512 ok and 58 blob; v1 had 22 good, 96 ok and 622 blob (`artifacts/metrics/bank_review.json`). Reviewer strictness varied (8 to 47 good v3 rows per 150). A second pass by the main session cut v3's "good" to a 64-sprite slide shortlist (`artifacts/figures/bank_shortlist_v3.png`). Plain shapes (circle, slate, dune) were dropped as too easy.
+
+**Learned:** v3 is good at simple, well-defined objects: bottles, potions, fruit, candles, keys, helmets, flames, drops. It is weak on animals beyond a silhouette, abstract prompts and actions. v1 usually draws one shape for all 8 seeds, and its good rows are emoji-like shapes (face, heart, star, clock).

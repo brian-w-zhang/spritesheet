@@ -1,0 +1,43 @@
+{
+ "prompts": 740,
+ "seeds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8
+ ],
+ "models": {
+  "v3": {
+   "spec": "v3p_a@g=0.75:t=0.8:u=v3p_u48",
+   "sprites": 5920,
+   "seconds": 251.0,
+   "ms_per_sprite": 42.39,
+   "parity_vs_spec": {
+    "spec_model": "v3p_a_g1_sheet",
+    "pairs": 24,
+    "pixel_exact": 24
+   },
+   "mean_clip_text": 0.3117,
+   "mean_clip_real": 0.9182
+  },
+  "v1": {
+   "spec": "v1_xl",
+   "sprites": 5920,
+   "seconds": 13.7,
+   "ms_per_sprite": 2.32,
+   "parity_vs_spec": {
+    "spec_model": "v1_xl",
+    "pairs": 24,
+    "pixel_exact": 24
+   },
+   "mean_clip_text": 0.3003,
+   "mean_clip_real": 0.8966
+  }
+ },
+ "time": "2026-11-05 10:45",
+ "real_refs_per_prompt_mean": 31.2
+}

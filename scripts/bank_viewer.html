@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SpriteSheet generation bank</title>
+<style>
+  :root { --ink:#0c0909; --muted:#85827f; --line:#d8d4dd; --paper:#f9f8f8; --sel:#2d56ce; --star:#f2cd3a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.4 -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--paper); }
+  header { position:sticky; top:0; z-index:2; background:#fff; border-bottom:1px solid var(--line); padding:10px 16px;
+           display:flex; flex-wrap:wrap; gap:10px; align-items:center; }
+  header h1 { font-size:15px; margin:0 12px 0 0; }
+  select, input, button { font:inherit; padding:4px 8px; border:1px solid var(--line); background:#fff; border-radius:3px; }
+  button { cursor:pointer; }
+  button:focus-visible, select:focus-visible, input:focus-visible, canvas:focus-visible { outline:2px solid var(--sel); outline-offset:1px; }
+  .count { color:var(--muted); margin-left:auto; }
+  main { padding:12px 16px 60px; }
+  .row { display:grid; grid-template-columns:180px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--line); }
+  .row h2 { font-size:14px; margin:0; }
+  .row .meta { color:var(--muted); font-size:12px; }
+  .sets { display:flex; flex-direction:column; gap:6px; }
+  .set { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+  .set .lab { width:58px; color:var(--muted); font-size:12px; }
+  .grid { display:flex; flex-wrap:wrap; gap:10px; }
+  figure { margin:0; position:relative; }
+  figure figcaption { font-size:11px; color:var(--muted); width:96px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  canvas { display:block; width:96px; height:96px; image-rendering:pixelated; border:2px solid transparent; cursor:pointer; }
+  canvas.best { border-color:var(--line); }
+  canvas.pick { border-color:var(--sel); }
+  canvas.starred { border-color:var(--star); }
+  .set .note { font-size:12px; color:var(--muted); margin-left:6px; max-width:260px; }
+  .v-good { color:#1f7a3a; font-weight:600; } .v-ok { color:#9a6a00; font-weight:600; } .v-blob { color:#b3261e; font-weight:600; }
+  .real canvas { cursor:default; opacity:.9; }
+  .pager { display:flex; gap:8px; align-items:center; margin:16px 0; }
+  #tip { position:fixed; pointer-events:none; background:var(--ink); color:#fff; font-size:12px; padding:4px 6px; border-radius:3px; display:none; z-index:5; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Generation bank</h1>
+  <label>View <select id="view"><option value="rows">One row per prompt</option><option value="grid">All sprites</option><option value="short">Shortlist (slide-worthy)</option><option value="picks">Agent picks (good)</option><option value="stars">Starred</option></select></label>
+  <label>Model <select id="model"></select></label>
+  <label>Sort <select id="sort">
+    <option value="verdict">Agent verdict</option><option value="score">CLIP score</option><option value="clip_real">Closest to real sprites</option>
+    <option value="clip_text">Closest to the prompt text</option><option value="n_train">Most training data</option>
+    <option value="prompt">Prompt A–Z</option><option value="worst">Worst score</option></select></label>
+  <label>Category <select id="cat"><option value="">All</option></select></label>
+  <input id="q" type="search" placeholder="Filter prompts">
+  <button id="export">Export starred (JSON)</button>
+  <span class="count" id="count"></span>
+</header>
+<main id="main"></main>
+<div id="tip"></div>
+<script>
+const DATA = /*DATA*/null;
+const $ = (id) => document.getElementById(id);
+const KEYS = Object.keys(DATA.models);
+const dec = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const M = {};
+for (const k of KEYS) { const m = DATA.models[k]; M[k] = { ...m, px: dec(m.sprites), rgb: m.palette.map(hex) }; }
+const REAL = DATA.real ? DATA.real.sprites.map((s) => (s ? dec(s) : null)) : null;
+const S = DATA.seeds.length, P = DATA.prompts.length;
+const REV = DATA.review || {};   // REV[k][i] = {best_seed, verdict, good_seeds, note} from the visual review agents
+const rv = (k, i) => (REV[k] && REV[k][i]) || null;
+const VRANK = { good: 2, ok: 1, blob: 0 };
+const isShort = (k, j) => { const r = rv(k, Math.floor(j / S)); return !!r && !!r.shortlist && r.best_seed === DATA.seeds[j % S]; };
+const isPick = (k, j) => { const r = rv(k, Math.floor(j / S)); return !!r && (r.good_seeds || []).includes(DATA.seeds[j % S]); };
+const stars = new Set(JSON.parse(localStorage.getItem("bank-stars") || "[]"));
+const saveStars = () => localStorage.setItem("bank-stars", JSON.stringify([...stars]));
+function hex(h) { return [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16)); }
+
+$("model").innerHTML = `<option value="all">Both</option>` + KEYS.map((k) => `<option value="${k}">${M[k].label}</option>`).join("");
+[...new Set(DATA.prompts.map((p) => p.category))].sort().forEach((c) => $("cat").insertAdjacentHTML("beforeend", `<option>${c}</option>`));
+
+function draw(buf, off, n, rgb) {
+  const c = document.createElement("canvas"); c.width = n; c.height = n;
+  const ctx = c.getContext("2d"), im = ctx.createImageData(n, n);
+  for (let i = 0; i < n * n; i++) { const [r, g, b] = rgb[buf[off + i]]; im.data.set([r, g, b, 255], i * 4); }
+  ctx.putImageData(im, 0, 0); return c;
+}
+function sprite(k, j) {
+  const m = M[k], c = draw(m.px, j * m.n * m.n, m.n, m.rgb), id = `${k}|${j}`;
+  const p = DATA.prompts[Math.floor(j / S)], seed = DATA.seeds[j % S];
+  c.tabIndex = 0; c.dataset.id = id;
+  c.dataset.tip = `${m.label} · "${p.prompt}" · seed ${seed} · score ${m.score[j]} · text ${m.clip_text[j]} · real ${m.clip_real[j]}`;
+  const r = rv(k, Math.floor(j / S));
+  if (r) c.dataset.tip += ` · agent: ${r.verdict}${r.best_seed === seed ? " (best)" : ""}${isPick(k, j) ? ", good" : ""} · ${r.note || ""}`;
+  if (isPick(k, j)) c.classList.add("pick");
+  if (stars.has(id)) c.classList.add("starred");
+  const toggle = () => { stars.has(id) ? stars.delete(id) : stars.add(id); c.classList.toggle("starred"); saveStars(); };
+  c.onclick = toggle; c.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } };
+  return c;
+}
+const val = (k, j, s) => {
+  if (s === "verdict") { const r = rv(k, Math.floor(j / S)); const v = r ? VRANK[r.verdict] || 0 : -1;
+    return v * 10 + (r && r.shortlist ? 5 : 0) + (isPick(k, j) ? 2 : 0) + (r && r.best_seed === DATA.seeds[j % S] ? 1 : 0) + M[k].score[j] / 100; }
+  return s === "worst" ? -M[k].score[j] : M[k][s][j];
+};
+function bestOf(k, i, s) { let b = i * S; for (let j = i * S; j < i * S + S; j++) if (val(k, j, s) > val(k, b, s)) b = j; return b; }
+
+let page = 0;
+function render() {
+  const view = $("view").value, mk = $("model").value, s = $("sort").value, cat = $("cat").value, q = $("q").value.toLowerCase();
+  const keys = mk === "all" ? KEYS : [mk];
+  const okP = (i) => (!cat || DATA.prompts[i].category === cat) && (!q || DATA.prompts[i].prompt.includes(q));
+  const main = $("main"); main.innerHTML = "";
+  let items;
+  if (view === "rows") {
+    items = [...Array(P).keys()].filter(okP);
+    const key = (i) => s === "prompt" ? DATA.prompts[i].prompt : s === "n_train" ? -DATA.prompts[i].n_train
+      : -Math.max(...keys.map((k) => val(k, bestOf(k, i, s), s)));
+    items.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
+  } else {
+    items = [];
+    for (const k of keys) for (let j = 0; j < P * S; j++)
+      if (okP(Math.floor(j / S)) && (view !== "stars" || stars.has(`${k}|${j}`)) && (view !== "picks" || isPick(k, j)) && (view !== "short" || isShort(k, j))) items.push([k, j]);
+    const key = ([k, j]) => s === "prompt" ? DATA.prompts[Math.floor(j / S)].prompt
+      : s === "n_train" ? -DATA.prompts[Math.floor(j / S)].n_train : -val(k, j, s);
+    items.sort((a, b) => (key(a) < key(b) ? -1 : key(a) > key(b) ? 1 : 0));
+  }
+  const per = view === "rows" ? 40 : 300, pages = Math.max(1, Math.ceil(items.length / per));
+  page = Math.min(page, pages - 1);
+  $("count").textContent = `${items.length} ${view === "rows" ? "prompts" : "sprites"} · ${stars.size} starred · blue border = agent says good, yellow = your star`;
+  const slice = items.slice(page * per, page * per + per);
+  if (view === "rows") {
+    for (const i of slice) {
+      const p = DATA.prompts[i], row = document.createElement("div"); row.className = "row";
+      row.innerHTML = `<div><h2>${p.prompt}</h2><div class="meta">${p.category.replace(/^\d+_/, "").replaceAll("_", " ")}<br>${p.n_train} training captions</div></div>`;
+      const sets = document.createElement("div"); sets.className = "sets";
+      for (const k of keys) {
+        const set = document.createElement("div"); set.className = "set";
+        set.innerHTML = `<span class="lab">${k}</span>`;
+        const b = bestOf(k, i, s);
+        for (let j = i * S; j < i * S + S; j++) { const c = sprite(k, j); if (j === b) c.classList.add("best"); set.appendChild(c); }
+        const r = rv(k, i);
+        if (r) set.insertAdjacentHTML("beforeend", `<span class="note"><span class="v-${r.verdict}">${r.verdict}</span>${r.shortlist ? " · shortlist" : ""}${r.best_seed ? `, best seed ${r.best_seed}` : ""}<br>${r.note || ""}</span>`);
+        sets.appendChild(set);
+      }
+      if (REAL && REAL[i]) {
+        const set = document.createElement("div"); set.className = "set real";
+        set.innerHTML = `<span class="lab">real</span>`;
+        const n = DATA.real.n, rgb = DATA.real.palette.map(hex);
+        for (let r = 0; r < REAL[i].length / (n * n); r++) set.appendChild(draw(REAL[i], r * n * n, n, rgb));
+        sets.appendChild(set);
+      }
+      row.appendChild(sets); main.appendChild(row);
+    }
+  } else {
+    const g = document.createElement("div"); g.className = "grid";
+    for (const [k, j] of slice) {
+      const f = document.createElement("figure"); f.appendChild(sprite(k, j));
+      f.insertAdjacentHTML("beforeend", `<figcaption>${k} · ${DATA.prompts[Math.floor(j / S)].prompt}</figcaption>`);
+      g.appendChild(f);
+    }
+    main.appendChild(g);
+  }
+  const pg = document.createElement("div"); pg.className = "pager";
+  pg.innerHTML = `<button ${page ? "" : "disabled"} id="prev">Previous</button><span>Page ${page + 1} of ${pages}</span><button ${page < pages - 1 ? "" : "disabled"} id="next">Next</button>`;
+  main.appendChild(pg);
+  $("prev").onclick = () => { page--; render(); scrollTo(0, 0); };
+  $("next").onclick = () => { page++; render(); scrollTo(0, 0); };
+}
+for (const id of ["view", "model", "sort", "cat"]) $(id).onchange = () => { page = 0; render(); };
+$("q").oninput = () => { page = 0; render(); };
+$("export").onclick = () => {
+  const out = [...stars].map((id) => { const [k, j] = id.split("|"); const jj = +j;
+    return { model: k, spec: k, prompt: DATA.prompts[Math.floor(jj / S)].prompt, seed: DATA.seeds[jj % S], score: M[k].score[jj] }; });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(out, null, 1)], { type: "application/json" }));
+  a.download = "bank_favourites.json"; a.click();
+};
+const tip = $("tip");
+document.addEventListener("mouseover", (e) => { const t = e.target.dataset && e.target.dataset.tip; tip.style.display = t ? "block" : "none"; if (t) tip.textContent = t; });
+document.addEventListener("mousemove", (e) => { tip.style.left = e.clientX + 12 + "px"; tip.style.top = e.clientY + 12 + "px"; });
+render();
+</script>
+</body>
+</html>
