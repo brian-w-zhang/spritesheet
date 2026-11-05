@@ -29,6 +29,8 @@ def main():
     ap.add_argument("--p-colour", type=float, default=0.25)
     ap.add_argument("--p-short", type=float, default=0.0, help="head-noun-preserving caption dropout (data.v3.shorten)")
     ap.add_argument("--init", default=None)
+    ap.add_argument("--kd", default=None, help="teacher samples npz (scripts/gen_teacher_codes.py): sequence-level distillation")
+    ap.add_argument("--kd-mix", type=float, default=0.75, help="share of each batch taken from the teacher samples")
     ap.add_argument("--uncond", action="store_true", help="train the unconditional prior (UPatchGPT) used for guidance")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--out", required=True)
@@ -131,11 +133,22 @@ def main():
         Image.fromarray(img).resize((img.shape[1] * 4, img.shape[0] * 4), Image.NEAREST).save(
             os.path.join(run_dir, "snapshots", f"step_{step:06d}.png"))
 
+    kd_caps = kd_codes = None
+    if a.kd:
+        z = np.load(a.kd)
+        kd_caps, kd_codes = z["caption"], torch.as_tensor(z["codes"].astype(np.int64))
+        kd_rng = np.random.default_rng(a.seed + 1)
+        print("kd:", a.kd, len(kd_caps), "samples, mix", a.kd_mix, flush=True)
     log, t0 = [], time.time()
     for step in range(1, a.steps + 1):
-        caps, tgt = sampler.batch(a.batch)
-        ids = torch.tensor([T.encode(c, vocab) for c in caps], device=dev)
+        nk = int(round(a.batch * a.kd_mix)) if a.kd else 0
+        caps, tgt = sampler.batch(a.batch - nk)
         codes = codes_of(tgt)
+        if nk:
+            ix = kd_rng.integers(0, len(kd_caps), nk)
+            caps = list(caps) + [str(x) for x in kd_caps[ix]]
+            codes = torch.cat([codes, kd_codes[ix].to(dev)])
+        ids = torch.tensor([T.encode(c, vocab) for c in caps], device=dev)
         lg = fwd(ids, codes)
         loss = F.cross_entropy(lg.flatten(0, 1), codes.flatten(), label_smoothing=a.label_smooth)
         opt.zero_grad(set_to_none=True)
