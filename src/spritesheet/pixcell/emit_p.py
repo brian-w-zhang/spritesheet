@@ -150,8 +150,8 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
         urf = wb.add_block("U.rf", "U_Out", 1, 1, T, 1)
         uxr = lambda t: ux.row_range(t, sheet=ux.sheet)
         wb.fill(urf, lambda t, _: f"=1/SQRT(SUMPRODUCT({uxr(t)},{uxr(t)})/{cfg['U_dm']}+{EPS!r})")
-        LU = wb.add_block("LU", "U_Out", 1, 3, T, Kp)
-        wb.fill(LU, lambda t, k: "=" + _lin(UWo, k, uxr(t), cfg["U_dm"], urf.ref(t, 0)))
+        # the unconditional logit is inlined in each Score cell (D-55): no separate 64 x Kp logit tab
+        LU = lambda t, k: _lin(UWo, k, uxr(t), cfg["U_dm"], urf.ref(t, 0, "U_Out"))
 
     # ---- logits → Gumbel score → code (one MATCH(MAX) per step)
     Wout = _wtab(wb, "W_out", w["Wout"].T, w["bout"])
@@ -162,7 +162,7 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
 
     def score(t, k):
         lc = _lin(Wout, k, xr(t), dm, rf.ref(t, 0, "Out"))
-        lg = f"({1.0 + g!r}*({lc})-{g!r}*{LU.ref(t, k, 'U_Out')})" if g else f"({lc})"
+        lg = f"({1.0 + g!r}*({lc})-{g!r}*({LU(t, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
         return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
     wb.fill(Sc, score)
@@ -258,8 +258,7 @@ def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", de
         urf = wb.add_block("U.rf", "U_Out", 1, 1, T, 1)
         uxr = lambda p: ux.row_range(qrow[p] - L + 1, sheet=ux.sheet)
         wb.fill(urf, lambda p, _: f"=1/SQRT(SUMPRODUCT({uxr(p)},{uxr(p)})/{cfg['U_dm']}+{EPS!r})")
-        LU = wb.add_block("LU", "U_Out", 1, 3, T, Kp)
-        wb.fill(LU, lambda p, k: "=" + _lin(UWo, k, uxr(p), cfg["U_dm"], urf.ref(p, 0)))
+        LU = lambda p, k: _lin(UWo, k, uxr(p), cfg["U_dm"], urf.ref(p, 0, "U_Out"))   # inlined in Score (D-55)
 
     Wout = _wtab(wb, "W_out", w["Wout"].T, w["bout"])
     xr = lambda p: xf.row_range(qrow[p], sheet=xf.sheet)
@@ -269,7 +268,7 @@ def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", de
 
     def score(p, k):
         lc = _lin(Wout, k, xr(p), dm, rf.ref(p, 0, "Out"))
-        lg = f"({1.0 + g!r}*({lc})-{g!r}*{LU.ref(p, k, 'U_Out')})" if g else f"({lc})"
+        lg = f"({1.0 + g!r}*({lc})-{g!r}*({LU(p, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{p * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
         return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
     wb.fill(Sc, score)

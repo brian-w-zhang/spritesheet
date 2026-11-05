@@ -66,3 +66,13 @@ Append-only. Format: `D-NN · date · decision · why · alternatives rejected`.
   - *Guidance distillation:* the teacher's samples can be drawn with classifier-free guidance (causal unconditional prior `v3p_u`) and foreground min-p truncation (`patchgpt.pick`). The student then learns the guided distribution, so the sheet needs no second chain and stays at ~250k formulas.
   - *Cosine round sizes:* optional `sizes` in the config (`"cosine"` = [1, 4, 6, 8, 9, 12, 12, 12] for 64 patches in 8 rounds, as in MaskGIT). The first decisions are made almost one at a time, and the parallel picks come later, when the drawing is mostly fixed. The depth is still 8 rounds; context rows drop from 56 to 52. Spec, emitter and trace all follow `group_layout`, so the sheet path is unchanged: twin-vs-spec and HyperFormula/LibreOffice op parity pass with cosine sizes (`tests/test_patchgpt.py`, `tests/test_pixcell_p.py`).
   - *Teachers are never deployed*, so they can be any size (`v3p_b`: dm192 L6).
+- **D-55 · 2026-11-05 · Classifier-free guidance runs in the sheet; the unconditional chain is made cheap instead of distilled away.**
+  - *Why:* guidance g=1 on the causal model is the largest quality gain measured (r13: novel R@5 0.38 → 0.51, PixelGPT-test 0.042 → 0.078; by eye, prompt-specific features). Brian: guidance must run on the sheet. The guidance-distillation plan (D-54) and the non-deployable teacher `v3p_b` were dropped.
+  - *Inlined unconditional logits:* the U chain's 64 × 1024 logit tab (`LU`, 65,536 formulas) is gone. Each Score cell computes `((1+g)·(x·Wout_k·rf + b_k) − g·(u·Uout_k·urf + ub_k))·(1/tau) + gumbel` itself. The spec is unchanged, and op parity passes in HyperFormula and LibreOffice (`tests/test_pixcell_p.py`).
+  - *Small U chain:* the unconditional prior only has to supply the generic-sprite contrast, so it is a small causal model. Formulas with `v3p_a` (dm128 L4, 431,836 alone):
+    - U dm32 L2: 475,548
+    - U dm48 L2: 492,956
+    - U dm64 L2: 510,364
+    - U dm96 L3: 611,612 (the r13 prior)
+
+    The smallest chain that keeps the r13 quality by eye is used. Uploads above 250k use the inert path (D-48); the causal Score tab is activated row by row (D-53).

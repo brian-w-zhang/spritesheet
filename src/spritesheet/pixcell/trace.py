@@ -259,13 +259,12 @@ def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
         E["U.X0"] = np.array([r["ux0"] for r in ur])
         _stack_expected(E, "U", [r["uparts"] for r in ur], Tn, cfg["U_H"], cfg["U_dm"] // cfg["U_H"])
         E["U.rf"] = np.array([[r["urf"]] for r in ur])
-        E["LU"] = np.array([r["lu"] for r in ur])
     out["style"] = 1
     return {"ids": ids, "expected": E, "forward": out}
 
 
 def trace_pg(prompt, seed, w, cfg, vocab_index) -> dict:
-    """v3-PG: expected value of every block (spec: reference_p.forward_g). Score/Codes/rf/LU are indexed by position."""
+    """v3-PG: expected value of every block (spec: reference_p.forward_g). Score/Codes/rf are indexed by position."""
     from .. import reference_p as RP
     ids = T.encode(prompt, vocab_index)
     out = RP.forward_g(ids, seed, w, cfg)
@@ -293,6 +292,5 @@ def trace_pg(prompt, seed, w, cfg, vocab_index) -> dict:
         _stack_expected(E, "U", [out["ustart"]] + [r["uparts"] for r in ur], len(ur) + 1, cfg["U_H"], cfg["U_dm"] // cfg["U_H"],
                         is_q=lambda m: m > 0 and rows_img[m - 1][0] == "q")
         E["U.rf"] = np.array([[rows[qrow[p]]["urf"]] for p in range(Tn)])
-        E["LU"] = np.array([rows[qrow[p]]["lu"] for p in range(Tn)])
     out["style"] = 1
     return {"ids": ids, "expected": E, "forward": out}
