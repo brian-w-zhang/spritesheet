@@ -362,3 +362,20 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - first consistent read: 110–137 s;
   - stable: 136–167 s (one at 356 s).
 - **By eye (read-back figure):** clean, recognisable sprites. A corked potion, a frog with a mouth, a fox, a spotted mushroom, a crown, a treasure chest, a blue slime with drips.
+
+### Same-size fine-tunes (r17) [metrics/v3_eval_r17.json; figures/v3_*_r17_*.png]
+- **What changed:**
+  - `v3p_a2` = `v3p_a` fine-tuned 20k steps with head-noun caption dropout (p_short 0.3).
+  - `v3p_u48b` = u48 trained 20k more steps.
+- **Novel R@5 at g=0.75, t=0.8:**
+
+  | Main | U chain | Novel R@5 |
+  |---|---|---|
+  | **`v3p_a`** | **u48 (deployed)** | **0.61** [0.52, 0.70] |
+  | `v3p_a` | u48b | 0.52 |
+  | `v3p_a2` | u48b | 0.51 |
+  | `v3p_a2` | u48 | 0.47 |
+
+  PixelGPT-test R@5 is 0.068–0.074 for all four.
+- **By eye:** mixed. `v3p_a2` draws cats with ears on some seeds, cleaner skeletons and clearer owls, but stranger knights and wizards.
+- **Decision:** no clear win, so the deployed model stays. The re-push costs ~70 min.

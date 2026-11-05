@@ -29,3 +29,11 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
 - Pixcell compiler + oracles: A1 (320 prompts) and A2 (2 random models × 10 cases) PASS on HyperFormula + LibreOffice; A3 random-v32 100 cases PASS; A4 random-v32 20 prompts PASS on Google Sheets; R1/R3 spikes in artifacts/metrics/spikes.json (random weights; rerun A3/A4 with the trained model).
 - 03:50 · A3 PASS on trained v1 (400 cases × 2 engines). A4 PASS earlier (20 prompts, median 30.6 s). v2a (diffusion) underperformed v1; v2b (+ spatial prior, with PixelGPT) and v2c (PixelGPT-majority) training. Switched generalisation measurement to CLIP R-precision (see docs/09).
 - 06:00 · C4 SpriteX32 bench, D systems, E related work, F figures done for v1 main. v2c (diffusion, 4 steps) uploading to the diffusion sheet (inert method). v1-XL training (ETA ~08:00).
+- 2026-11-05 04:30 · **v3 final model live on the v3 sheet:**
+  - **Model:** `v3p_a` (causal PatchGPT, dm128 L4, 3×3 patches from a 1024-entry dictionary) plus the in-sheet classifier-free guidance chain `v3p_u48` (D-55). Total 492,956 formulas, t=0.8. Export: `artifacts/model/v3p_a_g1_sheet`.
+  - **Guidance:** a live cell, Prompt!B4, set to 0.75.
+  - **Verified:** `scripts/verify_v3p_sheet.py` → `parity_sheets_v3p.json`: 8/8 prompts read back from Google Sheets match the spec pixel for pixel. Figure: `v3_sheet_readback.png`.
+  - **Latency:** ~110–137 s to the first consistent image, ~136–167 s until stable.
+  - **Quality:** novel R@5 0.61 [0.52, 0.70], against v1-XL 0.41 (r15).
+  - **Rejected:** grouped / distilled / fine-tuned variants did not beat it (docs/09 r8–r17).
+  - **Next:** slides (`docs/slides/`); team info TODOs are for the team.
