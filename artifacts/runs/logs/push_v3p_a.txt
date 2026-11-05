@@ -1,0 +1,141 @@
+tabs: 58 created in 123.4s
+  values 1/50 (RAW, 2 ranges) t=0.6s
+  values 2/50 (RAW, 1 ranges) t=2.6s
+  values 3/50 (RAW, 1 ranges) t=4.0s
+  values 4/50 (RAW, 1 ranges) t=5.5s
+  values 5/50 (RAW, 1 ranges) t=7.0s
+  values 6/50 (RAW, 1 ranges) t=8.5s
+  values 7/50 (RAW, 1 ranges) t=10.1s
+  values 8/50 (RAW, 1 ranges) t=11.6s
+  values 9/50 (RAW, 1 ranges) t=13.2s
+  values 10/50 (RAW, 1 ranges) t=14.7s
+  values 11/50 (RAW, 1 ranges) t=16.3s
+  values 12/50 (RAW, 1 ranges) t=17.7s
+  values 13/50 (RAW, 1 ranges) t=19.4s
+  values 14/50 (RAW, 5 ranges) t=20.4s
+  values 15/50 (RAW, 1 ranges) t=22.0s
+  values 16/50 (RAW, 3 ranges) t=23.2s
+  values 17/50 (RAW, 5 ranges) t=24.8s
+  values 18/50 (RAW, 3 ranges) t=26.4s
+  values 19/50 (RAW, 1 ranges) t=28.0s
+  values 20/50 (RAW, 2 ranges) t=35.9s
+  values 21/50 (RAW, 1 ranges) t=37.1s
+  values 22/50 (RAW, 1 ranges) t=38.7s
+  values 23/50 (RAW, 4 ranges) t=40.1s
+  values 24/50 (RAW, 3 ranges) t=41.8s
+  values 25/50 (RAW, 1 ranges) t=43.4s
+  values 26/50 (RAW, 2 ranges) t=45.0s
+  values 27/50 (RAW, 1 ranges) t=46.3s
+  values 28/50 (RAW, 1 ranges) t=47.6s
+  values 29/50 (RAW, 4 ranges) t=49.0s
+  values 30/50 (RAW, 3 ranges) t=50.5s
+  values 31/50 (RAW, 1 ranges) t=52.1s
+  values 32/50 (RAW, 2 ranges) t=53.9s
+  values 33/50 (RAW, 1 ranges) t=55.1s
+  values 34/50 (RAW, 1 ranges) t=56.4s
+  values 35/50 (RAW, 4 ranges) t=57.8s
+  values 36/50 (RAW, 3 ranges) t=59.2s
+  values 37/50 (RAW, 1 ranges) t=60.9s
+  values 38/50 (RAW, 2 ranges) t=62.5s
+  values 39/50 (RAW, 1 ranges) t=63.7s
+  values 40/50 (RAW, 1 ranges) t=65.0s
+  values 41/50 (RAW, 1 ranges) t=65.6s
+  values 42/50 (RAW, 1 ranges) t=67.4s
+  values 43/50 (RAW, 1 ranges) t=68.4s
+  values 44/50 (RAW, 1 ranges) t=69.7s
+  values 45/50 (RAW, 1 ranges) t=72.6s
+  values 46/50 (RAW, 1 ranges) t=74.6s
+  values 47/50 (RAW, 1 ranges) t=76.7s
+  values 48/50 (RAW, 1 ranges) t=78.6s
+  values 49/50 (RAW, 1 ranges) t=81.1s
+  values 50/50 (RAW, 6 ranges) t=83.6s
+  activate Prompt: 1.4s
+  activate Tokens: 0.7s
+  activate Seed: 0.6s
+  activate Inputs: 5.0s
+  activate Out: 0.5s
+  activate Blk1_QKV: 14.4s
+  activate Blk1_Att: 7.6s
+  activate Blk1_Ctx: 13.4s
+  activate Blk1_MLP: 19.6s
+  activate Blk2_QKV: 18.1s
+  activate Blk2_Att: 9.3s
+  activate Blk2_Ctx: 14.5s
+  activate Blk2_MLP: 20.5s
+  activate Blk3_QKV: 19.9s
+  activate Blk3_Att: 12.2s
+  activate Blk3_Ctx: 18.5s
+  activate Blk3_MLP: 37.8s
+  activate Blk4_QKV: 25.3s
+  activate Blk4_Att: 24.7s
+  activate Blk4_Ctx: 24.6s
+  activate Blk4_MLP: 28.5s
+  activate Score row 1/64: 14.4s
+  activate Score row 2/64: 30.6s
+  activate Score row 3/64: 34.3s
+  activate Score row 4/64: 47.8s
+  activate Score row 5/64: 100.8s
+  activate Score row 6/64: 31.9s
+  activate Score row 7/64: 37.0s
+  activate Score row 8/64: 40.9s
+  activate Score row 9/64: 31.2s
+  activate Score row 10/64: 34.2s
+  activate Score row 11/64: 32.4s
+  activate Score row 12/64: 31.7s
+  activate Score row 13/64: 30.4s
+  activate Score row 14/64: 44.6s
+  activate Score row 15/64: 31.2s
+  activate Score row 16/64: 38.3s
+  activate Score row 17/64: 29.9s
+  activate Score row 18/64: 32.3s
+  activate Score row 19/64: 27.3s
+  activate Score row 20/64: 41.7s
+  activate Score row 21/64: 31.3s
+  activate Score row 22/64: 33.2s
+  activate Score row 23/64: 31.4s
+  activate Score row 24/64: 30.6s
+  activate Score row 25/64: 41.0s
+  activate Score row 26/64: 30.3s
+  activate Score row 27/64: 30.1s
+  activate Score row 28/64: 30.7s
+  activate Score row 29/64: 116.6s
+  activate Score row 30/64: 31.1s
+  activate Score row 31/64: 29.9s
+  activate Score row 32/64: 28.6s
+  activate Score row 33/64: 29.3s
+  activate Score row 34/64: 37.9s
+  activate Score row 35/64: 42.3s
+  activate Score row 36/64: 34.0s
+  activate Score row 37/64: 32.9s
+  activate Score row 38/64: 28.6s
+  activate Score row 39/64: 29.2s
+  activate Score row 40/64: 31.7s
+  activate Score row 41/64: 74.0s
+  activate Score row 42/64: 28.5s
+  activate Score row 43/64: 29.4s
+  activate Score row 44/64: 32.2s
+  activate Score row 45/64: 28.0s
+  activate Score row 46/64: 27.7s
+  activate Score row 47/64: 33.3s
+  activate Score row 48/64: 38.5s
+  activate Score row 49/64: 31.0s
+  activate Score row 50/64: 41.7s
+  activate Score row 51/64: 33.2s
+  activate Score row 52/64: 29.2s
+  activate Score row 53/64: 36.7s
+  activate Score row 54/64: 29.5s
+  activate Score row 55/64: 28.3s
+  activate Score row 56/64: 30.2s
+  activate Score row 57/64: 36.8s
+  activate Score row 58/64: 43.6s
+  activate Score row 59/64: 45.4s
+  activate Score row 60/64: 35.4s
+  activate Score row 61/64: 39.6s
+  activate Score row 62/64: 30.3s
+  activate Score row 63/64: 36.3s
+  activate Score row 64/64: 31.1s
+  activate Score: 2323.2s
+  activate Pixels: 31.6s
+  activate Hex: 29.1s
+pushed trained v3-P model to sheet 'v3' in 2943.9 s {'requests': 153, 'bytes_sent': 76610295}
+render 'a red potion' seed 1.0 matches reference: True latency: 45.1s (stable 60.3s)

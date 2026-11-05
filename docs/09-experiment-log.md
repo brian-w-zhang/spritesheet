@@ -306,3 +306,9 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **By eye at g=1:** prompts are much more specific. Foxes have ears and white chests, frogs have eyes, owls have faces, knights have helmets. But there are more specks and fragments.
 - **Plan (guidance distillation):** a guidance chain in the sheet would add ~200k formulas. Instead, generate guided samples from a stronger teacher (`v3p_b`, dm192 L6) at g=1, t=0.8. Then train a causal student at the deployable size (dm128 L4, 431,836 formulas, initialised from `v3p_a`) on 75% of those (`scripts/run_queue11.sh` → `v3p_c`).
 - **Meanwhile:** `v3p_a` (t=0.8) is being pushed to the v3 sheet as the working final model. The Score tab is activated one row per request, now built into `sheets.activate(row_tabs=…)`.
+
+### Trained causal v3p_a on the real v3 sheet [log: artifacts/runs/logs/push_v3p_a.txt]
+- **Model:** `v3p_a` at t=0.8 (export `artifacts/model/v3p_a_sheet`), 431,836 formulas, inert upload. Score was activated one row per request, all 64 rows in 2,323 s. The whole push took 2,944 s (153 requests, 76.6 MB).
+- **Result:** the "a red potion" seed-1 render read back from Sheets **matches the reference pixel for pixel**.
+- **Prompt-change latency:** 45.1 s to the first consistent read, 60.3 s until stable. The random-weight model of the same shape took 128 / 148 s (D-53). Trained weights give sparse attention and peaked scores, but the cause of the difference was not investigated.
+- **Role:** this is the working fallback on the sheet. Next is the same model plus the in-sheet guidance chain (D-55).
