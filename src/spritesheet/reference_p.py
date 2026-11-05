@@ -50,8 +50,9 @@ def _rms(x, dm):
     return 1.0 / math.sqrt(float(x @ x) / dm + EPS)
 
 
-def _row_forward(x, n, w, cfg, cache, keyok, pre=""):
-    """One sequence row through every layer; appends this row's k, v to the per-layer cache. Returns final x and parts."""
+def _row_forward(x, n, w, cfg, cache, keyok, pre="", selfok=1.0):
+    """One sequence row through every layer; appends this row's k, v to the per-layer cache. Returns final x and parts.
+    selfok = 0: the row does not attend to itself (v3-PG query rows)."""
     dm, H = cfg["dm"], cfg["H"]
     dh = dm // H
     scale = 1.0 / math.sqrt(dh)
@@ -70,7 +71,8 @@ def _row_forward(x, n, w, cfg, cache, keyok, pre=""):
         for h in range(H):
             sl = slice(h * dh, (h + 1) * dh)
             e = np.exp((Kc[:, sl] @ q[sl]) * scale)
-            e[:n] *= keyok[:n]                                          # pad keys off; a row always sees itself
+            e[:n] *= keyok[:n]                                          # pad keys off; a row sees itself unless selfok = 0
+            e[n] *= selfok
             z = e.sum()
             ctx[sl] = (e @ Vc[:, sl]) / z
             es.append(e)
@@ -187,21 +189,27 @@ def group_rows(cfg):
 
 def forward_g(ids, seed, w, cfg, keep=True):
     """Grouped spec. Rows: L prompt rows, then per group g: query rows (x = qpos[p]) and context rows
-    (x = E[code_p] + cpos[p]; none for the last group). Causal in row order, and query rows are never keys of other
-    rows (keymask 0); a row always sees itself. Query row of p → logit[p] → code[p] (Gumbel-max, noise row p).
-    Guidance (cfg guidance g > 0): an unconditional chain with the same image rows and "U" weights (no prompt rows)."""
+    (x = E[code_p] + cpos[p]; none for the last group). Causal in row order; query rows are never keys (not even of
+    themselves); prompt row 0 is always a key. Query row of p → logit[p] → code[p] (Gumbel-max, noise row p).
+    Guidance (cfg guidance g > 0): an unconditional chain with a learned start row (U_start) then the same image rows
+    and "U" weights."""
     ids = np.asarray(ids)
     L, T, K, dm = len(ids), cfg["T"], cfg["Kp"], cfg["dm"]
     order, rows_img = group_rows(cfg)
     kinds = [k for k, _, _ in rows_img]
-    keyok = np.concatenate([(ids != 1).astype(np.float64), np.array([0.0 if k == "q" else 1.0 for k in kinds])])
-    ukeyok = keyok[L:]
+    tk = (ids != 1).astype(np.float64)
+    tk[0] = 1.0
+    keyok = np.concatenate([tk, np.array([0.0 if k == "q" else 1.0 for k in kinds])])
+    ukeyok = np.concatenate([[1.0], keyok[L:]])
     g = float(cfg.get("guidance", 0.0))
     inv_tau = 1.0 / float(cfg.get("tau", 1.0))
     Gn = gumbel(seed, T, K)
     cache = [{"k": [], "v": []} for _ in range(cfg["layers"])]
     ucfg = {"dm": cfg["U_dm"], "H": cfg["U_H"], "layers": cfg["U_layers"]} if g else None
     ucache = [{"k": [], "v": []} for _ in range(cfg["U_layers"])] if g else None
+    ustart = None
+    if g:
+        _, ustart = _row_forward(w["U_start"], 0, w, ucfg, ucache, ukeyok, pre="U")
     codes = np.full(T, -1, np.int64)
     logits, scores, margins, rows = np.zeros((T, K)), np.zeros((T, K)), [], []
     for n in range(L + len(rows_img)):
@@ -213,12 +221,13 @@ def forward_g(ids, seed, w, cfg, keep=True):
             kind, p, _ = rows_img[n - L]
             assert kind == "q" or codes[p] >= 0
             x0 = w["qpos"][p] if kind == "q" else w["E"][codes[p]] + w["cpos"][p]
-        x, parts = _row_forward(x0, n, w, cfg, cache, keyok)
+        isq = n >= L and kind == "q"
+        x, parts = _row_forward(x0, n, w, cfg, cache, keyok, selfok=0.0 if isq else 1.0)
         row.update({"x0": x0, "parts": parts, "x": x})
         if n >= L and g:
-            i = n - L
+            i = n - L + 1                                    # U row 0 is the start row
             ux0 = w["U_qpos"][p] if kind == "q" else w["U_E"][codes[p]] + w["U_cpos"][p]
-            ux, uparts = _row_forward(ux0, i, w, ucfg, ucache, ukeyok, pre="U")
+            ux, uparts = _row_forward(ux0, i, w, ucfg, ucache, ukeyok, pre="U", selfok=0.0 if isq else 1.0)
             row.update({"ux0": ux0, "uparts": uparts, "ux": ux})
         if n >= L and kind == "q":
             rf = _rms(x, dm)
@@ -241,7 +250,7 @@ def forward_g(ids, seed, w, cfg, keep=True):
     Gd = int(round(T ** 0.5))
     pix = w["D"].astype(np.int64)[codes].reshape(Gd, Gd, P, P).transpose(0, 2, 1, 3).reshape(Gd * P, Gd * P)
     return {"codes": codes, "pixels": pix, "logits": logits, "scores": scores, "min_margin": min(margins),
-            "rows": rows, "keyok": keyok, "gumbel": Gn, "rows_img": rows_img}
+            "rows": rows, "keyok": keyok, "gumbel": Gn, "rows_img": rows_img, "ustart": ustart}
 
 
 def export_g(net, D, extra_cfg=None, unet=None):
@@ -257,7 +266,7 @@ def export_g(net, D, extra_cfg=None, unet=None):
     if unet is not None:
         su = {k: v.detach().double().cpu().numpy() for k, v in unet.state_dict().items()}
         cu = unet.cfg
-        w.update({"U_E": su["E"], "U_qpos": su["qpos"], "U_cpos": su["cpos"]})
+        w.update({"U_E": su["E"], "U_qpos": su["qpos"], "U_cpos": su["cpos"], "U_start": su["start"]})
         _export_blocks(w, su, cu["layers"], cu["dm"], "U")
         w["U_Wout"], w["U_bout"] = su["nf.g"][:, None] * su["out.weight"].T, su["out.bias"]
         cfg.update(U_dm=cu["dm"], U_H=cu["H"], U_mlp=cu["mlp"], U_layers=cu["layers"])

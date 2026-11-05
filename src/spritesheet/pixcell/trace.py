@@ -207,8 +207,9 @@ def compare(wb, values: dict, expected: dict, skip_weights=True) -> dict:
     return res
 
 
-def _stack_expected(E, pre, parts_rows, N, H, dh):
-    """parts_rows[n] = list over layers of reference_p._row_forward parts for sequence row n."""
+def _stack_expected(E, pre, parts_rows, N, H, dh, is_q=None):
+    """parts_rows[n] = list over layers of reference_p._row_forward parts for sequence row n.
+    is_q (v3-PG): zero the cells the emitter prunes (query rows' K/V; last layer: all but 1/rms, K, V for non-query rows)."""
     layers = len(parts_rows[0])
     for l in range(layers):
         p = f"{pre}b{l}."
@@ -223,6 +224,13 @@ def _stack_expected(E, pre, parts_rows, N, H, dh):
         E[p + "Z"] = np.array([[parts_rows[n][l]["z"][h] for h in range(H)] for n in range(N)])
         E[p + "ctx"], E[p + "x1"] = get("ctx"), get("x1")
         E[p + "r2"], E[p + "hid"], E[p + "x2"] = get("r2")[:, None], get("hid"), get("x2")
+        if is_q is not None:
+            q = np.array([is_q(n) for n in range(N)])
+            E[p + "K"] = E[p + "K"] * (~q)[:, None]
+            E[p + "VT"] = E[p + "VT"] * (~q)[None, :]
+            if l == layers - 1:
+                for part in ["Q", "Z", "ctx", "x1", "r2", "hid", "x2"] + [f"E{h}" for h in range(H)]:
+                    E[p + part] = E[p + part] * q[:, None]
 
 
 def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
@@ -273,15 +281,17 @@ def trace_pg(prompt, seed, w, cfg, vocab_index) -> dict:
          "Tokens.denom": np.array([[max(1.0, m.sum())]]),
          "seed.s0": np.array([[s0]], float), "seed.s1": np.array([[RP.seed_state(seed)]], float),
          "WV": np.array([rows[n]["wv"] for n in range(L)]), "X0": np.array([r["x0"] for r in rows])}
-    _stack_expected(E, "", [r["parts"] for r in rows], N, H, cfg["dm"] // H)
+    _stack_expected(E, "", [r["parts"] for r in rows], N, H, cfg["dm"] // H,
+                    is_q=lambda n: n >= L and rows_img[n - L][0] == "q")
     E["rf"] = np.array([[rows[qrow[p]]["rf"]] for p in range(Tn)])
     E["Score"] = out["scores"]
     E["Codes"] = out["codes"].astype(float)[:, None]
     E["Pixels"] = out["pixels"].astype(float)
     if cfg.get("guidance"):
         ur = rows[L:]
-        E["U.X0"] = np.array([r["ux0"] for r in ur])
-        _stack_expected(E, "U", [r["uparts"] for r in ur], len(ur), cfg["U_H"], cfg["U_dm"] // cfg["U_H"])
+        E["U.X0"] = np.array([w["U_start"]] + [r["ux0"] for r in ur])
+        _stack_expected(E, "U", [out["ustart"]] + [r["uparts"] for r in ur], len(ur) + 1, cfg["U_H"], cfg["U_dm"] // cfg["U_H"],
+                        is_q=lambda m: m > 0 and rows_img[m - 1][0] == "q")
         E["U.rf"] = np.array([[rows[qrow[p]]["urf"]] for p in range(Tn)])
         E["LU"] = np.array([rows[qrow[p]]["lu"] for p in range(Tn)])
     out["style"] = 1

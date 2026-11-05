@@ -149,17 +149,21 @@ def group_layout(T, G, seed=0):
 
 class GroupGPT(nn.Module):
     """Text rows, then per group g: query rows (input = qpos[p]; give the logits for patch p) and context rows
-    (input = E[code_p] + cpos[p]). Causal in row order, and query rows are invisible as keys to every other row
-    (a row always sees itself), so group g is predicted from the prompt and the patches of groups < g only.
-    In the sheet the dependency depth is G rounds, not T steps. L = 0 gives the unconditional prior (guidance)."""
+    (input = E[code_p] + cpos[p]). Causal in row order; query rows are never keys (not even for themselves), and
+    text row 0 is always a key (a "start" row, so no row is ever without keys). Group g is predicted from the prompt
+    and the patches of groups < g only; in the sheet the dependency depth is G rounds. Without a word table it is the
+    unconditional prior (guidance): its first row is a learned start vector."""
 
     def __init__(self, cfg, wordvec=None):
         super().__init__()
         self.cfg = dict(cfg)
         dm, T, K, L = cfg["dm"], cfg["T"], cfg["Kp"], cfg.get("L", 12)
-        self.L = L if wordvec is not None else 0
+        self.L = L if wordvec is not None else 1
+        self.cond = wordvec is not None
         self.order, self.rows = group_layout(T, cfg["G"], cfg.get("order_seed", 0))
-        if self.L:
+        if not self.cond:
+            self.start = nn.Parameter(torch.randn(dm) * 0.02)
+        if self.cond:
             self.register_buffer("wordvec", torch.tensor(wordvec, dtype=torch.float32))
             self.win = nn.Linear(wordvec.shape[1], dm)
             self.pos_text = nn.Parameter(torch.randn(self.L, dm) * 0.02)
@@ -185,15 +189,21 @@ class GroupGPT(nn.Module):
         x[:, self.is_q] = self.qpos[self.qpos_of].expand(B, -1, -1)
         x[:, self.is_c] = self.E[codes[:, self.cpos_of]] + self.cpos[self.cpos_of]
         keyok = (~self.is_q)[None].expand(B, R)
-        if self.L:
+        if self.cond:
             t = F.embedding(ids - 1, self.wordvec)
             if self.training and self.emb_noise > 0:
                 t = t * (1 + self.emb_noise * torch.randn_like(t))
             x = torch.cat([self.win(t) + self.pos_text, x], 1)
-            keyok = torch.cat([ids != 1, keyok], 1)
+            tk = ids != 1
+            tk[:, 0] = True                                       # text row 0 is always a key
+            keyok = torch.cat([tk, keyok], 1)
+        else:
+            x = torch.cat([self.start.expand(B, 1, -1), x], 1)
+            keyok = torch.cat([torch.ones(B, 1, dtype=torch.bool, device=dev), keyok], 1)
         N = x.shape[1]
         causal = torch.ones(N, N, dtype=torch.bool, device=dev).tril()
-        m = (causal[None] & keyok[:, None, :]) | torch.eye(N, dtype=torch.bool, device=dev)[None]
+        selfok = torch.cat([torch.ones(self.L, dtype=torch.bool, device=dev), ~self.is_q])
+        m = (causal[None] & keyok[:, None, :]) | (torch.eye(N, dtype=torch.bool, device=dev) & selfok[None, :])[None]
         for b in self.blocks:
             x = b(x, m)
         lq = self.out(self.nf(x[:, self.L + self.qrow]))          # [B, T, K] in query-row order

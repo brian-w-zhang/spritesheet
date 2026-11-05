@@ -24,14 +24,20 @@ def _lin(Wb: Block, j: int, xrow: str, n: int, scale_ref=None) -> str:
 
 
 def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, mlp: int, layers: int,
-               keymask=lambda m: None, tab=lambda l, part: f"Blk{l + 1}_{part}") -> Block:
+               keymask=lambda m: None, tab=lambda l, part: f"Blk{l + 1}_{part}", is_q=None) -> Block:
     """Transformer blocks over the N rows of X0 (causal). keymask(m) → cell ref of key m's 0/1 mask, None (always a
     key) or False (never a key for other rows: constant 0, no formula; D-53 query rows).
     Returns the final x block. Block names: f"{pre}b{l}.<part>" (trace_p uses the same names)."""
     dh = dm // H
     scale = 1.0 / math.sqrt(dh)
     x = X0
+    # v3-PG pruning (D-53): query rows are never keys (no K/V cells, no self weight); in the last layer only query rows
+    # need outputs, so the other rows keep just 1/rms, K and V there. Pruned cells are constant 0 (no formula).
+    isq = is_q or (lambda n: False)
+    pruned = is_q is not None
     for l in range(layers):
+        last = pruned and l == layers - 1
+        need_out = lambda n, last=last: not last or isq(n)
         p, wp = f"{pre}b{l}.", f"{pre}l{l}."
         Wq = _wtab(wb, tab(l, "Wq"), w[wp + "Wq"].T, w[wp + "bq"])
         Wk = _wtab(wb, tab(l, "Wk"), w[wp + "Wk"].T, w[wp + "bk"])
@@ -47,17 +53,17 @@ def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, ml
         Q = wb.add_block(p + "Q", sq, 1, 3, N, dm)
         K = wb.add_block(p + "K", sq, 1, 4 + dm, N, dm)
         VT = wb.add_block(p + "VT", sq, N + 2, 3, dm, N)
-        wb.fill(Q, lambda n, j, xrow=xrow, rb=rb: "=" + _lin(Wq, j, xrow(n), dm, rb.ref(n, 0)))
-        wb.fill(K, lambda n, j, xrow=xrow, rb=rb: "=" + _lin(Wk, j, xrow(n), dm, rb.ref(n, 0)))
-        wb.fill(VT, lambda j, m, xrow=xrow, rb=rb: "=" + _lin(Wv, j, xrow(m), dm, rb.ref(m, 0)))
+        wb.fill(Q, lambda n, j, xrow=xrow, rb=rb, no=need_out: "=" + _lin(Wq, j, xrow(n), dm, rb.ref(n, 0)) if no(n) else 0.0)
+        wb.fill(K, lambda n, j, xrow=xrow, rb=rb: 0.0 if isq(n) else "=" + _lin(Wk, j, xrow(n), dm, rb.ref(n, 0)))
+        wb.fill(VT, lambda j, m, xrow=xrow, rb=rb: 0.0 if isq(m) else "=" + _lin(Wv, j, xrow(m), dm, rb.ref(m, 0)))
         sa = tab(l, "Att")
         Es, Zs = [], []
         for h in range(H):
             Eb = wb.add_block(p + f"E{h}", sa, 1, 1 + h * (N + 1), N, N)
 
-            def ecell(n, m, h=h, Q=Q, K=K, sq=sq):
+            def ecell(n, m, h=h, Q=Q, K=K, sq=sq, no=need_out):
                 km = keymask(m) if m < n else None
-                if m > n or km is False:
+                if m > n or km is False or not no(n) or (m == n and isq(n)):
                     return 0.0
                 s = (f"EXP(SUMPRODUCT({Q.row_range(n, h * dh, h * dh + dh - 1, sq)},"
                      f"{K.row_range(m, h * dh, h * dh + dh - 1, sq)})*{scale!r})")
@@ -65,21 +71,21 @@ def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, ml
             wb.fill(Eb, ecell)
             Es.append(Eb)
         Zb = wb.add_block(p + "Z", sa, N + 2, 1, N, H)
-        wb.fill(Zb, lambda n, h: f"=SUM({Es[h].row_range(n, 0, n)})")
+        wb.fill(Zb, lambda n, h, no=need_out: f"=SUM({Es[h].row_range(n, 0, n)})" if no(n) else 0.0)
         sc = tab(l, "Ctx")
         C = wb.add_block(p + "ctx", sc, 1, 1, N, dm)
-        wb.fill(C, lambda n, j: (f"=SUMPRODUCT({Es[j // dh].row_range(n, 0, n, sa)},{VT.row_range(j, 0, n, sq)})"
-                                 f"/{Zb.ref(n, j // dh, sa)}"))
+        wb.fill(C, lambda n, j, no=need_out: (f"=SUMPRODUCT({Es[j // dh].row_range(n, 0, n, sa)},{VT.row_range(j, 0, n, sq)})"
+                                              f"/{Zb.ref(n, j // dh, sa)}") if no(n) else 0.0)
         X1 = wb.add_block(p + "x1", sc, N + 2, 1, N, dm)
-        wb.fill(X1, lambda n, j, x=x, xs=xs: f"={x.ref(n, j, xs)}+" + _lin(Wo, j, C.row_range(n), dm))
+        wb.fill(X1, lambda n, j, x=x, xs=xs, no=need_out: f"={x.ref(n, j, xs)}+" + _lin(Wo, j, C.row_range(n), dm) if no(n) else 0.0)
         sm = tab(l, "MLP")
         x1row = lambda n: X1.row_range(n, sheet=sc)
         r2 = wb.add_block(p + "r2", sm, 1, 1, N, 1)
-        wb.fill(r2, lambda n, _: f"=1/SQRT(SUMPRODUCT({x1row(n)},{x1row(n)})/{dm}+{EPS!r})")
+        wb.fill(r2, lambda n, _, no=need_out: f"=1/SQRT(SUMPRODUCT({x1row(n)},{x1row(n)})/{dm}+{EPS!r})" if no(n) else 0.0)
         Hd = wb.add_block(p + "hid", sm, 1, 3, N, mlp)
-        wb.fill(Hd, lambda n, i: f"=MAX(0,{_lin(W1, i, x1row(n), dm, r2.ref(n, 0))})")
+        wb.fill(Hd, lambda n, i, no=need_out: f"=MAX(0,{_lin(W1, i, x1row(n), dm, r2.ref(n, 0))})" if no(n) else 0.0)
         X2 = wb.add_block(p + "x2", sm, N + 2, 3, N, dm)
-        wb.fill(X2, lambda n, j: f"={X1.ref(n, j, sc)}+" + _lin(W2, j, Hd.row_range(n), mlp))
+        wb.fill(X2, lambda n, j, no=need_out: f"={X1.ref(n, j, sc)}+" + _lin(W2, j, Hd.row_range(n), mlp) if no(n) else 0.0)
         x = X2
     return x
 
@@ -223,29 +229,34 @@ def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", de
 
     def keymask(m):
         if m < L:
-            return f"Tokens!$E${1 + m}"
+            return f"Tokens!$E${1 + m}" if m > 0 else None      # prompt row 0 is always a key (start row)
         return False if rows[m - L][0] == "q" else None
-    xf = emit_stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask)
+    xf = emit_stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask,
+                    is_q=lambda n: n >= L and rows[n - L][0] == "q")
 
     LU = None
     if g:
-        U0 = wb.add_block("U.X0", "U_X0", 1, 1, R, cfg["U_dm"])
+        U0 = wb.add_block("U.X0", "U_X0", 1, 1, R + 1, cfg["U_dm"])     # row 0 = learned start row
         UE = _wtab(wb, "U_W_E", w["U_E"])
         UQ = _wtab(wb, "U_W_qpos", w["U_qpos"])
         UC = _wtab(wb, "U_W_cpos", w["U_cpos"])
         UER = UE.range("U_W_E", absolute=True)
+        USt = _wtab(wb, "U_W_start", w["U_start"][None, :])
 
         def ux0(i, j):
-            kind, p, _ = rows[i]
+            if i == 0:
+                return f"={USt.ref(0, j, 'U_W_start')}"
+            kind, p, _ = rows[i - 1]
             if kind == "q":
                 return f"={UQ.ref(p, j, 'U_W_qpos')}"
             return f"=INDEX({UER},{CODES.ref(p, 0, 'Out')}+1,{j + 1})+{UC.ref(p, j, 'U_W_cpos')}"
         wb.fill(U0, ux0)
-        ux = emit_stack(wb, w, "U", U0, R, cfg["U_dm"], cfg["U_H"], cfg["U_mlp"], cfg["U_layers"],
-                        keymask=lambda m: False if rows[m][0] == "q" else None, tab=lambda l, part: f"U{l + 1}_{part}")
+        uq = lambda m: m > 0 and rows[m - 1][0] == "q"
+        ux = emit_stack(wb, w, "U", U0, R + 1, cfg["U_dm"], cfg["U_H"], cfg["U_mlp"], cfg["U_layers"],
+                        keymask=lambda m: False if uq(m) else None, tab=lambda l, part: f"U{l + 1}_{part}", is_q=uq)
         UWo = _wtab(wb, "U_W_out", w["U_Wout"].T, w["U_bout"])
         urf = wb.add_block("U.rf", "U_Out", 1, 1, T, 1)
-        uxr = lambda p: ux.row_range(qrow[p] - L, sheet=ux.sheet)
+        uxr = lambda p: ux.row_range(qrow[p] - L + 1, sheet=ux.sheet)
         wb.fill(urf, lambda p, _: f"=1/SQRT(SUMPRODUCT({uxr(p)},{uxr(p)})/{cfg['U_dm']}+{EPS!r})")
         LU = wb.add_block("LU", "U_Out", 1, 3, T, Kp)
         wb.fill(LU, lambda p, k: "=" + _lin(UWo, k, uxr(p), cfg["U_dm"], urf.ref(p, 0)))
