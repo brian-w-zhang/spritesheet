@@ -1,0 +1,1 @@
+{"stopped_at": 30000, "reason": "stopped early to free the GPU for distillation; baseline only"}

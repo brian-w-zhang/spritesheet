@@ -118,8 +118,22 @@ class UPatchGPT(nn.Module):
         return self.out(self.nf(x))
 
 
+def pick(lg, noise, tau=1.0, trunc=None, bg=0):
+    """Gumbel-max pick. trunc = c > 0: min-p truncation among the foreground codes only: a code other than the
+    empty patch `bg` can win only if its logit >= (max foreground logit) - c. The empty patch is never truncated, so
+    the background-vs-object decision keeps its full probability (truncating it empties the raster-order image)."""
+    s = lg / tau + noise
+    if trunc:
+        fgl = lg.clone()
+        fgl[..., bg] = -1e30
+        keep = lg >= fgl.max(-1, keepdim=True).values - trunc
+        keep[..., bg] = True
+        s = torch.where(keep, s, torch.full_like(s, -1e30))
+    return s.argmax(-1)
+
+
 @torch.no_grad()
-def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0):
+def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None):
     """Gumbel-max sampling with classifier-free guidance: l = (1+g) l_c - g l_u (as reference_p.forward)."""
     B, T = ids.shape[0], noise.shape[1]
     codes = torch.zeros(B, T, dtype=torch.long, device=ids.device)
@@ -127,7 +141,7 @@ def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0):
         lg = net.logits(ids, codes[:, : t + 1])[:, t]
         if guidance and unet is not None:
             lg = (1 + guidance) * lg - guidance * unet.logits(codes[:, : t + 1])[:, t]
-        codes[:, t] = (lg / tau + noise[:, t]).argmax(-1)
+        codes[:, t] = pick(lg, noise[:, t], tau, trunc)
     return codes
 
 
@@ -213,7 +227,7 @@ class GroupGPT(nn.Module):
 
 
 @torch.no_grad()
-def sample_grouped(net, unet, ids, noise, guidance=0.0, tau=1.0):
+def sample_grouped(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None):
     """G rounds; round g fixes the patches of group g (noise [B, T, K] indexed by position, as reference_p)."""
     B, T = noise.shape[0], noise.shape[1]
     codes = torch.zeros(B, T, dtype=torch.long, device=noise.device)
@@ -223,5 +237,5 @@ def sample_grouped(net, unet, ids, noise, guidance=0.0, tau=1.0):
         lg = net.logits(ids, codes)[:, pos]
         if guidance and unet is not None:
             lg = (1 + guidance) * lg - guidance * unet.logits(None, codes)[:, pos]
-        codes[:, pos] = (lg / tau + noise[:, pos]).argmax(-1)
+        codes[:, pos] = pick(lg, noise[:, pos], tau, trunc)
     return codes

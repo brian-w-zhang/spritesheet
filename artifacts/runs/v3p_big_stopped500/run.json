@@ -1,0 +1,53 @@
+{
+ "name": "v3p_big",
+ "family": "v3",
+ "args": {
+  "dict": "artifacts/model/patchdict_k1024_p3",
+  "steps": 40000,
+  "batch": 256,
+  "lr": 0.0004,
+  "wd": 0.05,
+  "cfg": "{\"dm\":256,\"H\":8,\"mlp\":768,\"layers\":6}",
+  "emb_noise": 0.15,
+  "label_smooth": 0.0,
+  "p_colour": 0.25,
+  "p_short": 0.3,
+  "init": null,
+  "kd": null,
+  "kd_mix": 0.75,
+  "uncond": false,
+  "seed": 0,
+  "out": "artifacts/model/v3p_big",
+  "note": "big causal teacher for distillation only (never deployed): dm256 L6; its samples train the grouped student",
+  "snap_every": 5000,
+  "snap_tau": 0.8
+ },
+ "cfg": {
+  "model": "v3p",
+  "N": 24,
+  "L": 12,
+  "T": 64,
+  "Kp": 1024,
+  "P": 3,
+  "K": 48,
+  "d": 64,
+  "dm": 256,
+  "H": 8,
+  "mlp": 768,
+  "layers": 6
+ },
+ "dict": {
+  "K": 1024,
+  "P": 3,
+  "K1": 49,
+  "n_sprites": 120000,
+  "iters": 10,
+  "fit_log": null,
+  "recon_fg_acc": 0.7991000962361674,
+  "recon_px_acc": 0.9043095906575521,
+  "codes_used_val": 1024
+ },
+ "started": "2026-11-04T21:54:42",
+ "strategy": "big causal teacher for distillation only (never deployed): dm256 L6; its samples train the grouped student",
+ "data": "PixelGPT-24x24-216K train split, Sampler3 augmentation; targets = nearest dictionary patch per 3x3 cell"
+}

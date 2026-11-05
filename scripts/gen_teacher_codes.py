@@ -15,7 +15,7 @@ import torch  # noqa: E402
 
 from spritesheet import tokenizer as T  # noqa: E402
 from spritesheet.data.v3 import OUT as V3, Sampler3  # noqa: E402
-from spritesheet.patchgpt import PatchGPT  # noqa: E402
+from spritesheet.patchgpt import PatchGPT, UPatchGPT, sample_guided  # noqa: E402
 
 
 def main():
@@ -26,6 +26,9 @@ def main():
     ap.add_argument("--batch", type=int, default=512)
     ap.add_argument("--p-short", type=float, default=0.3)
     ap.add_argument("--seed", type=int, default=11)
+    ap.add_argument("--unet", default=None, help="causal unconditional prior: guided teacher samples (guidance distillation)")
+    ap.add_argument("--guidance", type=float, default=0.0)
+    ap.add_argument("--trunc", type=float, default=None, help="foreground min-p truncation (patchgpt.pick)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
@@ -33,6 +36,11 @@ def main():
     net = PatchGPT(cfg, np.load(os.path.join(V3, "wordvec.npy"))).to(dev)
     net.load_state_dict(torch.load(os.path.join(a.teacher, "model.pt"), map_location=dev))
     net.eval()
+    unet = None
+    if a.unet:
+        unet = UPatchGPT(json.load(open(os.path.join(a.unet, "config.json")))).to(dev)
+        unet.load_state_dict(torch.load(os.path.join(a.unet, "model.pt"), map_location=dev))
+        unet.eval()
     vocab = T.load_vocab(os.path.join(V3, "vocab.txt"))
     s = Sampler3("train", seed=a.seed, p_short=a.p_short)
     g = torch.Generator(device="cpu").manual_seed(a.seed)
@@ -42,13 +50,14 @@ def main():
         ids = torch.tensor([T.encode(x, vocab) for x in c], device=dev)
         u = torch.rand(len(c), cfg["T"], cfg["Kp"], generator=g).clamp(1e-9, 1 - 1e-9)
         noise = (-torch.log(-torch.log(u))).to(dev)
-        codes.append(net.sample(ids, noise, a.tau).cpu().numpy().astype(np.int16))
+        codes.append(sample_guided(net, unet, ids, noise, a.guidance, a.tau, a.trunc).cpu().numpy().astype(np.int16))
         caps += c
         if len(caps) % (a.batch * 20) == 0:
             print(len(caps), f"{time.time() - t0:.0f}s", flush=True)
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     np.savez_compressed(a.out, caption=np.array(caps[: a.n]), codes=np.concatenate(codes)[: a.n],
-                        meta=json.dumps({"teacher": a.teacher, "tau": a.tau, "n": a.n, "p_short": a.p_short}))
+                        meta=json.dumps({"teacher": a.teacher, "tau": a.tau, "n": a.n, "p_short": a.p_short, "unet": a.unet,
+                                         "guidance": a.guidance, "trunc": a.trunc}))
     print("wrote", a.out, a.n, f"{time.time() - t0:.0f}s")
 
 

@@ -53,7 +53,7 @@ class Model:
             if k == "u":   # v3-P: unconditional prior dir (for guidance)
                 self.unet_dir = os.path.join(ROOT, "artifacts", "model", v)
                 continue
-            self.cfg[{"g": "guidance", "t": "sample_tau"}[k]] = float(v)
+            self.cfg[{"g": "guidance", "t": "sample_tau", "c": "noise_clip", "m": "trunc"}[k]] = float(v)
         self.v3p = self.cfg.get("model") in ("v3p", "v3pg")
         self.grouped = self.cfg.get("model") == "v3pg"
         self.v3 = self.cfg.get("model") in ("v3", "v3vq", "v3p", "v3pg")
@@ -109,8 +109,11 @@ class Model:
             out = []
             for i in range(0, len(caps), 128):
                 nz = torch.tensor(np.stack([RP.gumbel(s, Tn, Kp) for s in seeds[i:i + 128]]), dtype=torch.float32)
+                if "noise_clip" in self.cfg:   # truncated Gumbel: MIN(c, g) caps how far a low-logit code can jump
+                    nz = nz.clamp(max=self.cfg["noise_clip"])
                 fn = sample_grouped if self.grouped else sample_guided
-                codes = fn(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau)
+                codes = fn(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau,
+                           self.cfg.get("trunc"))
                 out.append(from_patches(self.D[codes.numpy()], self.cfg["P"]).astype(np.uint8))
             return np.concatenate(out), None
         if self.vq:

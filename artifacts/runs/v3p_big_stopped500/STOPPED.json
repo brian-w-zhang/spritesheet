@@ -1,0 +1,1 @@
+{"stopped_at":500,"reason":"ran concurrently with v3pg_kd on one MPS GPU: ~1 s/step (both runs slowed ~2.5x); stopped, GPU stays sequential"}

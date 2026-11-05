@@ -249,3 +249,28 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 - **t=0.8:** novel R@5 0.38 [0.29, 0.47]; **PixelGPT-test R@5 0.042** (30k checkpoint 0.027; v1-XL 0.013); speckle 0.025; fg components 1.82; colour-adjective accuracy 1.00; seed diversity 0.40. At t=0.9: R@5 0.33 / 0.046, more fragments (3.06).
 - **By eye: the best v3 so far.** A standing skeleton figure, a fox, a red dragon with a flame, a black owl with yellow eyes, a wizard in a hat. 8 seeds per prompt give whole, distinct drawings (lying foxes, slimes, wizards). Some creatures (cat) still collapse to blobs on some seeds.
 - **Role:** this 64-step causal model is too slow for Sheets (D-53), so it is the quality reference for the deployable grouped models.
+
+### Grouped v3pg_a vs causal v3p_a (r8) [metrics/v3_eval_r8.json; figures/v3_lineup_r8_*.png, v3_seeds_r8_*.png]
+- `v3pg_a` (grouped, 8 rounds, dm96 L2, 250k formulas) was stopped at 30k of 60k steps, to free the GPU for distillation. The baseline is the 30k checkpoint (`scripts/ckpt_to_model.py`; run dir has STOPPED.json). Val NLL at 30k is 2.18, against 1.88 for the causal model at the same step.
+- **Novel R@5:**
+
+  | Model | Novel R@5 | PixelGPT-test R@5 | Fg components |
+  |---|---|---|---|
+  | `v3pg_a` t=0.8 | 0.25 [0.17, 0.33] | 0.021 | 2.06 |
+  | `v3pg_a` t=0.7 | 0.27 | 0.023 | 1.42 |
+  | causal `v3p_a` t=0.8 | 0.38 | 0.042 | 1.82 |
+
+- **By eye:** the grouped samples are incoherent. Patches of different "versions" of the object are mixed: an orange fox with a white patch, a frog over a blue water strip that appears in many prompts.
+- **Colours per sprite** [metrics/colour_stats_r10.json]: `v3pg_a` gives 3.94 at t=0.8 and 6.50 at t=1. Real sprites average 3.50. This confirms the mixing: parallel picks within a round disagree.
+- **Next:** sequence-level distillation from the causal teacher (`v3pg_kd`, training).
+
+### Sampling tricks on the causal teacher (r9, r10) [metrics/v3_eval_r9.json, v3_eval_r10.json, colour_stats_r10.json; figures/v3_lineup_r9_*.png, v3_lineup_r10_*.png]
+- **Flatness is caused by the temperature.** Mean distinct colours per sprite: real test sprites 3.50; `v3p_a` 1.87 at t=0.8, 2.47 at t=0.9, 3.42 at t=1.0. Lowering t removes the rarer multi-colour patches, which leaves flat single-colour silhouettes.
+- **Clipped Gumbel noise (`MIN(c, g)`, r9) fails:**
+  - With c=1, novel R@5 is 0.21 and fg components 0.55: most creature prompts come out blank.
+  - In raster order, the empty patch is the most likely code at every early position. Starting the object is a tail event, so cutting the tail empties the image.
+- **Min-p truncation (r10, `patchgpt.pick`)** keeps only codes whose logit is within c of the best one:
+  - **Applied to all codes:** blank images (0.9 colours at c=3).
+  - **Applied among foreground codes only** (the empty patch is always eligible): the foreground share is right (0.38 against 0.40 for real sprites), but the colours drop to 1.88 at c=4.
+  - **Best novel R@5 so far:** 0.46 [0.37, 0.56] at t=1 with c=4. Compare 0.38 at t=0.8 and 0.41 at t=1. The samples are still speckled by eye.
+- **Lesson:** the prior is genuinely uncertain. Sampling tricks only trade flat against noisy. Quality has to come from a better prior, so the next step is a stronger teacher plus guidance, distilled into the grouped student. Guidance distillation means the sheet does not need a second (unconditional) chain.

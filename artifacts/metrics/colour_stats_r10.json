@@ -1,0 +1,35 @@
+{
+ "real_test": {
+  "colours": 3.498,
+  "fg_share": 0.3954
+ },
+ "n": 400,
+ "v3p_a@t=0.8": {
+  "colours": 1.873,
+  "fg_share": 0.3389
+ },
+ "v3p_a@t=0.9": {
+  "colours": 2.465,
+  "fg_share": 0.3564
+ },
+ "v3p_a@t=1": {
+  "colours": 3.42,
+  "fg_share": 0.374
+ },
+ "v3p_a@t=1:m=4": {
+  "colours": 1.875,
+  "fg_share": 0.3804
+ },
+ "v3p_a@t=1:m=2": {
+  "colours": 1.235,
+  "fg_share": 0.3851
+ },
+ "v3pg_a@t=0.8": {
+  "colours": 3.94,
+  "fg_share": 0.3784
+ },
+ "v3pg_a@t=1": {
+  "colours": 6.503,
+  "fg_share": 0.4125
+ }
+}
