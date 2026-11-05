@@ -243,3 +243,9 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - v1-XL for reference: 221k formulas, 30–38 s.
 - **Reading:** latency follows formula count, with a penalty for sequential depth (64 > 8 rounds > v1's ~20 tab levels). Browser timing was not measurable reliably tonight: the laptop is loaded with GPU training, and the tab showed "Trying to connect…".
 - **Decision:** train two grouped models at ~250k formulas (`v3pg_a` 3×3/dm96/L2; `v3pg_b` 4×4/dm128/L3). If the latency is too slow for the demo, there are ~140k-formula variants (4×4, dm 96/L2 or dm 64/L3).
+
+### v3p_a final (60k steps, causal reference) (r7) [metrics/v3_eval_r7.json; figures/v3_lineup_r7_*.png, v3_seeds_r7_*.png, v3_panel_r7_*.png]
+- **Final val NLL** 1.86 nats/patch; top-1 patch accuracy 0.57.
+- **t=0.8:** novel R@5 0.38 [0.29, 0.47]; **PixelGPT-test R@5 0.042** (30k checkpoint 0.027; v1-XL 0.013); speckle 0.025; fg components 1.82; colour-adjective accuracy 1.00; seed diversity 0.40. At t=0.9: R@5 0.33 / 0.046, more fragments (3.06).
+- **By eye: the best v3 so far.** A standing skeleton figure, a fox, a red dragon with a flame, a black owl with yellow eyes, a wizard in a hat. 8 seeds per prompt give whole, distinct drawings (lying foxes, slimes, wizards). Some creatures (cat) still collapse to blobs on some seeds.
+- **Role:** this 64-step causal model is too slow for Sheets (D-53), so it is the quality reference for the deployable grouped models.

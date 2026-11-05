@@ -1,0 +1,48 @@
+{
+ "name": "v3p_a",
+ "family": "v3",
+ "args": {
+  "dict": "artifacts/model/patchdict_k1024_p3",
+  "steps": 60000,
+  "batch": 256,
+  "lr": 0.0006,
+  "wd": 0.05,
+  "cfg": "{\"dm\":128,\"H\":4,\"mlp\":256,\"layers\":4}",
+  "emb_noise": 0.15,
+  "label_smooth": 0.0,
+  "p_colour": 0.25,
+  "init": null,
+  "seed": 0,
+  "out": "artifacts/model/v3p_a",
+  "note": "PatchGPT baseline: 8x8 grid of 3x3 patches from a 1024-entry k-modes dictionary; causal transformer dm128 L4 H4 mlp256 with text prefix; Gumbel-max seed sampling",
+  "snap_every": 5000
+ },
+ "cfg": {
+  "model": "v3p",
+  "N": 24,
+  "L": 12,
+  "T": 64,
+  "Kp": 1024,
+  "P": 3,
+  "K": 48,
+  "d": 64,
+  "dm": 128,
+  "H": 4,
+  "mlp": 256,
+  "layers": 4
+ },
+ "dict": {
+  "K": 1024,
+  "P": 3,
+  "K1": 49,
+  "n_sprites": 120000,
+  "iters": 10,
+  "fit_log": null,
+  "recon_fg_acc": 0.7991000962361674,
+  "recon_px_acc": 0.9043095906575521,
+  "codes_used_val": 1024
+ },
+ "started": "2026-11-04T16:50:35",
+ "strategy": "PatchGPT baseline: 8x8 grid of 3x3 patches from a 1024-entry k-modes dictionary; causal transformer dm128 L4 H4 mlp256 with text prefix; Gumbel-max seed sampling",
+ "data": "PixelGPT-24x24-216K train split, Sampler3 augmentation; targets = nearest dictionary patch per 3x3 cell"
+}
