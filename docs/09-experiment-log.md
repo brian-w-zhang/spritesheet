@@ -310,7 +310,7 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
 ### Trained causal v3p_a on the real v3 sheet [log: artifacts/runs/logs/push_v3p_a.txt]
 - **Model:** `v3p_a` at t=0.8 (export `artifacts/model/v3p_a_sheet`), 431,836 formulas, inert upload. Score was activated one row per request, all 64 rows in 2,323 s. The whole push took 2,944 s (153 requests, 76.6 MB).
 - **Result:** the "a red potion" seed-1 render read back from Sheets **matches the reference pixel for pixel**.
-- **Prompt-change latency:** 45.1 s to the first consistent read, 60.3 s until stable. The random-weight model of the same shape took 128 / 148 s (D-53). Trained weights give sparse attention and peaked scores, but the cause of the difference was not investigated.
+- **Prompt-change latency:** push_sheets reported 45.1 / 60.3 s, but that number is **not a real prompt change**: the push renders the prompt already in the sheet. Real prompt changes on the guided build take ~110–170 s (next entry).
 - **Role:** this is the working fallback on the sheet. Next is the same model plus the in-sheet guidance chain (D-55).
 
 ### Small unconditional chain for in-sheet guidance (r14) [metrics/v3_eval_r14.json; figures/v3_lineup_r14_*.png, v3_seeds_r14_*.png]
@@ -353,3 +353,12 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - **g=0.75, t=0.8, U = u48.** dm64 does not help; dm32 is worse.
   - g is the live cell Prompt!B4, so it is set on the sheet without a re-push.
   - Next, at the same sheet size: `v3p_a2` (v3p_a fine-tuned with head-noun caption dropout, which v3p_a predates) and `v3p_u48b` (U trained longer).
+
+### Guided model live on the v3 sheet (A4 for v3-P) [metrics/parity_sheets_v3p.json; figures/v3_sheet_readback.png; log: artifacts/runs/logs/push_v3p_a_g1.txt]
+- **Push:** `v3p_a` + U chain `v3p_u48`, t=0.8 (export `artifacts/model/v3p_a_g1_sheet`), 492,956 formulas. Inert upload, then row-by-row Score activation: 4,079 s total, 179 requests, 90.4 MB.
+- **Check:** guidance set to 0.75 in the live cell Prompt!B4. Then 8 prompt/seed pairs were written, Pixels read back from Google Sheets, and compared with `reference_p.forward` at g=0.75.
+- **Result: all 8 match pixel for pixel.** Prompts: potion, frog, fox, mushroom, golden crown, owl, treasure chest, blue slime. This also checks that the guidance cell is really live.
+- **Real prompt-change latency:**
+  - first consistent read: 110–137 s;
+  - stable: 136–167 s (one at 356 s).
+- **By eye (read-back figure):** clean, recognisable sprites. A corked potion, a frog with a mouth, a fox, a spotted mushroom, a crown, a treasure chest, a blue slime with drips.
