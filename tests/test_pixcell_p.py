@@ -43,12 +43,12 @@ def test_parity_v3p(guidance):
     assert r["pass"], {eng: e["max_rel"] for eng, e in r["engines"].items()}
 
 
-@pytest.mark.parametrize("guidance", [0.0, 2.0])
-def test_parity_v3pg(guidance):
+@pytest.mark.parametrize("guidance,sizes", [(0.0, None), (2.0, None), (2.0, "cosine")])
+def test_parity_v3pg(guidance, sizes):
     if not os.path.exists(os.path.join(ROOT, "tools", "node_modules", "hyperformula")):
         pytest.skip("HyperFormula not installed (npm ci --prefix tools)")
     from test_patchgpt import _gnet
-    net, unet, D, cfg0 = _gnet(3, guidance > 0)
+    net, unet, D, cfg0 = _gnet(3, guidance > 0, sizes)
     w, cfg = RP.export_g(net, D, unet=unet)
     cfg["guidance"] = guidance
     vocab, pal = F.vocab_words(w["wordvec"].shape[0], 3), F.palette(cfg["K"], 3)
@@ -56,7 +56,7 @@ def test_parity_v3pg(guidance):
     r = G.parity(wb, w, cfg, vocab, CASES, G.ENGINES)
     out = os.path.join(ROOT, "artifacts", "metrics", "parity_ops_v3p.json")
     prev = json.load(open(out)) if os.path.exists(out) else {}
-    prev[f"grouped,guidance={guidance:g}"] = {k: v for k, v in r.items()}
+    prev[f"grouped,guidance={guidance:g}" + (f",sizes={sizes}" if sizes else "")] = {k: v for k, v in r.items()}
     json.dump(prev, open(out, "w"), indent=1, default=G.np_default)
     for eng, e in r["engines"].items():
         assert e["n_fail"] == 0 and e["error_cells"] == 0, (eng, e["failures"][:2])

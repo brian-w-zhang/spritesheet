@@ -184,7 +184,7 @@ def _export_blocks(w, sd, layers, dm, pre):
 # ---------------------------------------------------------------- v3-PG: grouped decoding (D-53)
 def group_rows(cfg):
     from .patchgpt import group_layout   # pure numpy; the layout is part of the spec
-    return group_layout(cfg["T"], cfg["G"], cfg.get("order_seed", 0))
+    return group_layout(cfg["T"], cfg["G"], cfg.get("order_seed", 0), cfg.get("sizes"))
 
 
 def forward_g(ids, seed, w, cfg, keep=True):
@@ -263,6 +263,8 @@ def export_g(net, D, extra_cfg=None, unet=None):
     w["Wout"], w["bout"] = sd["nf.g"][:, None] * sd["out.weight"].T, sd["out.bias"]
     cfg = {k: c[k] for k in ("dm", "H", "mlp", "layers", "T", "Kp", "P", "K", "N", "d", "G") if k in c}
     cfg.update(model="v3pg", L=c.get("L", 12), order_seed=c.get("order_seed", 0), tau=1.0, guidance=0.0)
+    if c.get("sizes") is not None:
+        cfg["sizes"] = c["sizes"]
     if unet is not None:
         su = {k: v.detach().double().cpu().numpy() for k, v in unet.state_dict().items()}
         cu = unet.cfg

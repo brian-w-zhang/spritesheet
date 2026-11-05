@@ -146,15 +146,28 @@ def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None):
 
 
 # ---------------------------------------------------------------- v3-PG: grouped (parallel-per-group) decoding
-def group_layout(T, G, seed=0):
-    """Fixed spread-out order of the T patch positions, split into G equal groups.
+def group_sizes(T, G, sizes=None):
+    """Patches fixed per round: equal groups by default; `sizes` = explicit list (e.g. a MaskGIT-style cosine
+    schedule, few patches first), or "cosine" = round(T * (1 - cos(pi/2 * g/G))) increments."""
+    if sizes == "cosine":
+        cum = [round(T * (1 - np.cos(np.pi / 2 * g / G))) for g in range(G + 1)]
+        cum = [max(c, i) for i, c in enumerate(cum)]          # every round fixes >= 1 patch
+        sizes = [cum[g + 1] - cum[g] for g in range(G)]
+    if sizes is None:
+        sizes = [T // G] * G
+    assert len(sizes) == G and sum(sizes) == T and min(sizes) >= 1, sizes
+    return [int(x) for x in sizes]
+
+
+def group_layout(T, G, seed=0, sizes=None):
+    """Fixed spread-out order of the T patch positions, split into G groups (group_sizes).
     → order (list of positions), rows [(kind, pos, group)] for the image part: Q rows of group g, then C rows of
     group g (the last group has no C rows: nothing reads them)."""
     order = [int(p) for p in np.random.default_rng(seed).permutation(T)]
-    n = T // G
+    cut = np.cumsum([0] + group_sizes(T, G, sizes))
     rows = []
     for g in range(G):
-        grp = order[g * n:(g + 1) * n]
+        grp = order[cut[g]:cut[g + 1]]
         rows += [("q", p, g) for p in grp]
         if g < G - 1:
             rows += [("c", p, g) for p in grp]
@@ -174,7 +187,7 @@ class GroupGPT(nn.Module):
         dm, T, K, L = cfg["dm"], cfg["T"], cfg["Kp"], cfg.get("L", 12)
         self.L = L if wordvec is not None else 1
         self.cond = wordvec is not None
-        self.order, self.rows = group_layout(T, cfg["G"], cfg.get("order_seed", 0))
+        self.order, self.rows = group_layout(T, cfg["G"], cfg.get("order_seed", 0), cfg.get("sizes"))
         if not self.cond:
             self.start = nn.Parameter(torch.randn(dm) * 0.02)
         if self.cond:
@@ -231,9 +244,9 @@ def sample_grouped(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None):
     """G rounds; round g fixes the patches of group g (noise [B, T, K] indexed by position, as reference_p)."""
     B, T = noise.shape[0], noise.shape[1]
     codes = torch.zeros(B, T, dtype=torch.long, device=noise.device)
-    n = T // net.cfg["G"]
+    cut = np.cumsum([0] + group_sizes(T, net.cfg["G"], net.cfg.get("sizes")))
     for g in range(net.cfg["G"]):
-        pos = torch.tensor(net.order[g * n:(g + 1) * n], device=noise.device)
+        pos = torch.tensor(net.order[cut[g]:cut[g + 1]], device=noise.device)
         lg = net.logits(ids, codes)[:, pos]
         if guidance and unet is not None:
             lg = (1 + guidance) * lg - guidance * unet.logits(None, codes)[:, pos]

@@ -1,6 +1,7 @@
 """v3-P: the torch training twin (patchgpt.py) and the numpy spec (reference_p.py) agree: same codes for the same
 seed, logits to ~1e-12, with folded RMSNorm gains and with/without guidance."""
 import numpy as np
+import pytest
 import torch
 
 from spritesheet import reference_p as RP
@@ -52,13 +53,13 @@ def test_twin_matches_spec_guided():
 
 
 # ---------------------------------------------------------------- v3-PG (grouped)
-def _gnet(seed=0, guidance=False):
+def _gnet(seed=0, guidance=False, sizes=None):
     from spritesheet.patchgpt import GroupGPT
     torch.manual_seed(seed)
     r = np.random.default_rng(seed)
     V, d, K, T = 50, 16, 64, 16
     cfg = {"model": "v3pg", "N": 8, "L": 12, "T": T, "Kp": K, "P": 2, "K": 5, "d": d, "dm": 32, "H": 4, "mlp": 48,
-           "layers": 2, "G": 4, "order_seed": 3}
+           "layers": 2, "G": 4, "order_seed": 3, "sizes": sizes}
     net = GroupGPT(cfg, r.normal(0, 1, (V, d))).double()
     unet = GroupGPT(dict(cfg, dm=24, H=2, mlp=32, layers=1)).double() if guidance else None
     with torch.no_grad():
@@ -69,21 +70,28 @@ def _gnet(seed=0, guidance=False):
     return net.eval(), (unet.eval() if unet is not None else None), D, cfg
 
 
-def test_grouped_only_sees_earlier_groups():
-    net, _, _, cfg = _gnet(2)
+@pytest.mark.parametrize("sizes", [None, "cosine"])
+def test_grouped_only_sees_earlier_groups(sizes):
+    from spritesheet.patchgpt import group_sizes
+    net, _, _, cfg = _gnet(2, sizes=sizes)
     ids, c = torch.randint(2, 50, (2, 12)), torch.randint(0, 64, (2, 16))
-    n = cfg["T"] // cfg["G"]
+    cut = np.cumsum([0] + group_sizes(cfg["T"], cfg["G"], sizes))
     for g in range(cfg["G"]):
-        later = net.order[g * n:]
+        later = net.order[cut[g]:]
         c2 = c.clone()
         c2[:, later] = (c2[:, later] + 7) % 64
-        here = net.order[g * n:(g + 1) * n]
+        here = net.order[cut[g]:cut[g + 1]]
         assert torch.allclose(net.logits(ids, c)[:, here], net.logits(ids, c2)[:, here])
+        if g + 1 < cfg["G"]:   # and the next group does see this one
+            nxt = net.order[cut[g + 1]:cut[g + 2]]
+            c3 = c.clone()
+            c3[:, here] = (c3[:, here] + 7) % 64
+            assert not torch.allclose(net.logits(ids, c)[:, nxt], net.logits(ids, c3)[:, nxt])
 
 
-def _check_g(guidance):
+def _check_g(guidance, sizes=None):
     from spritesheet.patchgpt import sample_grouped
-    net, unet, D, cfg = _gnet(1, guidance > 0)
+    net, unet, D, cfg = _gnet(1, guidance > 0, sizes)
     w, rc = RP.export_g(net, D, unet=unet)
     rc["guidance"] = guidance
     for ids, seed in (([3, 7, 9] + [1] * 9, 1), ([5] * 12, 42), ([1] * 12, 123456)):
@@ -99,3 +107,8 @@ def test_grouped_twin_matches_spec():
 
 def test_grouped_twin_matches_spec_guided():
     _check_g(2.0)
+
+
+def test_grouped_cosine_twin_matches_spec():
+    _check_g(0.0, "cosine")
+    _check_g(2.0, "cosine")
