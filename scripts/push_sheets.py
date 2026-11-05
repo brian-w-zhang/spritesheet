@@ -42,7 +42,7 @@ def main():
     wb = G.compile_any(w, cfg, vocab, pal, default_prompt=a.prompt, default_seed=a.seed, render=True)
     cl = sheets.Client(key)
     t0 = time.time()
-    rep = sheets.push(wb, cl, inert=a.inert)
+    rep = sheets.push(wb, cl, inert=a.inert, row_tabs=("Score",) if cfg.get("model") == "v3p" else ())
     print(f"pushed {src['source']} {'v2' if mdm else 'v3-P' if v3p else 'v1'} model to sheet '{key}' in {time.time() - t0:.1f} s",
           {k: rep[k] for k in ("requests", "bytes_sent") if k in rep})
     got = sheets.set_prompt_and_read(a.prompt, a.seed, cl, wb, timeout=1800)

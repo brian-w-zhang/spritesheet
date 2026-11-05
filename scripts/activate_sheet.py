@@ -24,7 +24,7 @@ def main():
     wb = G.compile_any(w, cfg, vocab, pal, default_prompt=a.prompt, default_seed=a.seed, render=True)
     cl = sheets.Client(a.sheet)
     t0 = time.time()
-    sheets.activate(wb, cl, start=a.start)
+    sheets.activate(wb, cl, start=a.start, row_tabs=("Score",) if cfg.get("model") == "v3p" else ())
     ids = {x["properties"]["title"]: x["properties"]["sheetId"] for x in cl.meta().get("sheets", [])}
     sheets.format_prompt(cl, wb, ids["Prompt"])
     print(f"activated in {time.time() - t0:.0f}s", flush=True)

@@ -186,7 +186,7 @@ def _chunks(wb: Workbook, max_bytes=MAX_BYTES, inert: bool = False):
 
 
 # ---------------------------------------------------------------- push
-def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert: bool = False) -> dict:
+def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert: bool = False, row_tabs=()) -> dict:
     """Replace every tab of the shared spreadsheet sheet_ids[key] (v32 = v1 demo, diffusion = v2) with the
     workbook's tabs, write all cells, format Prompt. A given client wins over key."""
     cl = client or Client(key)
@@ -232,7 +232,7 @@ def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert
     t_values = time.time() - t1
     t_activate = 0.0
     if inert:  # switch formulas on tab by tab, upstream first (workbook order), so each request computes one tab
-        t_activate = activate(wb, cl, ids, log)
+        t_activate = activate(wb, cl, ids, log, row_tabs=row_tabs)
     fmt = format_prompt(cl, wb, ids["Prompt"])
     return {"tabs": len(ids), "value_requests": len(chunks), "tabs_s": t_tabs, "values_s": t_values,
             "inert": inert, "activate_s": t_activate,
@@ -240,7 +240,7 @@ def push(wb: Workbook, client: Client | None = None, log=print, key="v32", inert
             "bytes_sent": cl.bytes_sent, "format": fmt}
 
 
-def activate(wb: Workbook, cl: Client, ids=None, log=print, start=None, tries=12) -> float:
+def activate(wb: Workbook, cl: Client, ids=None, log=print, start=None, tries=12, row_tabs=()) -> float:
     """findReplace "#=" → "=" per formula tab, upstream first. Idempotent (an active tab has nothing to replace), so it
     also resumes a push whose activation was cut off. A 404 during a heavy recalculation (the spreadsheet is briefly
     unavailable, D-45/D-53) is waited out and retried."""
@@ -250,17 +250,32 @@ def activate(wb: Workbook, cl: Client, ids=None, log=print, start=None, tries=12
     names = [n for n in wb.sheets if any(is_formula(v) for v in wb.sheets[n].values())]
     if start:
         names = names[names.index(start):]
-    for name in names:
-        ta = time.time()
+    def fr(name, rng=None):
+        req = {"find": INERT, "replacement": "=", "matchCase": True}
+        if rng is None:
+            req["sheetId"] = ids[name]
+        else:
+            req["range"] = {"sheetId": ids[name], "startRowIndex": rng[0], "endRowIndex": rng[1]}
         for k in range(tries):
             try:
-                cl.batch_update([{"findReplace": {"find": INERT, "replacement": "=", "sheetId": ids[name], "matchCase": True}}])
-                break
+                cl.batch_update([{"findReplace": req}])
+                return
             except SheetsError as ex:
-                if "HTTP 404" not in str(ex) or k == tries - 1:
+                if not any(c in str(ex) for c in ("HTTP 404", "HTTP 503", "giving up")) or k == tries - 1:
                     raise
-                log(f"  activate {name}: 404 (sheet busy), retry {k + 1} in 60s")
+                log(f"  activate {name} {rng or ''}: busy ({str(ex)[:40]}), retry {k + 1} in 60s")
                 time.sleep(60)
+
+    for name in names:
+        ta = time.time()
+        if name in row_tabs:   # a tab that closes a long causal loop: one row per request (D-53: whole tab = 404s)
+            nrows = wb.dims(name)[0]
+            for r in range(nrows):
+                tr = time.time()
+                fr(name, (r, r + 1))
+                log(f"  activate {name} row {r + 1}/{nrows}: {time.time() - tr:.1f}s")
+        else:
+            fr(name)
         log(f"  activate {name}: {time.time() - ta:.1f}s")
     return time.time() - t2
 

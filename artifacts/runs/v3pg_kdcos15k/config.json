@@ -1,0 +1,29 @@
+{
+ "model": "v3pg",
+ "N": 24,
+ "L": 12,
+ "T": 64,
+ "Kp": 1024,
+ "P": 3,
+ "K": 48,
+ "d": 64,
+ "dm": 96,
+ "H": 4,
+ "mlp": 192,
+ "layers": 2,
+ "G": 8,
+ "sizes": "cosine",
+ "order_seed": 0,
+ "steps": 15000,
+ "train_seconds": 2557.8,
+ "dict_dir": "artifacts/model/patchdict_k1024_p3",
+ "params": 366592,
+ "final_log": {
+  "step": 15000,
+  "loss": 1.4081,
+  "lr": 0.0,
+  "s": 2557.4,
+  "val_nll": 2.2106,
+  "val_tok_acc": 0.5227
+ }
+}

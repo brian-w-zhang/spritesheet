@@ -274,3 +274,35 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - **Applied among foreground codes only** (the empty patch is always eligible): the foreground share is right (0.38 against 0.40 for real sprites), but the colours drop to 1.88 at c=4.
   - **Best novel R@5 so far:** 0.46 [0.37, 0.56] at t=1 with c=4. Compare 0.38 at t=0.8 and 0.41 at t=1. The samples are still speckled by eye.
 - **Lesson:** the prior is genuinely uncertain. Sampling tricks only trade flat against noisy. Quality has to come from a better prior, so the next step is a stronger teacher plus guidance, distilled into the grouped student. Guidance distillation means the sheet does not need a second (unconditional) chain.
+
+### Distilled grouped student v3pg_kd (r11) [metrics/v3_eval_r11.json, colour_stats_r11.json; figures/v3_lineup_r11_*.png, v3_seeds_r11_*.png]
+- **Setup:** 40k steps; each batch is 75% samples from `v3p_a` (t=0.8, `data/build/v3/kd_v3p_a.npz`, 200k samples, 47 min to generate) and 25% real data.
+- **Novel R@5:**
+
+  | Model | Novel R@5 |
+  |---|---|
+  | `v3pg_kd` t=0.8 | **0.32** [0.23, 0.41] |
+  | `v3pg_kd` t=1 | 0.27 |
+  | `v3pg_kd` t=1, m=4 | 0.27 |
+  | `v3pg_a` (no distillation, 30k) | 0.25 |
+  | causal teacher `v3p_a` t=0.8 | 0.38 |
+
+- **Colours per sprite at t=0.8:** 3.11, against 3.94 without distillation (real sprites: 3.50). Less mixing.
+- **By eye:** more unified shapes than `v3pg_a`, but still blobs without the defining parts. The sword is near-empty, the mushroom has no cap pattern, the owl has no eyes. Clearly behind the causal model.
+- **The cosine-schedule student** (`v3pg_kdcos15k`, 15k steps) finished but was **NOT evaluated**: the grouped path was deprioritised (below).
+- **Decision:** the final model will be causal. Real-Sheets latency follows formula count more than depth (D-53: 432k causal 128 s vs 446k grouped ~90 s), and the grouped models stay blobbier. Quality comes first (Brian: "not blobs").
+
+### Guidance on the causal model (r12, r13) [metrics/v3_eval_r12.json, v3_eval_r13.json, colour_stats_r12.json; figures/v3_lineup_r12_*.png, v3_lineup_r13_*.png, v3_seeds_r13_*.png]
+- **r12, looser truncation at t=1:** colours rise with c (m=5: 2.19; m=6: 2.60; m=8: 3.08). Novel R@5 is 0.38 at m=6 and 0.41 at m=8. Objects at t=1 with m=6 look good by eye (chest, potion, castle, crown). The creatures are still the weak part.
+- **r13, classifier-free guidance** with the causal unconditional prior `v3p_u` (dm96 L3, 12k steps):
+
+  | Setting | Novel R@5 | PixelGPT-test R@5 | Fg components |
+  |---|---|---|---|
+  | **g=1, t=0.8** | **0.51** [0.42, 0.61] (best so far) | **0.078** (2× `v3p_a`) | 3.41 |
+  | g=1, t=1, m=6 | 0.50 | 0.073 | — |
+  | g=2 | 0.35–0.40 | — | ~9 |
+
+  At g=1, colour-adjective accuracy is 0.97 and speckle 0.042. At g=2 the fragments explode and colour-adjective accuracy is 0.80–0.82.
+- **By eye at g=1:** prompts are much more specific. Foxes have ears and white chests, frogs have eyes, owls have faces, knights have helmets. But there are more specks and fragments.
+- **Plan (guidance distillation):** a guidance chain in the sheet would add ~200k formulas. Instead, generate guided samples from a stronger teacher (`v3p_b`, dm192 L6) at g=1, t=0.8. Then train a causal student at the deployable size (dm128 L4, 431,836 formulas, initialised from `v3p_a`) on 75% of those (`scripts/run_queue11.sh` → `v3p_c`).
+- **Meanwhile:** `v3p_a` (t=0.8) is being pushed to the v3 sheet as the working final model. The Score tab is activated one row per request, now built into `sheets.activate(row_tabs=…)`.
