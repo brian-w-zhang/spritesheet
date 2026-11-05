@@ -328,3 +328,28 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - Remaining flaw: stray specks on some creatures (owl, ghost, skeleton).
   - g=1.5 breaks the drawings into multicolour noise.
 - **Decision:** push `v3p_a` + u48 at g=1 to the v3 sheet (492,956 formulas). The guidance weight is now a live cell (Prompt!B4), so it can be tuned in the sheet without a re-push.
+
+### Guidance weight, temperature and U-chain size (r15, r16) [metrics/v3_eval_r15.json, v3_eval_r16.json, colour_stats_r16.json; figures/v3_*_r15_*.png, v3_*_r16_*.png]
+- **All with `v3p_a`:**
+
+  | g | t | U chain | Novel R@5 | PixelGPT-test R@5 | Speckle | Fg comp. | Colours |
+  |---|---|---|---|---|---|---|---|
+  | **0.75** | **0.8** | u48 | **0.61** [0.52, 0.70] | 0.073 | 0.037 | 3.20 | **3.07** |
+  | 0.75 | 0.7 | u48 | 0.57 | 0.083 | 0.031 | 2.49 | 2.61 |
+  | 0.75 | 0.9 | u48 | 0.53 | — | 0.050 | 4.21 | — |
+  | 0.5 | 0.8 | u48 | 0.55 | — | 0.035 | — | — |
+  | 1 | 0.8 | u48 | 0.55 (r14) | — | — | — | 3.95 |
+  | 1 | 0.8 | u64 | 0.54 | — | — | — | — |
+  | 1 | 0.8 | u32 | 0.50 | — | — | 4.91 | — |
+  | 1 | 0.7 | u48 | 0.57 | 0.084 | 0.035 | — | — |
+
+  Real test sprites have 3.50 colours.
+- **By eye at g=0.75, t=0.8:**
+  - Frogs with eyes and mouths, and foxes with ears and white faces, on all 8 seeds.
+  - Owls with faces; dragons as green winged shapes.
+  - Cats are still mostly white silhouettes, and ghosts have a few specks.
+  - t=0.7 is cleaner (penguin-like owls, clean skeletons) but flatter.
+- **Decision:**
+  - **g=0.75, t=0.8, U = u48.** dm64 does not help; dm32 is worse.
+  - g is the live cell Prompt!B4, so it is set on the sheet without a re-push.
+  - Next, at the same sheet size: `v3p_a2` (v3p_a fine-tuned with head-noun caption dropout, which v3p_a predates) and `v3p_u48b` (U trained longer).

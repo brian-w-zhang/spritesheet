@@ -1,0 +1,19 @@
+{
+ "real_test": {
+  "colours": 3.498,
+  "fg_share": 0.3954
+ },
+ "n": 400,
+ "v3p_a@g=0.75:t=0.8:u=v3p_u48": {
+  "colours": 3.065,
+  "fg_share": 0.4065
+ },
+ "v3p_a@g=0.75:t=0.7:u=v3p_u48": {
+  "colours": 2.607,
+  "fg_share": 0.3894
+ },
+ "v3p_a@g=1:t=0.8:u=v3p_u48": {
+  "colours": 3.945,
+  "fg_share": 0.4227
+ }
+}
