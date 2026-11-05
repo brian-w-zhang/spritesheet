@@ -234,3 +234,12 @@ Same 36 prompts (12 trained emoji concepts, 12 novel, 12 PixelGPT-style) × mode
   - References: v3_vq6_pg@g=3 0.45 / 0.045 / 0.018 / 1.52 / 0.41; v1-XL 0.41 / 0.013 / 0.028 / 1.40 / 0.29.
 - **By eye, t=0.8 is the best-looking v3 so far:** crisp outlined pixel art. A sword, a corked red potion, a golden key, a spotted mushroom, a rooted tree, a shield ring, a lantern. A black cat silhouette with ears, a black owl with yellow eyes. t=1.0 scatters patches; t=0.6 collapses many creatures to tiny or blank sprites (the background mode wins).
 - **Next:** guidance with the small unconditional prior (queued), head-noun caption dropout, and the full 60k steps.
+
+### Sheets latency vs size for v3-P / v3-PG (random weights, real v3 sheet; logs: artifacts/runs/logs/latency_v3p_random.txt, push_v3pg_random*.txt)
+- **API prompt-change latency (first consistent read / stable); every render pixel-identical to the reference:**
+  - causal, 64 steps, 431,836 formulas: 128 / 148 s;
+  - grouped, 8 rounds, 446,452 formulas: 88–97 / 106–115 s;
+  - **grouped, pruned, 8 rounds, ~250k formulas: 56–58 / 66–69 s** (3 prompts);
+  - v1-XL for reference: 221k formulas, 30–38 s.
+- **Reading:** latency follows formula count, with a penalty for sequential depth (64 > 8 rounds > v1's ~20 tab levels). Browser timing was not measurable reliably tonight: the laptop is loaded with GPU training, and the tab showed "Trying to connect…".
+- **Decision:** train two grouped models at ~250k formulas (`v3pg_a` 3×3/dm96/L2; `v3pg_b` 4×4/dm128/L3). If the latency is too slow for the demo, there are ~140k-formula variants (4×4, dm 96/L2 or dm 64/L3).
