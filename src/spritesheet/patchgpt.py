@@ -129,3 +129,89 @@ def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0):
             lg = (1 + guidance) * lg - guidance * unet.logits(codes[:, : t + 1])[:, t]
         codes[:, t] = (lg / tau + noise[:, t]).argmax(-1)
     return codes
+
+
+# ---------------------------------------------------------------- v3-PG: grouped (parallel-per-group) decoding
+def group_layout(T, G, seed=0):
+    """Fixed spread-out order of the T patch positions, split into G equal groups.
+    → order (list of positions), rows [(kind, pos, group)] for the image part: Q rows of group g, then C rows of
+    group g (the last group has no C rows: nothing reads them)."""
+    order = [int(p) for p in np.random.default_rng(seed).permutation(T)]
+    n = T // G
+    rows = []
+    for g in range(G):
+        grp = order[g * n:(g + 1) * n]
+        rows += [("q", p, g) for p in grp]
+        if g < G - 1:
+            rows += [("c", p, g) for p in grp]
+    return order, rows
+
+
+class GroupGPT(nn.Module):
+    """Text rows, then per group g: query rows (input = qpos[p]; give the logits for patch p) and context rows
+    (input = E[code_p] + cpos[p]). Causal in row order, and query rows are invisible as keys to every other row
+    (a row always sees itself), so group g is predicted from the prompt and the patches of groups < g only.
+    In the sheet the dependency depth is G rounds, not T steps. L = 0 gives the unconditional prior (guidance)."""
+
+    def __init__(self, cfg, wordvec=None):
+        super().__init__()
+        self.cfg = dict(cfg)
+        dm, T, K, L = cfg["dm"], cfg["T"], cfg["Kp"], cfg.get("L", 12)
+        self.L = L if wordvec is not None else 0
+        self.order, self.rows = group_layout(T, cfg["G"], cfg.get("order_seed", 0))
+        if self.L:
+            self.register_buffer("wordvec", torch.tensor(wordvec, dtype=torch.float32))
+            self.win = nn.Linear(wordvec.shape[1], dm)
+            self.pos_text = nn.Parameter(torch.randn(self.L, dm) * 0.02)
+        self.E = nn.Parameter(torch.randn(K, dm) * 0.02)
+        self.qpos = nn.Parameter(torch.randn(T, dm) * 0.02)
+        self.cpos = nn.Parameter(torch.randn(T, dm) * 0.02)
+        self.blocks = nn.ModuleList(Block(dm, cfg["H"], cfg["mlp"]) for _ in range(cfg["layers"]))
+        self.nf = RMS(dm)
+        self.out = nn.Linear(dm, K)
+        self.emb_noise = 0.0
+        kinds = [k for k, _, _ in self.rows]
+        self.register_buffer("qrow", torch.tensor([i for i, k in enumerate(kinds) if k == "q"]))
+        self.register_buffer("qpos_of", torch.tensor([p for k, p, _ in self.rows if k == "q"]))
+        self.register_buffer("cpos_of", torch.tensor([p for k, p, _ in self.rows if k == "c"]))
+        self.register_buffer("is_c", torch.tensor([k == "c" for k in kinds]))
+        self.register_buffer("is_q", torch.tensor([k == "q" for k in kinds]))
+
+    def logits(self, ids, codes):
+        """ids [B, L] (ignored when L = 0), codes [B, T] by position → logits [B, T, K] by position."""
+        B, dev = codes.shape[0], codes.device
+        R = len(self.rows)
+        x = torch.zeros(B, R, self.cfg["dm"], device=dev, dtype=self.E.dtype)
+        x[:, self.is_q] = self.qpos[self.qpos_of].expand(B, -1, -1)
+        x[:, self.is_c] = self.E[codes[:, self.cpos_of]] + self.cpos[self.cpos_of]
+        keyok = (~self.is_q)[None].expand(B, R)
+        if self.L:
+            t = F.embedding(ids - 1, self.wordvec)
+            if self.training and self.emb_noise > 0:
+                t = t * (1 + self.emb_noise * torch.randn_like(t))
+            x = torch.cat([self.win(t) + self.pos_text, x], 1)
+            keyok = torch.cat([ids != 1, keyok], 1)
+        N = x.shape[1]
+        causal = torch.ones(N, N, dtype=torch.bool, device=dev).tril()
+        m = (causal[None] & keyok[:, None, :]) | torch.eye(N, dtype=torch.bool, device=dev)[None]
+        for b in self.blocks:
+            x = b(x, m)
+        lq = self.out(self.nf(x[:, self.L + self.qrow]))          # [B, T, K] in query-row order
+        out = torch.empty_like(lq)
+        out[:, self.qpos_of] = lq
+        return out
+
+
+@torch.no_grad()
+def sample_grouped(net, unet, ids, noise, guidance=0.0, tau=1.0):
+    """G rounds; round g fixes the patches of group g (noise [B, T, K] indexed by position, as reference_p)."""
+    B, T = noise.shape[0], noise.shape[1]
+    codes = torch.zeros(B, T, dtype=torch.long, device=noise.device)
+    n = T // net.cfg["G"]
+    for g in range(net.cfg["G"]):
+        pos = torch.tensor(net.order[g * n:(g + 1) * n], device=noise.device)
+        lg = net.logits(ids, codes)[:, pos]
+        if guidance and unet is not None:
+            lg = (1 + guidance) * lg - guidance * unet.logits(None, codes)[:, pos]
+        codes[:, pos] = (lg / tau + noise[:, pos]).argmax(-1)
+    return codes

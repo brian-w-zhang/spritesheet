@@ -33,7 +33,7 @@ def main():
         sys.exit(2)
     w, cfg, vocab, pal, src = G.load_model(a.model, model_type=G.model_type_of(a.model, a.model_type))
     mdm = G.is_mdm(cfg)
-    v3p = cfg.get("model") == "v3p"
+    v3p = cfg.get("model") in ("v3p", "v3pg")
     key = a.sheet or ("diffusion" if mdm else "v3" if v3p else "v32")
     if v3p and key != "v3":
         sys.exit("refusing to push a v3-P model anywhere but the v3 sheet")
@@ -49,7 +49,7 @@ def main():
     ids = T.encode(a.prompt, T.index_vocab(vocab))
     if v3p:
         from spritesheet import reference_p as RP
-        ref = RP.forward(ids, a.seed, w, cfg, keep=False)["pixels"]
+        ref = (RP.forward_g if cfg["model"] == "v3pg" else RP.forward)(ids, a.seed, w, cfg, keep=False)["pixels"]
     else:
         ref = (D.ref_generate(ids, a.seed, w, cfg) if mdm else R.forward(ids, a.seed, w, cfg))["classes"]
     ok = bool((np.asarray(got["classes"]) == ref).all())

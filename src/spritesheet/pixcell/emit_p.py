@@ -25,7 +25,8 @@ def _lin(Wb: Block, j: int, xrow: str, n: int, scale_ref=None) -> str:
 
 def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, mlp: int, layers: int,
                keymask=lambda m: None, tab=lambda l, part: f"Blk{l + 1}_{part}") -> Block:
-    """Transformer blocks over the N rows of X0 (causal). keymask(m) → cell ref of key m's 0/1 mask, or None.
+    """Transformer blocks over the N rows of X0 (causal). keymask(m) → cell ref of key m's 0/1 mask, None (always a
+    key) or False (never a key for other rows: constant 0, no formula; D-53 query rows).
     Returns the final x block. Block names: f"{pre}b{l}.<part>" (trace_p uses the same names)."""
     dh = dm // H
     scale = 1.0 / math.sqrt(dh)
@@ -55,11 +56,11 @@ def emit_stack(wb: Workbook, w, pre: str, X0: Block, N: int, dm: int, H: int, ml
             Eb = wb.add_block(p + f"E{h}", sa, 1, 1 + h * (N + 1), N, N)
 
             def ecell(n, m, h=h, Q=Q, K=K, sq=sq):
-                if m > n:
+                km = keymask(m) if m < n else None
+                if m > n or km is False:
                     return 0.0
                 s = (f"EXP(SUMPRODUCT({Q.row_range(n, h * dh, h * dh + dh - 1, sq)},"
                      f"{K.row_range(m, h * dh, h * dh + dh - 1, sq)})*{scale!r})")
-                km = keymask(m) if m < n else None
                 return f"={s}*{km}" if km else f"={s}"
             wb.fill(Eb, ecell)
             Es.append(Eb)
@@ -173,3 +174,98 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
 def T_L(cfg):
     assert cfg.get("L", T.L) == T.L
     return T.L
+
+
+def compile_pg(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", default_seed=1, render=False) -> Workbook:
+    """v3-PG (grouped decoding, spec reference_p.forward_g): rows = prompt, then per group query rows and context rows.
+    Query rows are never keys of other rows; Score/Codes are indexed by patch position."""
+    from ..reference_p import group_rows
+    L, T, Kp, dm, P = T_L(cfg), cfg["T"], cfg["Kp"], cfg["dm"], cfg["P"]
+    order, rows = group_rows(cfg)
+    R = len(rows)
+    N = L + R
+    Gd = int(round(T ** 0.5))
+    NPX = Gd * P
+    g = float(cfg.get("guidance", 0.0))
+    inv_tau = 1.0 / float(cfg.get("tau", 1.0))
+    qrow = {p: L + i for i, (k, p, _) in enumerate(rows) if k == "q"}      # position → sequence row of its query
+    wb = Workbook()
+    wb.meta.update({"config": dict(cfg), "model": "v3pg", "render": render, "N": NPX, "V": len(vocab_words)})
+    tk = emit_tokens(wb, w, cfg, vocab_words, default_prompt, default_seed, show_style=False)
+    Sd = "Seed"
+    wb.add_block("seed.s0", Sd, 1, 1, 1, 1)
+    wb.add_block("seed.s1", Sd, 1, 2, 1, 1)
+    wb.set(Sd, 1, 1, f"=MOD(INT(ABS({tk['SEED']})),{M31 - 1})+1")
+    wb.set(Sd, 1, 2, f"=MOD({LCG_A}*A1,{M31})")
+    wb.meta["seed_range"] = "'Seed'!A1:B1"
+    S1 = "Seed!$B$1"
+    Win = _wtab(wb, "W_in", w["Win"].T, w["b_in"])
+    Pt = _wtab(wb, "W_postext", w["pos_text"])
+    Eb = _wtab(wb, "W_E", w["E"])
+    Qp = _wtab(wb, "W_qpos", w["qpos"])
+    Cp = _wtab(wb, "W_cpos", w["cpos"])
+    Db = _wtab(wb, "W_D", w["D"])
+    d = w["wordvec"].shape[1]
+    WVr = wb.add_block("WV", "Inputs", 1, 1, L, d)
+    wb.fill(WVr, lambda n, k: f"=INDEX({tk['WV']},Tokens!$D${1 + n},{k + 1})")
+    X0 = wb.add_block("X0", "Inputs", 1, d + 2, N, dm)
+    CODES = wb.add_block("Codes", "Out", 1, 1, T, 1)
+    ER = Eb.range("W_E", absolute=True)
+
+    def x0cell(n, j):
+        if n < L:
+            return "=" + _lin(Win, j, WVr.row_range(n), d) + f"+{Pt.ref(n, j, 'W_postext')}"
+        kind, p, _ = rows[n - L]
+        if kind == "q":
+            return f"={Qp.ref(p, j, 'W_qpos')}"
+        return f"=INDEX({ER},{CODES.ref(p, 0, 'Out')}+1,{j + 1})+{Cp.ref(p, j, 'W_cpos')}"
+    wb.fill(X0, x0cell)
+
+    def keymask(m):
+        if m < L:
+            return f"Tokens!$E${1 + m}"
+        return False if rows[m - L][0] == "q" else None
+    xf = emit_stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask)
+
+    LU = None
+    if g:
+        U0 = wb.add_block("U.X0", "U_X0", 1, 1, R, cfg["U_dm"])
+        UE = _wtab(wb, "U_W_E", w["U_E"])
+        UQ = _wtab(wb, "U_W_qpos", w["U_qpos"])
+        UC = _wtab(wb, "U_W_cpos", w["U_cpos"])
+        UER = UE.range("U_W_E", absolute=True)
+
+        def ux0(i, j):
+            kind, p, _ = rows[i]
+            if kind == "q":
+                return f"={UQ.ref(p, j, 'U_W_qpos')}"
+            return f"=INDEX({UER},{CODES.ref(p, 0, 'Out')}+1,{j + 1})+{UC.ref(p, j, 'U_W_cpos')}"
+        wb.fill(U0, ux0)
+        ux = emit_stack(wb, w, "U", U0, R, cfg["U_dm"], cfg["U_H"], cfg["U_mlp"], cfg["U_layers"],
+                        keymask=lambda m: False if rows[m][0] == "q" else None, tab=lambda l, part: f"U{l + 1}_{part}")
+        UWo = _wtab(wb, "U_W_out", w["U_Wout"].T, w["U_bout"])
+        urf = wb.add_block("U.rf", "U_Out", 1, 1, T, 1)
+        uxr = lambda p: ux.row_range(qrow[p] - L, sheet=ux.sheet)
+        wb.fill(urf, lambda p, _: f"=1/SQRT(SUMPRODUCT({uxr(p)},{uxr(p)})/{cfg['U_dm']}+{EPS!r})")
+        LU = wb.add_block("LU", "U_Out", 1, 3, T, Kp)
+        wb.fill(LU, lambda p, k: "=" + _lin(UWo, k, uxr(p), cfg["U_dm"], urf.ref(p, 0)))
+
+    Wout = _wtab(wb, "W_out", w["Wout"].T, w["bout"])
+    xr = lambda p: xf.row_range(qrow[p], sheet=xf.sheet)
+    rf = wb.add_block("rf", "Out", 1, 3, T, 1)
+    wb.fill(rf, lambda p, _: f"=1/SQRT(SUMPRODUCT({xr(p)},{xr(p)})/{dm}+{EPS!r})")
+    Sc = wb.add_block("Score", "Score", 1, 1, T, Kp)
+
+    def score(p, k):
+        lc = _lin(Wout, k, xr(p), dm, rf.ref(p, 0, "Out"))
+        lg = f"({1.0 + g!r}*({lc})-{g!r}*{LU.ref(p, k, 'U_Out')})" if g else f"({lc})"
+        u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{p * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
+        return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
+    wb.fill(Sc, score)
+    wb.fill(CODES, lambda p, _: f"=MATCH(MAX({Sc.row_range(p, sheet='Score')}),{Sc.row_range(p, sheet='Score')},0)-1")
+    DR = Db.range("W_D", absolute=True)
+    px = wb.add_block("Pixels", "Pixels", 1, 1, NPX, NPX)
+    wb.fill(px, lambda y, x: f"=INDEX({DR},{CODES.ref((y // P) * Gd + x // P, 0, 'Out')}+1,{(y % P) * P + x % P + 1})")
+    emit_output(wb, px, palette_hex, render, tk["PROMPT"])
+    emit_about(wb, w, cfg, vocab_words, palette_hex, spec="src/spritesheet/reference_p.py (forward_g)")
+    return wb

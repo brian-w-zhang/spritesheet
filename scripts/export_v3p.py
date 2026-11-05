@@ -12,7 +12,7 @@ import numpy as np  # noqa: E402
 import torch  # noqa: E402
 
 from spritesheet import reference_p as RP  # noqa: E402
-from spritesheet.patchgpt import PatchGPT, UPatchGPT  # noqa: E402
+from spritesheet.patchgpt import PatchGPT, UPatchGPT, GroupGPT  # noqa: E402
 
 V3 = os.path.join(ROOT, "data", "build", "v3")
 
@@ -34,22 +34,24 @@ def main():
         pd = json.load(open(os.path.join(a.dict, "patchdict.json")))
         cfg = {"model": "v3p", "N": 24, "L": 12, "T": (24 // pd["P"]) ** 2, "Kp": pd["K"], "P": pd["P"], "K": len(pal),
                "d": int(wv.shape[1]), **json.loads(a.cfg)}
+        if "G" in cfg:
+            cfg["model"] = "v3pg"
         torch.manual_seed(0)
-        net = PatchGPT(cfg, wv)
+        net = GroupGPT(cfg, wv) if "G" in cfg else PatchGPT(cfg, wv)
         D = np.load(os.path.join(a.dict, "patches.npy"))
         src = a.dict
     else:
         cfg = json.load(open(os.path.join(a.model, "config.json")))
-        net = PatchGPT(cfg, wv)
+        net = GroupGPT(cfg, wv) if cfg.get("model") == "v3pg" else PatchGPT(cfg, wv)
         net.load_state_dict(torch.load(os.path.join(a.model, "model.pt"), map_location="cpu"))
         D = np.load(os.path.join(a.model, "patches.npy"))
         src = a.model
     unet = None
     if a.unet:
         ucfg = json.load(open(os.path.join(a.unet, "config.json")))
-        unet = UPatchGPT(ucfg)
+        unet = GroupGPT(ucfg) if "G" in ucfg else UPatchGPT(ucfg)
         unet.load_state_dict(torch.load(os.path.join(a.unet, "model.pt"), map_location="cpu"))
-    w, rc = RP.export(net.eval(), D, unet=unet.eval() if unet else None,
+    w, rc = (RP.export_g if "G" in cfg else RP.export)(net.eval(), D, unet=unet.eval() if unet else None,
                       extra_cfg={"guidance": a.guidance if unet else 0.0, "tau": a.tau,
                                  "source": "random" if a.random else a.model, "unet": a.unet})
     os.makedirs(a.out, exist_ok=True)

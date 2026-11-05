@@ -13,7 +13,7 @@ from ..oracles import hyperformula as HF
 from ..oracles import libreoffice as LO
 from ..oracles import scan_errors
 from . import emit, emit_mdm, emit_p, fixtures as F, lint
-from .trace import compare, trace, trace_mdm, trace_p
+from .trace import compare, trace, trace_mdm, trace_p, trace_pg
 
 ENGINES = ("hyperformula", "libreoffice")
 TOL = 1e-12
@@ -85,7 +85,7 @@ def parity(wb, w, cfg, vocab, cases, engines=ENGINES, read=None, batch=None) -> 
     read: sheets to read back (None = all; blocks on unread sheets are skipped)."""
     vi = T.index_vocab(vocab)
     mdm = wb.meta.get("model") == "mdm"
-    tfn = {"mdm": trace_mdm, "v3p": trace_p}.get(wb.meta.get("model"), trace)
+    tfn = {"mdm": trace_mdm, "v3p": trace_p, "v3pg": trace_pg}.get(wb.meta.get("model"), trace)
     traces = [tfn(p, s, w, cfg, vi) for p, s in cases]
     runs = [{"prompt": p, "seed": s, "read": read} for p, s in cases]
     out = {"cases": len(cases), "engines": {}, "stats": {k: v for k, v in wb.stats().items() if k != "per_sheet"}}
@@ -226,9 +226,9 @@ def model_type_of(model_dir, requested="auto") -> str:
 
 def compile_any(w, cfg, vocab, pal, **kw):
     """v1 (reference.forward), v2 (mdm.ref_generate) or v3-P (reference_p.forward), from cfg["model"]."""
-    if cfg.get("model") == "v3p":
+    if cfg.get("model") in ("v3p", "v3pg"):
         kw.pop("style_names", None)
-        return emit_p.compile_p(w, cfg, vocab, pal, **kw)
+        return (emit_p.compile_pg if cfg["model"] == "v3pg" else emit_p.compile_p)(w, cfg, vocab, pal, **kw)
     return (emit_mdm.compile_mdm if is_mdm(cfg) else emit.compile_model)(w, cfg, vocab, pal, **kw)
 
 

@@ -10,7 +10,7 @@ import torch
 import torch.nn.functional as F
 
 from . import tokenizer as T
-from .patchgpt import PatchGPT, UPatchGPT, gumbel, sample_guided
+from .patchgpt import PatchGPT, UPatchGPT, GroupGPT, gumbel, sample_guided, sample_grouped
 from .patches import to_patches, from_patches
 from .train_v3 import SNAP_PROMPTS, ROOT
 from .data.v3 import OUT as V3, Sampler3, eval_set3
@@ -34,6 +34,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--note", default="")
     ap.add_argument("--snap-every", type=int, default=5000)
+    ap.add_argument("--snap-tau", type=float, default=0.8, help="sampling temperature for snapshots (r6: 0.8 looks best)")
     a = ap.parse_args()
     torch.manual_seed(a.seed)
     dev = "mps" if torch.backends.mps.is_available() else "cpu"
@@ -46,10 +47,19 @@ def main():
     Tn = (24 // P) ** 2
     cfg = {"model": "v3p", "N": 24, "L": T.L, "T": Tn, "Kp": Kp, "P": P, "K": len(pal), "d": int(wv.shape[1]),
            **json.loads(a.cfg)}
-    net = (UPatchGPT(cfg) if a.uncond else PatchGPT(cfg, wv)).to(dev)
+    grouped = "G" in cfg
+    if grouped:
+        cfg["model"] = "v3pg"
+        cfg.setdefault("order_seed", 0)
+        net = (GroupGPT(cfg) if a.uncond else GroupGPT(cfg, wv)).to(dev)
+    else:
+        net = (UPatchGPT(cfg) if a.uncond else PatchGPT(cfg, wv)).to(dev)
     if a.uncond:
-        cfg["model"] = "v3p_u"
-    fwd = (lambda ids, codes: net.logits(codes)) if a.uncond else (lambda ids, codes: net.logits(ids, codes))
+        cfg["model"] += "_u"
+    if a.uncond and not grouped:
+        fwd = lambda ids, codes: net.logits(codes)
+    else:
+        fwd = lambda ids, codes: net.logits(None if a.uncond else ids, codes)
     if a.init:
         net.load_state_dict(torch.load(a.init, map_location=dev))
     net.emb_noise = a.emb_noise if not a.uncond else 0.0
@@ -94,10 +104,15 @@ def main():
 
     @torch.no_grad()
     def _usample(noise):
+        if grouped:
+            return sample_grouped(net, None, None, noise)
         codes = torch.zeros(noise.shape[0], Tn, dtype=torch.long, device=dev)
         for t in range(Tn):
             codes[:, t] = (net.logits(codes[:, : t + 1])[:, t] + noise[:, t]).argmax(-1)
         return codes
+
+    def _sample(ids, noise):
+        return sample_grouped(net, None, ids, noise, 0.0, a.snap_tau) if grouped else net.sample(ids, noise, a.snap_tau)
 
     @torch.no_grad()
     def snapshot(step):
@@ -107,8 +122,8 @@ def main():
             g = from_patches(D[_usample(frog_noise).cpu().numpy()], P)
             gf = from_patches(D[_usample(torch.flip(frog_noise, [1])).cpu().numpy()], P)
         else:
-            g = from_patches(D[net.sample(snap_ids, snap_noise).cpu().numpy()], P)
-            gf = from_patches(D[net.sample(snap_ids[:1].repeat(16, 1), frog_noise).cpu().numpy()], P)
+            g = from_patches(D[_sample(snap_ids, snap_noise).cpu().numpy()], P)
+            gf = from_patches(D[_sample(snap_ids[:1].repeat(16, 1), frog_noise).cpu().numpy()], P)
         net.train()
         np.savez_compressed(os.path.join(run_dir, "snapshots", f"step_{step:06d}.npz"), prompts=np.array(SNAP_PROMPTS),
                             grids=g.astype(np.uint8), frog=gf.astype(np.uint8))

@@ -30,9 +30,9 @@ def main():
     print(f"activated in {time.time() - t0:.0f}s", flush=True)
     got = sheets.set_prompt_and_read(a.prompt, a.seed, cl, wb, timeout=1800)
     ids_ = T.encode(a.prompt, T.index_vocab(vocab))
-    if cfg.get("model") == "v3p":
+    if cfg.get("model") in ("v3p", "v3pg"):
         from spritesheet import reference_p as RP
-        ref = RP.forward(ids_, a.seed, w, cfg, keep=False)["pixels"]
+        ref = (RP.forward_g if cfg["model"] == "v3pg" else RP.forward)(ids_, a.seed, w, cfg, keep=False)["pixels"]
     else:
         from spritesheet import reference as R
         ref = R.forward(ids_, a.seed, w, cfg)["classes"]

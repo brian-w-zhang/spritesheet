@@ -54,8 +54,9 @@ class Model:
                 self.unet_dir = os.path.join(ROOT, "artifacts", "model", v)
                 continue
             self.cfg[{"g": "guidance", "t": "sample_tau"}[k]] = float(v)
-        self.v3p = self.cfg.get("model") == "v3p"
-        self.v3 = self.cfg.get("model") in ("v3", "v3vq", "v3p")
+        self.v3p = self.cfg.get("model") in ("v3p", "v3pg")
+        self.grouped = self.cfg.get("model") == "v3pg"
+        self.v3 = self.cfg.get("model") in ("v3", "v3vq", "v3p", "v3pg")
         self.vq = self.cfg.get("model") == "v3vq"
         self.mdm = self.cfg.get("model") == "mdm"
         vp = os.path.join(d, "vocab.txt")
@@ -67,14 +68,16 @@ class Model:
             from compare_models import load_v2
             self.net, self.c2 = load_v2(d)
         elif self.v3p:
-            from spritesheet.patchgpt import PatchGPT, UPatchGPT
-            self.net = PatchGPT(self.cfg, np.load(os.path.join(ROOT, "data", "build", "v3", "wordvec.npy")))
+            from spritesheet.patchgpt import PatchGPT, UPatchGPT, GroupGPT
+            wv3 = np.load(os.path.join(ROOT, "data", "build", "v3", "wordvec.npy"))
+            self.net = GroupGPT(self.cfg, wv3) if self.grouped else PatchGPT(self.cfg, wv3)
             self.net.load_state_dict(torch.load(os.path.join(d, "model.pt"), map_location="cpu"))
             self.net = self.net.eval()
             self.D = np.load(os.path.join(d, "patches.npy"))
             self.unet = None
             if self.unet_dir:
-                self.unet = UPatchGPT(json.load(open(os.path.join(self.unet_dir, "config.json"))))
+                uc = json.load(open(os.path.join(self.unet_dir, "config.json")))
+                self.unet = GroupGPT(uc) if "G" in uc else UPatchGPT(uc)
                 self.unet.load_state_dict(torch.load(os.path.join(self.unet_dir, "model.pt"), map_location="cpu"))
                 self.unet = self.unet.eval()
         elif self.vq:
@@ -98,7 +101,7 @@ class Model:
             return np.asarray(g), None
         ids = torch.tensor([T.encode(c, self.vocab) for c in caps])
         if self.v3p:
-            from spritesheet.patchgpt import sample_guided
+            from spritesheet.patchgpt import sample_guided, sample_grouped
             from spritesheet.patches import from_patches
             from spritesheet import reference_p as RP
             Tn, Kp = self.cfg["T"], self.cfg["Kp"]
@@ -106,7 +109,8 @@ class Model:
             out = []
             for i in range(0, len(caps), 128):
                 nz = torch.tensor(np.stack([RP.gumbel(s, Tn, Kp) for s in seeds[i:i + 128]]), dtype=torch.float32)
-                codes = sample_guided(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau)
+                fn = sample_grouped if self.grouped else sample_guided
+                codes = fn(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau)
                 out.append(from_patches(self.D[codes.numpy()], self.cfg["P"]).astype(np.uint8))
             return np.concatenate(out), None
         if self.vq:

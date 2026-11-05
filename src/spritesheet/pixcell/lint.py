@@ -48,7 +48,7 @@ def lint(wb) -> dict:
             in_disp = any(sheet == b.sheet and b.r0 <= r < b.r0 + b.nrows and b.c0 <= c < b.c0 + b.ncols
                           for b in render_blocks)
             body = _STR.sub('""', v)
-            allowed = CORE | TOKENIZER | (NORM if wb.meta.get("model") == "v3p" else set()) | (RENDER if in_disp else set()) | (SAMPLING if _SCORE_TAB.match(sheet) else set())
+            allowed = CORE | TOKENIZER | (NORM if wb.meta.get("model") in ("v3p", "v3pg") else set()) | (RENDER if in_disp else set()) | (SAMPLING if _SCORE_TAB.match(sheet) else set())
             if "{" in body and not in_disp:
                 bad.append((sheet, (r, c), "array literal"))
             for m in _FN.finditer(body):

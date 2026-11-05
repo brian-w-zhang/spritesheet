@@ -177,3 +177,89 @@ def _export_blocks(w, sd, layers, dm, pre):
         w[p + "Wo"], w[p + "bo"] = sd[b + "o.weight"].T, sd[b + "o.bias"]
         w[p + "W1"], w[p + "b1"] = g2[:, None] * sd[b + "f1.weight"].T, sd[b + "f1.bias"]
         w[p + "W2"], w[p + "b2"] = sd[b + "f2.weight"].T, sd[b + "f2.bias"]
+
+
+# ---------------------------------------------------------------- v3-PG: grouped decoding (D-53)
+def group_rows(cfg):
+    from .patchgpt import group_layout   # pure numpy; the layout is part of the spec
+    return group_layout(cfg["T"], cfg["G"], cfg.get("order_seed", 0))
+
+
+def forward_g(ids, seed, w, cfg, keep=True):
+    """Grouped spec. Rows: L prompt rows, then per group g: query rows (x = qpos[p]) and context rows
+    (x = E[code_p] + cpos[p]; none for the last group). Causal in row order, and query rows are never keys of other
+    rows (keymask 0); a row always sees itself. Query row of p → logit[p] → code[p] (Gumbel-max, noise row p).
+    Guidance (cfg guidance g > 0): an unconditional chain with the same image rows and "U" weights (no prompt rows)."""
+    ids = np.asarray(ids)
+    L, T, K, dm = len(ids), cfg["T"], cfg["Kp"], cfg["dm"]
+    order, rows_img = group_rows(cfg)
+    kinds = [k for k, _, _ in rows_img]
+    keyok = np.concatenate([(ids != 1).astype(np.float64), np.array([0.0 if k == "q" else 1.0 for k in kinds])])
+    ukeyok = keyok[L:]
+    g = float(cfg.get("guidance", 0.0))
+    inv_tau = 1.0 / float(cfg.get("tau", 1.0))
+    Gn = gumbel(seed, T, K)
+    cache = [{"k": [], "v": []} for _ in range(cfg["layers"])]
+    ucfg = {"dm": cfg["U_dm"], "H": cfg["U_H"], "layers": cfg["U_layers"]} if g else None
+    ucache = [{"k": [], "v": []} for _ in range(cfg["U_layers"])] if g else None
+    codes = np.full(T, -1, np.int64)
+    logits, scores, margins, rows = np.zeros((T, K)), np.zeros((T, K)), [], []
+    for n in range(L + len(rows_img)):
+        row = {}
+        if n < L:
+            row["wv"] = w["wordvec"][ids[n] - 1]
+            x0 = row["wv"] @ w["Win"] + w["b_in"] + w["pos_text"][n]
+        else:
+            kind, p, _ = rows_img[n - L]
+            assert kind == "q" or codes[p] >= 0
+            x0 = w["qpos"][p] if kind == "q" else w["E"][codes[p]] + w["cpos"][p]
+        x, parts = _row_forward(x0, n, w, cfg, cache, keyok)
+        row.update({"x0": x0, "parts": parts, "x": x})
+        if n >= L and g:
+            i = n - L
+            ux0 = w["U_qpos"][p] if kind == "q" else w["U_E"][codes[p]] + w["U_cpos"][p]
+            ux, uparts = _row_forward(ux0, i, w, ucfg, ucache, ukeyok, pre="U")
+            row.update({"ux0": ux0, "uparts": uparts, "ux": ux})
+        if n >= L and kind == "q":
+            rf = _rms(x, dm)
+            lc = (x @ w["Wout"]) * rf + w["bout"]
+            lg = lc
+            row.update({"rf": rf, "lc": lc, "pos": p})
+            if g:
+                urf = _rms(row["ux"], cfg["U_dm"])
+                lu = (row["ux"] @ w["U_Wout"]) * urf + w["U_bout"]
+                lg = (1.0 + g) * lc - g * lu
+                row.update({"urf": urf, "lu": lu})
+            s = lg * inv_tau + Gn[p]
+            codes[p] = int(np.argmax(s))
+            top2 = np.sort(s)[-2:]
+            margins.append(float(top2[1] - top2[0]))
+            logits[p], scores[p] = lg, s
+        if keep:
+            rows.append(row)
+    P = cfg["P"]
+    Gd = int(round(T ** 0.5))
+    pix = w["D"].astype(np.int64)[codes].reshape(Gd, Gd, P, P).transpose(0, 2, 1, 3).reshape(Gd * P, Gd * P)
+    return {"codes": codes, "pixels": pix, "logits": logits, "scores": scores, "min_margin": min(margins),
+            "rows": rows, "keyok": keyok, "gumbel": Gn, "rows_img": rows_img}
+
+
+def export_g(net, D, extra_cfg=None, unet=None):
+    """GroupGPT (torch) [+ unconditional GroupGPT] → (w, cfg) for forward_g."""
+    sd = {k: v.detach().double().cpu().numpy() for k, v in net.state_dict().items()}
+    c = net.cfg
+    w = {"wordvec": sd["wordvec"], "Win": sd["win.weight"].T, "b_in": sd["win.bias"], "pos_text": sd["pos_text"],
+         "E": sd["E"], "qpos": sd["qpos"], "cpos": sd["cpos"], "D": np.asarray(D, np.float64)}
+    _export_blocks(w, sd, c["layers"], c["dm"], "")
+    w["Wout"], w["bout"] = sd["nf.g"][:, None] * sd["out.weight"].T, sd["out.bias"]
+    cfg = {k: c[k] for k in ("dm", "H", "mlp", "layers", "T", "Kp", "P", "K", "N", "d", "G") if k in c}
+    cfg.update(model="v3pg", L=c.get("L", 12), order_seed=c.get("order_seed", 0), tau=1.0, guidance=0.0)
+    if unet is not None:
+        su = {k: v.detach().double().cpu().numpy() for k, v in unet.state_dict().items()}
+        cu = unet.cfg
+        w.update({"U_E": su["E"], "U_qpos": su["qpos"], "U_cpos": su["cpos"]})
+        _export_blocks(w, su, cu["layers"], cu["dm"], "U")
+        w["U_Wout"], w["U_bout"] = su["nf.g"][:, None] * su["out.weight"].T, su["out.bias"]
+        cfg.update(U_dm=cu["dm"], U_H=cu["H"], U_mlp=cu["mlp"], U_layers=cu["layers"])
+    cfg.update(extra_cfg or {})
+    return {k: round15(v) for k, v in w.items()}, cfg

@@ -254,3 +254,35 @@ def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
         E["LU"] = np.array([r["lu"] for r in ur])
     out["style"] = 1
     return {"ids": ids, "expected": E, "forward": out}
+
+
+def trace_pg(prompt, seed, w, cfg, vocab_index) -> dict:
+    """v3-PG: expected value of every block (spec: reference_p.forward_g). Score/Codes/rf/LU are indexed by position."""
+    from .. import reference_p as RP
+    ids = T.encode(prompt, vocab_index)
+    out = RP.forward_g(ids, seed, w, cfg)
+    clean, rests, words = T.split_trace(prompt)
+    m = (np.array(ids) != T.PAD).astype(float)
+    L, Tn, H = len(ids), cfg["T"], cfg["H"]
+    rows, rows_img = out["rows"], out["rows_img"]
+    N = len(rows)
+    qrow = {p: L + i for i, (k, p, _) in enumerate(rows_img) if k == "q"}
+    s0 = int(abs(seed)) % (R.M31 - 1) + 1
+    E = {"Tokens.clean": [[clean]], "Tokens.rest": [[r] for r in rests], "Tokens.word": [[x] for x in words],
+         "Tokens.ids": np.array(ids, float)[:, None], "Tokens.mask": m[:, None],
+         "Tokens.denom": np.array([[max(1.0, m.sum())]]),
+         "seed.s0": np.array([[s0]], float), "seed.s1": np.array([[RP.seed_state(seed)]], float),
+         "WV": np.array([rows[n]["wv"] for n in range(L)]), "X0": np.array([r["x0"] for r in rows])}
+    _stack_expected(E, "", [r["parts"] for r in rows], N, H, cfg["dm"] // H)
+    E["rf"] = np.array([[rows[qrow[p]]["rf"]] for p in range(Tn)])
+    E["Score"] = out["scores"]
+    E["Codes"] = out["codes"].astype(float)[:, None]
+    E["Pixels"] = out["pixels"].astype(float)
+    if cfg.get("guidance"):
+        ur = rows[L:]
+        E["U.X0"] = np.array([r["ux0"] for r in ur])
+        _stack_expected(E, "U", [r["uparts"] for r in ur], len(ur), cfg["U_H"], cfg["U_dm"] // cfg["U_H"])
+        E["U.rf"] = np.array([[rows[qrow[p]]["urf"]] for p in range(Tn)])
+        E["LU"] = np.array([rows[qrow[p]]["lu"] for p in range(Tn)])
+    out["style"] = 1
+    return {"ids": ids, "expected": E, "forward": out}
