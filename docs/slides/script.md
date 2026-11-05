@@ -1,40 +1,27 @@
-# Video script draft (about 5 minutes)
+# MP2 narration (5 min, ~650 words) for `docs/slides/deck/slides.pdf`
 
-A draft for the team to rewrite in their own voices. The course grades narration flow, and every member should speak: assign the `[Speaker]` slots yourselves. Numbers match `docs/slides/README.md`, which names each source file.
+Roughly 35–40 s per slide. Every number is on the slide and comes from the metrics file named in `docs/slides/README.md`. Who speaks which slide is for the team to decide; mark it here.
 
----
+**1 · SpriteSheet (title)**
+Type a prompt into a Google Sheet, and a neural network made of nothing but formulas draws the sprite. No scripts, no add-ons, no API calls: 493,532 ordinary formulas. On the right is a real cell from our sheet. Pixel L15 of this potion is an `INDEX` into a patch dictionary, picked by the model a few tabs upstream.
 
-**1. Hook (0:00–0:35) · [Speaker A]**
-*(Screen recording: type "a red frog" into the sheet; the sprite appears.)*
-This is a Google Sheet. There's no script, no add-on and no API call behind it. Every pixel you see comes from about two hundred and twenty thousand ordinary formulas: SUMPRODUCTs, EXPs, MATCHes. Together they form a neural network that turns text into pixel art. We call the compiler that builds it **Pixcell**.
+**2 · Problem**
+Neural networks feel like magic, mostly because you can't see inside them. A spreadsheet can't hide anything. Our idea: put a whole text-to-image model inside the most familiar tool there is, so every multiply-add is a cell you can click. It's for students, teachers and spreadsheet users. Spreadsheet ML so far means tiny classifiers. Text-to-pixel-art models like SpriteX32 run on GPUs. As far as our search found, nothing else runs a text-to-image model as native spreadsheet formulas.
 
-**2. How it works (0:35–1:30) · [Speaker B]**
-*(pipeline.svg, then network_tabs.png)*
-We train a small text-to-image network in PyTorch. A word-vector table and a tiny attention layer read the prompt. A convolutional decoder grows a 4×4 grid into a 32×32 sprite. A palette picks each pixel's colour.
-Pixcell then lowers every layer into a sheet tab: matrix multiplies become SUMPRODUCTs over weight blocks, and attention becomes softmax formulas. The deployed model has 736 thousand trained parameters in 1.77 million cells, under nine percent of Google's cell limit.
-The hard requirement was exactness. A float64 numpy reference is our spec. In real Google Sheets, twenty test prompts matched it pixel for pixel, with relative error around ten to the minus thirteen.
+**3 · How it works**
+We built a compiler, Pixcell. We train in PyTorch on 195,154 licensed PixelGPT sprites. A float64 numpy reference is the definition of correct. Pixcell turns every multiply-add into a cell formula, like this ReLU. We upload the formulas as inert text and switch them on tab by tab. Then three engines, HyperFormula, LibreOffice and Google Sheets itself, must match the reference pixel for pixel. The model draws 64 patches one at a time, and a single recalculation draws the whole sprite.
 
-**3. v1 results (1:30–2:20) · [Speaker C]**
-*(lineup_xl_novel.png, seeds.png)*
-We trained on emoji in four art styles plus twenty thousand PixelGPT sprites. The seed cell picks a style. The model handles prompts that are in neither dataset, with a CLIP top-5 retrieval rate of 0.41.
-The biggest lever was simply scale: training four times longer and 2.4 times wider raised held-out pixel accuracy from 0.625 to 0.676.
-And against SpriteX32, a diffusion model with eleven million parameters running fifty steps on a GPU, our first one-pass spreadsheet model scored a higher CLIP score on held-out prompts: 0.267 versus 0.249.
+**4 · Results**
+Our first models drew blobs. A one-pass network trained per pixel draws the average of every frog it has seen. PatchGPT fixed that by choosing from hard 3×3 patches, so blur is impossible by construction. Then we added classifier-free guidance, inside the sheet, as a second small chain. Novel-prompt CLIP R@5 went from 0.41 to 0.61. We also tried and dropped diffusion, learned variants, a VQ code grid, faster parallel drawing and truncated sampling. Each one was blobbier or blank.
 
-**4. Iteration: the averaging problem (2:20–3:30) · [Speaker D]**
-*(v3_lineup_r4_creatures.png)*
-Look closely and v1's sprites are blurry. That's not a bug: a network trained pixel by pixel learns the *average* of every frog it has seen.
-We tried three fixes.
-- **Diffusion (v2):** drawing in four steps. It runs in Sheets, at 836 thousand formulas, but it wasn't better by eye and it was four times slower.
-- **Learned variants (v3):** sixteen variants, each owning the sprites it draws best, with the seed choosing between them. Colour words got much better, 0.66 to 0.90, but the variants split by colour, not by shape.
-- **A code grid:** a 6×6 grid of 256 learned codes, sampled one at a time by a small prior. That gives the first interiors and real seed variety, with diversity doubled. But it's still mushy.
-Honestly: on our retrieval metric, every model ties within its confidence interval, so v1 stays the live demo.
-*(Add the critic / guidance results if they land.)*
+**5 · Demo**
+This is the live sheet. These eight sprites were read back from Google Sheets, and all eight match our reference pixel for pixel. A new prompt takes two to three minutes to settle. Guidance is a live cell: type zero and it switches off. Same prompt, new seed, and you get a different frog.
 
-**5. How we worked (3:30–4:05) · [Speaker A]**
-*(kanban screenshot)* TODO, team: meeting cadence, the board, who owned what.
+**6 · Process**
+Humans decide, agents build, scripts check. We set the problem and the quality bar. Notion holds the course context and our board, and agents read it over MCP. Claude Code runs long sessions from a written goal and logs every experiment. GitHub holds 44 logged decisions and 17 evaluation rounds. Every card on the board says whether a human, an agent or both did it. *(Team: add the meeting cadence.)*
 
-**6. Use of AI (4:05–4:40) · [Speaker B]**
-We used Claude Code heavily: for research, the overnight implementation, training and figures. The rule was *checks, not trust*. Every claim is a script that passes or fails, and the parity gates caught three real spec bugs that review missed. What didn't work: the agent initially trusted loss numbers, so we made it look at real Sheets output. We kept the project choice, novelty claims and this narration for ourselves.
+**7 · Use of AI**
+An AI agent wrote the code; we kept it honest. What worked: a spec first, then pass/fail gates. They caught three spec bugs review missed. What didn't: trusting the loss, because lower loss still meant blobs, so we made the agent look at every image. It once reported 41 seconds per prompt; it had re-rendered the old prompt, and the real number is about two minutes. We vetoed its plan to bake guidance into the weights. We didn't delegate the project, the dataset purchase, the quality bar, or this narration.
 
-**7. Lessons and next (4:40–5:00) · [Speaker C]**
-Exactness turned out to be the easy part, once there was a spec and gates. Quality is the hard part. Next: putting the code-grid model into the sheet. TODO: the MP3 pivot.
+**8 · Lessons and next**
+Exactness was cheap; quality was hard. Look at the pictures, not the loss. And speed follows formula count. A cheaper guidance chain is what got guidance onto the sheet. Next time: under a minute per prompt, and better creatures. For MP3 we're pivoting to the Waterloo Goose Simulator, a 3D game of campus where you play the goose. Thank you.

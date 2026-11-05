@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SpriteSheet · SE 390 MP2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=JetBrains+Mono:wght@400;500;700&display=block" rel="stylesheet">
+<link rel="stylesheet" href="deck.css">
+<script src="sprites.js"></script>
+</head>
+<body>
+
+<!-- 1 · title -------------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="SpriteSheet">
+  <div class="body title">
+    <div class="t-left">
+      <h1 class="wordmark">SpriteSheet</h1>
+      <p class="lede">Type a prompt into a Google Sheet. A neural network made of nothing but formulas draws the sprite.</p>
+      <table class="facts">
+        <tr><td><b>493,532</b>formulas</td><td><b>0</b>scripts, add-ons or API calls</td><td><b>8 / 8</b>prompts pixel-exact in Google Sheets</td></tr>
+      </table>
+      <p class="team">Brian Zhang, Sabrina Wang, Adrian Tang, Mayank Upadhyay<br><span>Team Whiplash, SE 390 MP2, Advanced Technology</span></p>
+    </div>
+    <div class="t-right">
+      <div class="fbar"><span class="ref">L15</span><span class="fx">fx</span><code>=INDEX(W_D!$A$1:$I$1024,Out!A36+1,9)</code></div>
+      <div class="inputs">
+        <div><span>Prompt</span><b>a red potion</b></div>
+        <div><span>Seed</span><b>1</b></div>
+        <div><span>Guidance</span><b>0.75</b></div>
+      </div>
+      <div class="sprite hero" data-model="final" data-i="0" data-sel="14,11" data-ruler="1"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · problem ------------------------------------------------------------------------------------------------ -->
+<section class="slide" data-tab="Problem">
+  <div class="body">
+    <h2>Neural networks feel like magic.<br><span>A spreadsheet can't hide anything.</span></h2>
+    <div class="two">
+      <div>
+        <h3>The idea</h3>
+        <p class="big">Put a whole text-to-image model inside the most familiar tool there is, so every multiply-add is a cell you can click, read and change.</p>
+        <h3>Who it's for</h3>
+        <ul class="plain">
+          <li>Students and teachers who want to see how a model really works</li>
+          <li>Spreadsheet users curious about AI</li>
+          <li>Anyone who has only seen AI behind an API</li>
+        </ul>
+      </div>
+      <div>
+        <h3>What exists</h3>
+        <table class="grid-table">
+          <thead><tr><th></th><th>draws from text</th><th>runs in a spreadsheet</th><th>every step inspectable</th></tr></thead>
+          <tbody>
+            <tr><td>Spreadsheet ML demos<small>tiny classifiers, hand-built nets</small></td><td></td><td class="y">yes</td><td class="y">yes</td></tr>
+            <tr><td>Text-to-pixel-art models<small>SpriteX32, Five-Dollar Model</small></td><td class="y">yes</td><td></td><td></td></tr>
+            <tr class="us"><td>SpriteSheet<small>compiled by our Pixcell compiler</small></td><td class="y">yes</td><td class="y">yes</td><td class="y">yes</td></tr>
+          </tbody>
+        </table>
+        <p class="note">As far as our search found, nothing else runs a text-to-image model as native spreadsheet formulas.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 · how -------------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="How it works">
+  <div class="body">
+    <h2>We built a compiler from a neural network to a spreadsheet.</h2>
+    <ol class="pipe">
+      <li><b>Train</b><span>PyTorch, on 195,154 licensed PixelGPT sprites</span></li>
+      <li><b>Specify</b><span>a float64 numpy reference is the definition of correct</span></li>
+      <li><b>Compile</b><span>Pixcell turns every multiply-add into a cell formula</span></li>
+      <li><b>Upload</b><span>formulas go in as inert text, then switch on tab by tab</span></li>
+      <li><b>Check</b><span>HyperFormula, LibreOffice and Google Sheets must match the spec pixel for pixel</span></li>
+    </ol>
+    <div class="anatomy">
+      <div class="tabrow">
+        <div class="tb"><i>Prompt</i><em>your words</em></div>
+        <div class="tb"><i>Tokens</i><em>words to ids</em></div>
+        <div class="tb wide"><i>Blk1 … Blk4</i><em>transformer, 4 layers</em></div>
+        <div class="tb u"><i>U1, U2</i><em>guidance chain</em></div>
+        <div class="tb"><i>Score</i><em>64 × 1,024 choices</em></div>
+        <div class="tb"><i>Pixels</i><em>patch lookup</em></div>
+      </div>
+      <div class="fbar small"><span class="ref">Blk1_MLP!T40</span><span class="fx">fx</span><code>=MAX(0,SUMPRODUCT(Blk1_Ctx!A116:DX116,Blk1_W1!A18:DX18)*A40+Blk1_W1!DY18)</code></div>
+      <p class="caption">The sprite is 64 patches of 3×3 pixels, each picked from a learned dictionary of 1,024. The model picks them one at a time; every step is one more row of the same formula grid, so a single recalculation draws the whole sprite.</p>
+    </div>
+    <div class="stats">
+      <div><b>810,112</b>parameters in the main model</div>
+      <div><b>140,176</b>in the guidance chain</div>
+      <div><b>84</b>tabs</div>
+      <div><b>2,551,942</b>cells</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 · results --------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="Results">
+  <div class="body">
+    <h2>The iteration: from blobs to sprites.</h2>
+    <div class="lineup">
+      <div class="lu-head"><span></span><span class="cap" data-caps="1"></span><span class="r5h">novel-prompt CLIP R@5</span></div>
+      <div class="lu-row"><div class="lu-name"><b>v1-XL</b>one-pass decoder, 32×32<small>averages every frog it saw</small></div><div class="strip" data-model="v1xl"></div><div class="r5"><b>0.41</b><i style="--v:.41"></i></div></div>
+      <div class="lu-row"><div class="lu-name"><b>PatchGPT</b>hard 3×3 patches, 64 steps<small>blur is impossible by construction</small></div><div class="strip" data-model="unguided"></div><div class="r5"><b>0.38</b><i style="--v:.38"></i></div></div>
+      <div class="lu-row final"><div class="lu-name"><b>+ guidance in the sheet</b>final model, live<small>a second small chain sharpens the prompt</small></div><div class="strip" data-model="final"></div><div class="r5"><b>0.61</b><i style="--v:.61"></i></div></div>
+    </div>
+    <div class="dropped">
+      <h3>Tried and dropped</h3>
+      <ul class="plain inline">
+        <li><b>Diffusion</b> ran in Sheets at 836k formulas, no better by eye</li>
+        <li><b>Learned variants</b> changed colour, not shape</li>
+        <li><b>VQ code grid</b> still mushy</li>
+        <li><b>8-round parallel drawing</b> faster, blobbier (0.32)</li>
+        <li><b>Clipped or truncated sampling</b> blank images</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 5 · demo ------------------------------------------------------------------------------------------------ -->
+<section class="slide" data-tab="Demo">
+  <div class="body">
+    <h2>It runs live in Google Sheets.</h2>
+    <div class="demo">
+      <div class="sheetmock">
+        <div class="fbar"><span class="ref">B2</span><span class="fx">fx</span><code>a frog</code></div>
+        <div class="inputs">
+          <div><span>Prompt</span><b>a frog</b></div>
+          <div><span>Seed</span><b>3</b></div>
+          <div><span>Guidance</span><b>0.75</b></div>
+        </div>
+        <div class="sprite mid" data-model="final" data-i="1" data-ruler="1"></div>
+      </div>
+      <div class="demo-right">
+        <h3>Read back from the live sheet</h3>
+        <div class="strip big" data-model="final" data-n="8" data-labels="1"></div>
+        <div class="stats tight">
+          <div><b>8 / 8</b>match the spec pixel for pixel</div>
+          <div><b>2–3 min</b>per new prompt, until the image settles</div>
+          <div><b>B4</b>guidance is a live cell: type 0 to switch it off</div>
+        </div>
+        <h3>Same prompt, new seed</h3>
+        <div class="strip" data-model="final" data-from="8" data-n="8"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 · process ---------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="Process">
+  <div class="body">
+    <h2>Humans decide, agents build, scripts check.</h2>
+    <div class="flow">
+      <div class="node"><b>Us</b><span>pick the problem, set the bar, review the pictures</span></div>
+      <div class="arrow"></div>
+      <div class="node"><b>Notion</b><span>course context and the task board, read by people and by agents over MCP</span></div>
+      <div class="arrow"></div>
+      <div class="node"><b>Claude Code</b><span>long runs from a written goal: build, train, check, log, commit</span></div>
+      <div class="arrow"></div>
+      <div class="node"><b>GitHub</b><span>code, 44 logged decisions, 17 evaluation rounds</span></div>
+    </div>
+    <div class="kanban">
+      <div class="kb-title"><i>Tasks</i><em>Notion board, cards built from the commit history</em></div>
+      <div class="kb-cols">
+        <div><h4>Backlog</h4><p>Cut prompt latency below 2 min</p><p>Fix weak creatures</p></div>
+        <div><h4>To do</h4><p>Record the 5-min video</p><p>MP3 abstract</p></div>
+        <div><h4>In progress</h4><p>MP2 slides</p></div>
+        <div><h4>Blocked</h4><p class="empty">nothing blocked</p></div>
+        <div><h4>Done</h4><p>Guidance inside the sheet <s>agent</s></p><p>Guidance must run on the sheet <s class="h">human</s></p></div>
+      </div>
+    </div>
+    <div class="three">
+      <p><b>One source of truth.</b> Docs come first; when code and docs disagree, the docs win and the change is logged.</p>
+      <p><b>Every card says who did it.</b> Human, agent or both, with the commit that closed it.</p>
+      <p><b>Meetings.</b> <mark>Team: add our meeting cadence here.</mark></p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 · AI ---------------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="Use of AI">
+  <div class="body">
+    <h2>An AI agent wrote the code. We kept it honest.</h2>
+    <div class="ai">
+      <div class="ai-col">
+        <h3>Used</h3>
+        <p><b>Claude Code</b> for research with sources, the docs, every line of the compiler and models, training runs and figures.</p>
+        <p><b>Notion over MCP</b> for course context and the board.</p>
+        <p><b>CLIP</b> to score images against prompts. No image generator anywhere.</p>
+      </div>
+      <div class="ai-col">
+        <h3>Worked</h3>
+        <p><b>Spec first, then gates.</b> Parity checks caught three spec bugs that review missed.</p>
+        <p><b>Overnight runs.</b> A written goal plus pass/fail checks let the agent run for hours and stop honestly.</p>
+        <p><b>An experiment log</b> after every run became the source for these slides.</p>
+      </div>
+      <div class="ai-col">
+        <h3>Didn't</h3>
+        <p><b>Trusting the loss.</b> Lower loss still meant blobs; we made the agent look at every image.</p>
+        <p><b>A wrong number.</b> It reported 41 s per prompt; it had re-rendered the old prompt. Real: about 2 min.</p>
+        <p><b>Detours.</b> Hours on faster parallel drawing that looked worse, and a plan to bake guidance into weights that we vetoed.</p>
+      </div>
+      <div class="ai-col">
+        <h3>How we check</h3>
+        <p>Every number here comes from a metrics file a script wrote. <code>check_claims.py</code> tests the README, <code>verify_all.sh</code> runs from a clean clone.</p>
+        <h3>Not delegated</h3>
+        <p>The project, buying the dataset, what counts as "not blobs", guidance on the sheet, and this narration.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 · lessons ---------------------------------------------------------------------------------------------- -->
+<section class="slide" data-tab="Next">
+  <div class="body">
+    <h2>What we learned, and what's next.</h2>
+    <div class="lessons">
+      <div class="ls">
+        <p><b>Exactness is cheap; quality is hard.</b> With a float64 spec and parity gates, the sheet matched from day one. Making the drawings good took 17 rounds.</p>
+        <p><b>Look at the pictures.</b> Blobs come from averaging. Hard patches plus guidance fixed them; the loss never told us.</p>
+        <p><b>Speed follows formula count.</b> A cheaper guidance chain (61k formulas instead of ~180k) is what got guidance onto the sheet.</p>
+        <p><b>Next time:</b> cut latency below a minute, and fix weak creatures like white cats.</p>
+      </div>
+      <div class="next">
+        <div class="kb-title"><i>MP3</i><em>pivot</em></div>
+        <div class="next-body">
+          <h3>Waterloo Goose Simulator</h3>
+          <p>A browser 3D game of the whole UWaterloo campus, built from real map data. You play the goose.</p>
+          <p class="muted">We keep the tooling: docs-first agents, pass/fail checks, every number from a script.</p>
+        </div>
+      </div>
+    </div>
+    <p class="thanks">Thank you. Questions?</p>
+  </div>
+</section>
+
+<script src="deck.js"></script>
+</body>
+</html>
