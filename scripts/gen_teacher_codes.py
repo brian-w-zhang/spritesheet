@@ -31,7 +31,7 @@ def main():
     ap.add_argument("--trunc", type=float, default=None, help="foreground min-p truncation (patchgpt.pick)")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    dev = "mps" if torch.backends.mps.is_available() else "cpu"
+    dev = os.environ.get("SPRITESHEET_DEVICE") or ("mps" if torch.backends.mps.is_available() else "cpu")
     cfg = json.load(open(os.path.join(a.teacher, "config.json")))
     net = PatchGPT(cfg, np.load(os.path.join(V3, "wordvec.npy"))).to(dev)
     net.load_state_dict(torch.load(os.path.join(a.teacher, "model.pt"), map_location=dev))
@@ -41,6 +41,12 @@ def main():
         unet = UPatchGPT(json.load(open(os.path.join(a.unet, "config.json")))).to(dev)
         unet.load_state_dict(torch.load(os.path.join(a.unet, "model.pt"), map_location=dev))
         unet.eval()
+    allow = None
+    if cfg.get("slots"):   # v4 slot model: palette tokens first, then shape tokens (D-57)
+        S, Ks = cfg["slots"], cfg["Ks"]
+        allow = torch.zeros(cfg["T"], cfg["Kp"], dtype=torch.bool, device=dev)
+        allow[:S, Ks:] = True
+        allow[S:, :Ks] = True
     vocab = T.load_vocab(os.path.join(V3, "vocab.txt"))
     s = Sampler3("train", seed=a.seed, p_short=a.p_short)
     g = torch.Generator(device="cpu").manual_seed(a.seed)
@@ -50,7 +56,7 @@ def main():
         ids = torch.tensor([T.encode(x, vocab) for x in c], device=dev)
         u = torch.rand(len(c), cfg["T"], cfg["Kp"], generator=g).clamp(1e-9, 1 - 1e-9)
         noise = (-torch.log(-torch.log(u))).to(dev)
-        codes.append(sample_guided(net, unet, ids, noise, a.guidance, a.tau, a.trunc).cpu().numpy().astype(np.int16))
+        codes.append(sample_guided(net, unet, ids, noise, a.guidance, a.tau, a.trunc, allow=allow).cpu().numpy().astype(np.int16))
         caps += c
         if len(caps) % (a.batch * 20) == 0:
             print(len(caps), f"{time.time() - t0:.0f}s", flush=True)
