@@ -37,3 +37,17 @@ Started 2026-11-04 ~00:30 EST (overnight `/goal` run). Updated after every miles
   - **Quality:** novel R@5 0.61 [0.52, 0.70], against v1-XL 0.41 (r15).
   - **Rejected:** grouped / distilled / fine-tuned variants did not beat it (docs/09 r8–r17).
   - **Next:** slides (`docs/slides/`); team info TODOs are for the team.
+- 2026-11-21 · **MP3 model push: E1 eval, then v4 slot tokens** (docs/09 "MP3 push"; D-56, D-57):
+  - **E1 eval:** 187 fixed prompts × 8 seeds, no picking. Blind VLM judge (Qwen3-VL-8B, `tools/vlm`), CLIP, colour/size/diversity/near-duplicate checks. Commands: `scripts/evalkit.py gen|score|sheet`, `scripts/e1_table.py`, `scripts/e1_paired.py`. GPU and judge jobs run **one at a time** through `scripts/jobq.sh` (16 GB laptop: parallel jobs crashed it).
+  - **v4s_a** (slot tokens, same size as v3) beats deployed v3:
+    - naming 0.596 vs 0.539;
+    - clear 0.316 vs 0.223;
+    - eyes 0.146 vs 0.047;
+    - paired bootstrap CIs all above 0 (`e1_paired_v3__v4s.json`).
+  - **Pixcell** compiles slot models: Gate A2 passes. The spec matches the torch E1 grids 24/24. `v4s_a_sheet` (g 0.75, t 0.8) is being pushed to the **probe** sheet. The v3 demo sheet is unchanged.
+  - **Running:** teacher `v4s_b` (dm256 L6, 50k steps, ~9 h; queue `artifacts/queue/jobs.txt`).
+  - **Next:**
+    1. distil the teacher into a dm128 L4 student;
+    2. evaluate on E1;
+    3. size control and colour richness are the weak spots;
+    4. facing needs labels (29 of 217k captions mention it).

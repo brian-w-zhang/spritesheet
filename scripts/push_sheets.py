@@ -35,8 +35,8 @@ def main():
     mdm = G.is_mdm(cfg)
     v3p = cfg.get("model") in ("v3p", "v3pg")
     key = a.sheet or ("diffusion" if mdm else "v3" if v3p else "v32")
-    if v3p and key != "v3":
-        sys.exit("refusing to push a v3-P model anywhere but the v3 sheet")
+    if v3p and key not in ("v3", "probe"):   # probe = scratch sheet for trying a new build before the demo
+        sys.exit("refusing to push a v3-P model anywhere but the v3 sheet (or the probe scratch sheet)")
     if mdm and key == "v32":
         sys.exit("refusing to push a v2 model into the v1 demo sheet (v32); use --sheet diffusion")
     wb = G.compile_any(w, cfg, vocab, pal, default_prompt=a.prompt, default_seed=a.seed, render=True)
