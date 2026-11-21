@@ -37,3 +37,4 @@ docs/slides/deck/private/
 artifacts/queue/
 # E1 eval: the "real" pseudo-model holds PixelGPT sprites (local only)
 artifacts/eval/e1/real/
+artifacts/eval/e1/sheets/*_local.png
