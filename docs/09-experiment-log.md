@@ -521,3 +521,22 @@ Batch 256, T 64, step time in seconds:
   - Weak: the fox (an orange blob with an eye) and the owl (pale scatter).
 
   E1 is the fair comparison. This check is about parity.
+
+### Why v4s draws too few colours, and temperature on v4 (CPU sampling)
+- **Colours per sprite** (share of sprites with 1/2/3/4 colours; E1 grids):
+
+  | | 1 | 2 | 3 | 4 | mean |
+  |---|---|---|---|---|---|
+  | real | 0.01 | 0.09 | 0.26 | **0.65** | 3.55 |
+  | v4s (t 0.8) | 0.13 | 0.35 | 0.35 | 0.17 | 2.56 |
+  | v4s t 0.9 | 0.09 | 0.29 | 0.35 | 0.27 | 2.79 |
+  | v4s t 1.0 | 0.07 | 0.26 | 0.33 | 0.34 | 2.93 |
+  | v4s g 0.5, t 1.0 | 0.06 | 0.25 | 0.36 | 0.33 | 2.97 |
+
+- **Two losses** (spec codes, 40 random prompt/seed pairs at t 0.8):
+  1. The model picks a smaller palette: a mean of 3.0 colours, with 35% picking 4. In training, 62% of palettes have 4 colours.
+  2. The shape tokens then leave chosen slots unused: 2.48 colours are actually drawn.
+
+  Low temperature favours the commonest patches (solid fills of the main slot), and those are exactly the minority slots: eyes, shading, outlines.
+- **By eye** (`sheets/v4s_vs_v4s_t09_vs_v4s_t1_creatures.png`): unlike v3, v4s at t 1.0 mostly keeps the shape and adds detail: fox chests, fish eyes and fins, frog spots. A few seeds get noisier (two owls, one dog). t 0.9 looks like the middle ground.
+- **Next:** judge t 0.9 / 1.0 / g 0.5 t 1.0 (queued after the teacher; the judge never runs alongside training). Temperature is a live cell in neither sheet yet; the sheet bakes 1/τ into Score.
