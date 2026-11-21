@@ -505,3 +505,19 @@ Batch 256, T 64, step time in seconds:
   1. A bigger teacher, `v4s_b` (dm256 L6, 5.3M params, 50k steps, training now), then sequence-level distillation into a sheet-size student.
   2. Pixcell already compiles slot models (Gate A2 passes).
   3. Push v4s_a + u48 to a sheet.
+
+### v4s_a on Google Sheets (A4, probe sheet) [metrics/parity_sheets_probe.json; figures/probe_sheet_readback.png; logs: runs/logs/push_v4s_a_probe.txt, verify_v4s_probe.txt]
+- **Push:**
+  - What: `v4s_a` + `v4s_u48` at t=0.8 (export `artifacts/model/v4s_a_sheet`), sent to the **probe** scratch sheet. The v3 demo sheet is untouched.
+  - Cost: 3,176 s, 184 requests, 93.2 MB, using the inert upload plus row activation.
+- **Check:** the guidance cell was set to 0.75, and the same 8 prompt/seed pairs as the v3 A4 were read back. **8/8 match the spec pixel for pixel.**
+- **Latency:**
+  - first consistent read: 103–143 s;
+  - stable: 123–167 s.
+
+  That is the same as v3: the palette tokens add 4 steps, and the masked Score cells cost nothing.
+- **By eye**, on these fixed seeds (not picked):
+  - Good: potion, frog, mushroom, crown, chest, and a slime with an eye.
+  - Weak: the fox (an orange blob with an eye) and the owl (pale scatter).
+
+  E1 is the fair comparison. This check is about parity.

@@ -50,10 +50,10 @@ def main():
         tiles.append(np.pad(rgb[px.astype(int)], ((1, 1), (1, 1), (0, 0)), constant_values=255))
     out = {"model": src.get("source"), "sheet": a.sheet, "guidance": g, "tau": cfg.get("tau"), "cases": res,
            "all_match": all(r["match"] for r in res), "n": len(res), "time": time.strftime("%Y-%m-%d %H:%M")}
-    json.dump(out, open(os.path.join(ROOT, "artifacts", "metrics", "parity_sheets_v3p.json"), "w"), indent=1)
+    json.dump(out, open(os.path.join(ROOT, "artifacts", "metrics", "parity_sheets_v3p.json" if a.sheet == "v3" else f"parity_sheets_{a.sheet}.json"), "w"), indent=1)
     img = np.concatenate(tiles, 1)
     Image.fromarray(img).resize((img.shape[1] * 6, img.shape[0] * 6), Image.NEAREST).save(
-        os.path.join(ROOT, "artifacts", "figures", "v3_sheet_readback.png"))
+        os.path.join(ROOT, "artifacts", "figures", "v3_sheet_readback.png" if a.sheet == "v3" else f"{a.sheet}_sheet_readback.png"))
     print("all match:", out["all_match"])
 
 
