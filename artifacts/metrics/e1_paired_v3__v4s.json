@@ -1,0 +1,57 @@
+{
+ "a": "v3",
+ "b": "v4s",
+ "draws": 10000,
+ "mc": {
+  "prompts": 187,
+  "a": 0.5388,
+  "b": 0.5963,
+  "diff": 0.0575,
+  "ci95": [
+   0.0174,
+   0.0976
+  ],
+  "p_b_not_better": 0.0034,
+  "prompts_b_better": 79,
+  "prompts_a_better": 47
+ },
+ "blob": {
+  "prompts": 187,
+  "a": 0.2233,
+  "b": 0.3155,
+  "diff": 0.0922,
+  "ci95": [
+   0.0481,
+   0.1364
+  ],
+  "p_b_not_better": 0.0001,
+  "prompts_b_better": 68,
+  "prompts_a_better": 32
+ },
+ "eyes": {
+  "prompts": 53,
+  "a": 0.0472,
+  "b": 0.1462,
+  "diff": 0.0991,
+  "ci95": [
+   0.0613,
+   0.1368
+  ],
+  "p_b_not_better": 0.0,
+  "prompts_b_better": 22,
+  "prompts_a_better": 2
+ },
+ "facing": {
+  "prompts": 16,
+  "a": 0.5781,
+  "b": 0.5938,
+  "diff": 0.0156,
+  "ci95": [
+   -0.1719,
+   0.2031
+  ],
+  "p_b_not_better": 0.4643,
+  "prompts_b_better": 7,
+  "prompts_a_better": 6
+ }
+}

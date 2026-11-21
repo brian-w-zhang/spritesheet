@@ -467,3 +467,41 @@ Batch 256, T 64, step time in seconds:
 - bf16 autocast saves only about 10%.
 - dm256 L6 at T = 144 (2×2 tokens) ran out of memory under the 0.45 MPS cap at B = 256, so 2×2 models need a smaller batch.
 - **Teacher budget:** a 5M teacher at 60k steps takes about 8 h. That is feasible overnight, but only one at a time.
+
+### v4s_a: slot tokens beat colour patches at the same size [metrics/e1_v4s.json, e1_v4s_g0.json, e1_paired_v3__v4s.json; D-57]
+- **Setup:**
+  - `v4s_a`: dm128 L4, 823k params, 60k steps, 2.6 h on the M4. Its tokens are 4 palette tokens plus 64 3×3 slot-shape tokens (K=1024).
+  - `v4s_u48`: unconditional chain, dm48 L2, 20k steps.
+  - Sampled exactly like the sheet v3: g 0.75, t 0.8. Val NLL 2.475, token accuracy 0.488 (not comparable to v3: different tokens).
+
+  | metric | real | v3 | **v4s** | v4s g=0 |
+  |---|---|---|---|---|
+  | VLM naming, all | 0.662 | 0.539 | **0.596** | 0.453 |
+  | naming, creatures | 0.733 | 0.578 | **0.638** | 0.509 |
+  | naming, objects | 0.625 | 0.708 | **0.750** | 0.558 |
+  | naming, test captions | 0.542 | 0.396 | **0.458** | 0.385 |
+  | VLM clear | 0.424 | 0.223 | **0.316** | 0.241 |
+  | VLM eyes (creatures) | 0.259 | 0.047 | **0.146** | 0.179 |
+  | colours per sprite | 3.55 | 2.74 | 2.56 | 2.39 |
+  | giant/tiny area | 1.32 | 1.33 | 1.11 | 1.14 |
+  | near-duplicates | — | 0.001 | 0.001 | 0.003 |
+
+- **Paired bootstrap over prompts** (v4s − v3, 10k draws):
+  - naming +0.058, 95% CI [0.017, 0.098]: better on 79 prompts, worse on 47;
+  - clear +0.092, CI [0.048, 0.136];
+  - eyes +0.099, CI [0.061, 0.137]: 22 prompts better, 2 worse.
+
+  All three are clear wins. Facing is not (+0.016, CI [−0.17, 0.20]).
+- **By eye** (`sheets/v3_vs_v4s_vs_v4s_g0_creatures.png`, `v3_vs_v4s_objects.png`):
+  - **Creatures:** cats have ears and faces (a purple cat with eyes). Owls have faces with eyes on 5 of 8 seeds, against 1 of 8 for v3. Foxes have ears and white muzzles. Fish have outlines and fins. v3's white silhouettes are gone.
+  - **Objects:** shields are outlined heater shields with emblems, and axes have real heads. Potions and crowns are about equal. Bows are worse: two seeds drew a chest or frame.
+  - **Outlines:** sprites now often have a dark outline. v3 almost never drew one, because each outline colour pairing needed its own dictionary entry.
+- **Why it works:** shape and colour are factored, so one dictionary entry ("eye dot on fur", "outline corner") serves every colour. The palette tokens fix the sprite's colours first, so shape tokens can't drift into colour noise.
+- **Still weak:**
+  - Size control: giant/tiny area ratio 1.11 vs 1.33. It is the weakest group, and slot shapes may lose the scale cue.
+  - Colours per sprite: 2.56 vs real 3.55. The guided model stays under-shaded.
+  - Facing: only 29 of 217k captions mention facing, so it cannot be learned from these captions. Fixing that needs labels (flip augmentation plus VLM facing labels).
+- **Decision:** v4 slot tokens are the new base. Next:
+  1. A bigger teacher, `v4s_b` (dm256 L6, 5.3M params, 50k steps, training now), then sequence-level distillation into a sheet-size student.
+  2. Pixcell already compiles slot models (Gate A2 passes).
+  3. Push v4s_a + u48 to a sheet.
