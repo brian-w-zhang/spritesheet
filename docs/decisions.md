@@ -103,3 +103,11 @@ Append-only. Format: `D-NN · date · decision · why · alternatives rejected`.
   - *Sequence:* 4 palette tokens (class ids, offset by Ks), then 64 shape tokens. A fixed [T, V] mask lets each position pick only its own kind. In the sheet that is a constant added to the logits, and the grid stays one causal grid.
   - *Fair test:* `v4s_a` uses the same transformer size and steps as `v3p_a` (dm128 L4, 60k).
   - *In Pixcell* (`emit_p.compile_p`, cfg `slots`/`Ks`): a disallowed Score cell is the literal −10^30 (no logit formula, so the mask costs nothing). The palette block is `Out!E1:E5` = [0, code₀−Ks, …, code₃−Ks], and each pixel is one `INDEX(Pal, D[shape code, offset] + 1)`. Gate A2 passes on HyperFormula and LibreOffice, with and without guidance [metrics/parity_ops_v3p.json "slots,…"]. Note: HyperFormula does not parse `1E+30`, so the literal is written out in full.
+- **D-58 · 2026-11-21 · Size augmentation ("tiny" = half-size sprite).**
+  - *Why:* every PixelGPT sprite fills the 24×24 frame, whatever its caption says. So "tiny cat" and "giant cat" both come out full-frame for v3 and v4 (`sheets/v3_vs_v4s_vs_v4s_t1_size.png`; E1 giant/tiny area ratio 1.11–1.33, mostly noise).
+  - *What:* with `--p-tiny p`, Sampler3 shrinks a sprite 2× and prefixes "tiny" / "small" / "little".
+    - The shrink takes the majority-foreground colour of each 2×2 block, so the sprite's own ≤4 colours are kept and the slot factorisation stays exact.
+    - The 12×12 result goes at a random offset on an empty canvas.
+    - It runs after the recolour and before the background fill, so "tiny blue frog on a black background" stays consistent.
+  - *Cost:* the 3×3 slot dictionary reconstructs shrunk sprites at 0.882 fg, against 0.919 full-size.
+  - With p_tiny = 0 the sample stream is unchanged.

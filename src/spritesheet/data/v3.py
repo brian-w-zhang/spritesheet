@@ -158,7 +158,7 @@ class Sampler3:
     colour recolour + adjective ("blue <caption>") with p_colour, named background with p_bg, optional
     leading article. Eval splits ("validation", "test") return verbatim captions."""
 
-    def __init__(self, split="train", seed=0, p_colour=0.25, p_bg=0.08, p_article=0.5, p_short=0.0):
+    def __init__(self, split="train", seed=0, p_colour=0.25, p_bg=0.08, p_article=0.5, p_short=0.0, p_tiny=0.0):
         from .synth import recolor_luts, bg_classes, saturated_mask, COLORS, BG_COLORS, BG_PHRASES, _WORDS_OF
         from .. import tokenizer as T
         z = np.load(os.path.join(OUT, "imgs_24.npz"))
@@ -174,6 +174,7 @@ class Sampler3:
         self.COLORS, self.BG, self.BGP, self.WORDS_OF = list(COLORS), list(BG_COLORS), BG_PHRASES, _WORDS_OF
         self.p = (p_colour, p_bg, p_article) if split == "train" else (0.0, 0.0, 0.0)
         self.p_short = p_short if split == "train" else 0.0
+        self.p_tiny = p_tiny if split == "train" else 0.0
         self.L = T.L
         self.nw = lambda c: len(T.normalize(c))
 
@@ -188,6 +189,9 @@ class Sampler3:
             c = self.COLORS[int(r.integers(len(self.COLORS)))]
             g = self.luts[c][g]
             cap = self.WORDS_OF[c][int(r.integers(len(self.WORDS_OF[c])))] + " " + cap if c in self.WORDS_OF else c + " " + cap
+        if self.p_tiny and r.random() < self.p_tiny and self.nw(cap) + 1 <= self.L and (g > 0).any():
+            g = place_small(shrink2(g), r)          # size augmentation (D-58): a half-size sprite reads as "tiny"
+            cap = TINY_WORDS[int(r.integers(len(TINY_WORDS)))] + " " + cap
         if r.random() < pb and self.nw(cap) + 4 <= self.L:
             bg = self.BG[int(r.integers(len(self.BG)))]
             g = np.where(g == 0, self.bgc[bg], g)
@@ -201,6 +205,31 @@ class Sampler3:
         out = [self.sample() for _ in range(B)]
         caps, g = [o[0] for o in out], np.stack([o[1] for o in out])
         return (caps, g, np.array([o[2] for o in out])) if with_idx else (caps, g)
+
+
+TINY_WORDS = ("tiny", "small", "little")
+
+
+def shrink2(g):
+    """24x24 class grid → 12x12: a 2x2 block is foreground if >= 2 of its pixels are; its colour is the block's most
+    frequent foreground colour (ties → the lowest class id). Keeps at most the sprite's own colours."""
+    b = g.reshape(12, 2, 12, 2).transpose(0, 2, 1, 3).reshape(12, 12, 4)
+    out = np.zeros((12, 12), np.uint8)
+    for i in range(12):
+        for j in range(12):
+            v = b[i, j][b[i, j] > 0]
+            if len(v) >= 2:
+                u, c = np.unique(v, return_counts=True)
+                out[i, j] = u[np.argmax(c)]
+    return out
+
+
+def place_small(s, r):
+    """put a small grid on an empty (class 0) 24x24 canvas at a random offset."""
+    g = np.zeros((24, 24), np.uint8)
+    y, x = int(r.integers(0, 24 - s.shape[0] + 1)), int(r.integers(0, 24 - s.shape[1] + 1))
+    g[y:y + s.shape[0], x:x + s.shape[1]] = s
+    return g
 
 
 def eval_set3(split="validation", n=512, seed=7):

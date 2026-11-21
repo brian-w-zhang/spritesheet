@@ -28,6 +28,7 @@ def main():
     ap.add_argument("--label-smooth", type=float, default=0.0)
     ap.add_argument("--p-colour", type=float, default=0.25)
     ap.add_argument("--p-short", type=float, default=0.0, help="head-noun-preserving caption dropout (data.v3.shorten)")
+    ap.add_argument("--p-tiny", type=float, default=0.0, help="size augmentation: half-size sprite + 'tiny/small/little' (D-58)")
     ap.add_argument("--init", default=None)
     ap.add_argument("--kd", default=None, help="teacher samples npz (scripts/gen_teacher_codes.py): sequence-level distillation")
     ap.add_argument("--kd-mix", type=float, default=0.75, help="share of each batch taken from the teacher samples")
@@ -82,7 +83,7 @@ def main():
         x = F.one_hot(pt, K1).flatten(2).float()
         return (x @ Dh.T).argmax(-1)                                                        # [B, T]
 
-    sampler = Sampler3("train", seed=a.seed, p_colour=a.p_colour, p_short=a.p_short)
+    sampler = Sampler3("train", seed=a.seed, p_colour=a.p_colour, p_short=a.p_short, p_tiny=a.p_tiny)
     vc, vt = eval_set3("validation", 1024)
     v_ids = torch.tensor([T.encode(c, vocab) for c in vc], device=dev)
     v_codes = codes_of(vt)
