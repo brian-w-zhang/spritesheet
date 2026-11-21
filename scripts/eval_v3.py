@@ -112,6 +112,13 @@ class Model:
                 if "noise_clip" in self.cfg:   # truncated Gumbel: MIN(c, g) caps how far a low-logit code can jump
                     nz = nz.clamp(max=self.cfg["noise_clip"])
                 fn = sample_grouped if self.grouped else sample_guided
+                if self.cfg.get("slots"):
+                    from spritesheet.slots import SlotCodec
+                    codec = SlotCodec(self.D, self.cfg["P"])
+                    codes = sample_guided(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau,
+                                          self.cfg.get("trunc"), torch.as_tensor(codec.allowed()))
+                    out.append(codec.decode(codes.numpy()).astype(np.uint8))
+                    continue
                 codes = fn(self.net, self.unet, ids[i:i + 128], nz, g if self.unet is not None else 0.0, tau,
                            self.cfg.get("trunc"))
                 out.append(from_patches(self.D[codes.numpy()], self.cfg["P"]).astype(np.uint8))

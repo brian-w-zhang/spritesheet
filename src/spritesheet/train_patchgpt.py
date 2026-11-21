@@ -39,7 +39,7 @@ def main():
     ap.add_argument("--snap-tau", type=float, default=0.8, help="sampling temperature for snapshots (r6: 0.8 looks best)")
     a = ap.parse_args()
     torch.manual_seed(a.seed)
-    dev = "mps" if torch.backends.mps.is_available() else "cpu"
+    dev = os.environ.get("SPRITESHEET_DEVICE") or ("mps" if torch.backends.mps.is_available() else "cpu")
     vocab = T.load_vocab(os.path.join(V3, "vocab.txt"))
     wv = np.load(os.path.join(V3, "wordvec.npy"))
     pal = json.load(open(os.path.join(V3, "palette.json")))["colors"]
@@ -47,7 +47,12 @@ def main():
     D = np.load(os.path.join(a.dict, "patches.npy"))
     P, K1, Kp = pd["P"], pd["K1"], pd["K"]
     Tn = (24 // P) ** 2
-    cfg = {"model": "v3p", "N": 24, "L": T.L, "T": Tn, "Kp": Kp, "P": P, "K": len(pal), "d": int(wv.shape[1]),
+    codec = None
+    if pd.get("kind") == "slot":   # v4: [4 palette tokens] + [shape tokens over slot maps] (spritesheet.slots)
+        from .slots import SlotCodec
+        codec = SlotCodec(D, P)
+        Tn, Kp = codec.T, codec.V
+    cfg = {"model": "v3p", "slots": 4 if codec else 0, "Ks": len(D), "N": 24, "L": T.L, "T": Tn, "Kp": Kp, "P": P, "K": len(pal), "d": int(wv.shape[1]),
            **json.loads(a.cfg)}
     grouped = "G" in cfg
     if grouped:
@@ -67,7 +72,12 @@ def main():
     net.emb_noise = a.emb_noise if not a.uncond else 0.0
     Dh = F.one_hot(torch.as_tensor(D, dtype=torch.long), K1).flatten(1).float().to(dev)   # [Kp, P*P*K1]
 
+    allow = torch.as_tensor(codec.allowed(), device=dev) if codec else None
+    decode = (lambda c: codec.decode(c)) if codec else (lambda c: from_patches(D[c], P))
+
     def codes_of(grids):
+        if codec:
+            return torch.as_tensor(codec.encode(np.asarray(grids)), dtype=torch.long, device=dev)
         pt = torch.as_tensor(to_patches(np.asarray(grids), P), dtype=torch.long, device=dev)  # [B, T, P*P]
         x = F.one_hot(pt, K1).flatten(2).float()
         return (x @ Dh.T).argmax(-1)                                                        # [B, T]
@@ -110,22 +120,25 @@ def main():
             return sample_grouped(net, None, None, noise)
         codes = torch.zeros(noise.shape[0], Tn, dtype=torch.long, device=dev)
         for t in range(Tn):
-            codes[:, t] = (net.logits(codes[:, : t + 1])[:, t] + noise[:, t]).argmax(-1)
+            lg = net.logits(codes[:, : t + 1])[:, t]
+            if allow is not None:
+                lg = lg.masked_fill(~allow[t], -1e30)
+            codes[:, t] = (lg + noise[:, t]).argmax(-1)
         return codes
 
     def _sample(ids, noise):
-        return sample_grouped(net, None, ids, noise, 0.0, a.snap_tau) if grouped else net.sample(ids, noise, a.snap_tau)
+        return sample_grouped(net, None, ids, noise, 0.0, a.snap_tau) if grouped else sample_guided(net, None, ids, noise, 0.0, a.snap_tau, None, allow)
 
     @torch.no_grad()
     def snapshot(step):
         from PIL import Image
         net.eval()
         if a.uncond:   # unconditional samples (32 seeds)
-            g = from_patches(D[_usample(frog_noise).cpu().numpy()], P)
-            gf = from_patches(D[_usample(torch.flip(frog_noise, [1])).cpu().numpy()], P)
+            g = decode(_usample(frog_noise).cpu().numpy())
+            gf = decode(_usample(torch.flip(frog_noise, [1])).cpu().numpy())
         else:
-            g = from_patches(D[_sample(snap_ids, snap_noise).cpu().numpy()], P)
-            gf = from_patches(D[_sample(snap_ids[:1].repeat(16, 1), frog_noise).cpu().numpy()], P)
+            g = decode(_sample(snap_ids, snap_noise).cpu().numpy())
+            gf = decode(_sample(snap_ids[:1].repeat(16, 1), frog_noise).cpu().numpy())
         net.train()
         np.savez_compressed(os.path.join(run_dir, "snapshots", f"step_{step:06d}.npz"), prompts=np.array(SNAP_PROMPTS),
                             grids=g.astype(np.uint8), frog=gf.astype(np.uint8))

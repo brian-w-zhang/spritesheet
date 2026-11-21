@@ -1,0 +1,2459 @@
+{
+ "meta": {
+  "name": "e1",
+  "seeds": [
+   1,
+   2,
+   3,
+   4,
+   5,
+   6,
+   7,
+   8
+  ],
+  "n_prompts": 187,
+  "groups": {
+   "creatures": 29,
+   "objects": 30,
+   "colour": 40,
+   "size": 16,
+   "facing": 16,
+   "pose": 8,
+   "test": 48
+  },
+  "note": "fixed set; never edit in place. test prompts are verbatim PixelGPT test-split captions."
+ },
+ "prompts": [
+  {
+   "group": "creatures",
+   "prompt": "a cat",
+   "noun": "cat",
+   "n_train": 611,
+   "n_noun": 611,
+   "distractors": [
+    "bee",
+    "slime",
+    "octopus",
+    "cake"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a dog",
+   "noun": "dog",
+   "n_train": 402,
+   "n_noun": 402,
+   "distractors": [
+    "snake",
+    "snail",
+    "pig",
+    "flower"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a frog",
+   "noun": "frog",
+   "n_train": 583,
+   "n_noun": 583,
+   "distractors": [
+    "penguin",
+    "bee",
+    "bow",
+    "boat"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a fox",
+   "noun": "fox",
+   "n_train": 404,
+   "n_noun": 404,
+   "distractors": [
+    "bat",
+    "dog",
+    "cake",
+    "chest"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a owl",
+   "noun": "owl",
+   "n_train": 395,
+   "n_noun": 395,
+   "distractors": [
+    "bat",
+    "penguin",
+    "castle",
+    "pizza"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a bird",
+   "noun": "bird",
+   "n_train": 626,
+   "n_noun": 626,
+   "distractors": [
+    "robot",
+    "fish",
+    "book",
+    "tree"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a fish",
+   "noun": "fish",
+   "n_train": 766,
+   "n_noun": 766,
+   "distractors": [
+    "frog",
+    "owl",
+    "slime",
+    "chest"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a snake",
+   "noun": "snake",
+   "n_train": 535,
+   "n_noun": 535,
+   "distractors": [
+    "ghost",
+    "robot",
+    "helmet",
+    "turtle"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a turtle",
+   "noun": "turtle",
+   "n_train": 508,
+   "n_noun": 508,
+   "distractors": [
+    "crab",
+    "bee",
+    "bell",
+    "boat"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a rabbit",
+   "noun": "rabbit",
+   "n_train": 306,
+   "n_noun": 306,
+   "distractors": [
+    "knight",
+    "ghost",
+    "wizard",
+    "frog"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a bear",
+   "noun": "bear",
+   "n_train": 451,
+   "n_noun": 451,
+   "distractors": [
+    "octopus",
+    "bee",
+    "boot",
+    "scroll"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a wolf",
+   "noun": "wolf",
+   "n_train": 278,
+   "n_noun": 278,
+   "distractors": [
+    "robot",
+    "knight",
+    "lantern",
+    "axe"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a mouse",
+   "noun": "mouse",
+   "n_train": 327,
+   "n_noun": 327,
+   "distractors": [
+    "fox",
+    "bird",
+    "bow",
+    "wizard"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a pig",
+   "noun": "pig",
+   "n_train": 142,
+   "n_noun": 142,
+   "distractors": [
+    "frog",
+    "mouse",
+    "duck",
+    "cat"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a duck",
+   "noun": "duck",
+   "n_train": 182,
+   "n_noun": 182,
+   "distractors": [
+    "dragon",
+    "bee",
+    "rabbit",
+    "bow"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a bat",
+   "noun": "bat",
+   "n_train": 522,
+   "n_noun": 522,
+   "distractors": [
+    "mouse",
+    "pig",
+    "dragon",
+    "turtle"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a spider",
+   "noun": "spider",
+   "n_train": 573,
+   "n_noun": 573,
+   "distractors": [
+    "dragon",
+    "snail",
+    "wizard",
+    "penguin"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a crab",
+   "noun": "crab",
+   "n_train": 307,
+   "n_noun": 307,
+   "distractors": [
+    "skeleton",
+    "fish",
+    "duck",
+    "boot"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a snail",
+   "noun": "snail",
+   "n_train": 364,
+   "n_noun": 364,
+   "distractors": [
+    "wizard",
+    "snake",
+    "bell",
+    "bow"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a bee",
+   "noun": "bee",
+   "n_train": 236,
+   "n_noun": 236,
+   "distractors": [
+    "robot",
+    "dog",
+    "apple",
+    "spider"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a dragon",
+   "noun": "dragon",
+   "n_train": 742,
+   "n_noun": 742,
+   "distractors": [
+    "mouse",
+    "octopus",
+    "boot",
+    "key"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a slime",
+   "noun": "slime",
+   "n_train": 1057,
+   "n_noun": 1057,
+   "distractors": [
+    "fox",
+    "rabbit",
+    "bat",
+    "cake"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a ghost",
+   "noun": "ghost",
+   "n_train": 780,
+   "n_noun": 780,
+   "distractors": [
+    "pig",
+    "bat",
+    "lantern",
+    "dragon"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a skeleton",
+   "noun": "skeleton",
+   "n_train": 437,
+   "n_noun": 437,
+   "distractors": [
+    "duck",
+    "rabbit",
+    "cake",
+    "anchor"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a wizard",
+   "noun": "wizard",
+   "n_train": 103,
+   "n_noun": 103,
+   "distractors": [
+    "fox",
+    "fish",
+    "helmet",
+    "spider"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a knight",
+   "noun": "knight",
+   "n_train": 267,
+   "n_noun": 267,
+   "distractors": [
+    "skeleton",
+    "penguin",
+    "pizza",
+    "pig"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a robot",
+   "noun": "robot",
+   "n_train": 448,
+   "n_noun": 448,
+   "distractors": [
+    "fish",
+    "cat",
+    "fox",
+    "gem"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a penguin",
+   "noun": "penguin",
+   "n_train": 137,
+   "n_noun": 137,
+   "distractors": [
+    "bat",
+    "skeleton",
+    "lantern",
+    "pizza"
+   ]
+  },
+  {
+   "group": "creatures",
+   "prompt": "a octopus",
+   "noun": "octopus",
+   "n_train": 122,
+   "n_noun": 122,
+   "distractors": [
+    "knight",
+    "wizard",
+    "spider",
+    "apple"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a sword",
+   "noun": "sword",
+   "n_train": 471,
+   "n_noun": 471,
+   "distractors": [
+    "scroll",
+    "chest",
+    "robot",
+    "helmet"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a shield",
+   "noun": "shield",
+   "n_train": 789,
+   "n_noun": 789,
+   "distractors": [
+    "boot",
+    "house",
+    "fox",
+    "rabbit"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a axe",
+   "noun": "axe",
+   "n_train": 311,
+   "n_noun": 311,
+   "distractors": [
+    "pizza",
+    "coin",
+    "chest",
+    "flower"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a bow",
+   "noun": "bow",
+   "n_train": 490,
+   "n_noun": 490,
+   "distractors": [
+    "shield",
+    "lantern",
+    "pig",
+    "crown"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a potion",
+   "noun": "potion",
+   "n_train": 148,
+   "n_noun": 148,
+   "distractors": [
+    "helmet",
+    "anchor",
+    "owl",
+    "shield"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a key",
+   "noun": "key",
+   "n_train": 700,
+   "n_noun": 700,
+   "distractors": [
+    "scroll",
+    "lantern",
+    "apple",
+    "axe"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a crown",
+   "noun": "crown",
+   "n_train": 1289,
+   "n_noun": 1289,
+   "distractors": [
+    "clock",
+    "key",
+    "rocket",
+    "wolf"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a coin",
+   "noun": "coin",
+   "n_train": 554,
+   "n_noun": 554,
+   "distractors": [
+    "candle",
+    "rocket",
+    "bow",
+    "axe"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a gem",
+   "noun": "gem",
+   "n_train": 374,
+   "n_noun": 374,
+   "distractors": [
+    "boat",
+    "lantern",
+    "pig",
+    "pizza"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a candle",
+   "noun": "candle",
+   "n_train": 917,
+   "n_noun": 917,
+   "distractors": [
+    "axe",
+    "lantern",
+    "hat",
+    "duck"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a lantern",
+   "noun": "lantern",
+   "n_train": 840,
+   "n_noun": 840,
+   "distractors": [
+    "candle",
+    "gem",
+    "bird",
+    "rabbit"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a book",
+   "noun": "book",
+   "n_train": 635,
+   "n_noun": 635,
+   "distractors": [
+    "house",
+    "wand",
+    "pig",
+    "frog"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a scroll",
+   "noun": "scroll",
+   "n_train": 523,
+   "n_noun": 523,
+   "distractors": [
+    "crown",
+    "axe",
+    "key",
+    "bell"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a chest",
+   "noun": "chest",
+   "n_train": 482,
+   "n_noun": 482,
+   "distractors": [
+    "potion",
+    "key",
+    "sword",
+    "book"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a barrel",
+   "noun": "barrel",
+   "n_train": 380,
+   "n_noun": 380,
+   "distractors": [
+    "key",
+    "lantern",
+    "octopus",
+    "wolf"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a helmet",
+   "noun": "helmet",
+   "n_train": 632,
+   "n_noun": 632,
+   "distractors": [
+    "apple",
+    "clock",
+    "gem",
+    "bell"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a boot",
+   "noun": "boot",
+   "n_train": 221,
+   "n_noun": 221,
+   "distractors": [
+    "gem",
+    "crown",
+    "cake",
+    "wand"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a hat",
+   "noun": "hat",
+   "n_train": 1137,
+   "n_noun": 1137,
+   "distractors": [
+    "coin",
+    "anchor",
+    "wand",
+    "fish"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a bell",
+   "noun": "bell",
+   "n_train": 865,
+   "n_noun": 865,
+   "distractors": [
+    "rocket",
+    "axe",
+    "fox",
+    "bee"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a clock",
+   "noun": "clock",
+   "n_train": 327,
+   "n_noun": 327,
+   "distractors": [
+    "tree",
+    "book",
+    "key",
+    "car"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a wand",
+   "noun": "wand",
+   "n_train": 178,
+   "n_noun": 178,
+   "distractors": [
+    "pizza",
+    "lantern",
+    "sword",
+    "clock"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a anchor",
+   "noun": "anchor",
+   "n_train": 302,
+   "n_noun": 302,
+   "distractors": [
+    "hat",
+    "key",
+    "boat",
+    "candle"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a rocket",
+   "noun": "rocket",
+   "n_train": 69,
+   "n_noun": 69,
+   "distractors": [
+    "house",
+    "scroll",
+    "bird",
+    "bee"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a boat",
+   "noun": "boat",
+   "n_train": 309,
+   "n_noun": 309,
+   "distractors": [
+    "key",
+    "helmet",
+    "fish",
+    "snake"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a house",
+   "noun": "house",
+   "n_train": 310,
+   "n_noun": 310,
+   "distractors": [
+    "pizza",
+    "chest",
+    "duck",
+    "boot"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a castle",
+   "noun": "castle",
+   "n_train": 117,
+   "n_noun": 117,
+   "distractors": [
+    "lantern",
+    "boot",
+    "wolf",
+    "fish"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a tree",
+   "noun": "tree",
+   "n_train": 1342,
+   "n_noun": 1342,
+   "distractors": [
+    "anchor",
+    "apple",
+    "fox",
+    "octopus"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a apple",
+   "noun": "apple",
+   "n_train": 276,
+   "n_noun": 276,
+   "distractors": [
+    "helmet",
+    "wand",
+    "penguin",
+    "anchor"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a cake",
+   "noun": "cake",
+   "n_train": 138,
+   "n_noun": 138,
+   "distractors": [
+    "scroll",
+    "boot",
+    "bow",
+    "castle"
+   ]
+  },
+  {
+   "group": "objects",
+   "prompt": "a pizza",
+   "noun": "pizza",
+   "n_train": 53,
+   "n_noun": 53,
+   "distractors": [
+    "potion",
+    "cake",
+    "snail",
+    "snake"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a red cat",
+   "noun": "cat",
+   "n_train": 0,
+   "n_noun": 611,
+   "distractors": [
+    "key",
+    "ghost",
+    "pig",
+    "boot"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a yellow cat",
+   "noun": "cat",
+   "n_train": 0,
+   "n_noun": 611,
+   "distractors": [
+    "dragon",
+    "sword",
+    "lantern",
+    "slime"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a blue frog",
+   "noun": "frog",
+   "n_train": 0,
+   "n_noun": 583,
+   "distractors": [
+    "flower",
+    "hat",
+    "turtle",
+    "castle"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a purple frog",
+   "noun": "frog",
+   "n_train": 0,
+   "n_noun": 583,
+   "distractors": [
+    "hat",
+    "slime",
+    "helmet",
+    "lantern"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a green sword",
+   "noun": "sword",
+   "n_train": 1,
+   "n_noun": 471,
+   "distractors": [
+    "fish",
+    "potion",
+    "cat",
+    "bell"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a pink sword",
+   "noun": "sword",
+   "n_train": 0,
+   "n_noun": 471,
+   "distractors": [
+    "fish",
+    "boot",
+    "wizard",
+    "bee"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a yellow potion",
+   "noun": "potion",
+   "n_train": 0,
+   "n_noun": 148,
+   "distractors": [
+    "fish",
+    "ghost",
+    "candle",
+    "bell"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a black potion",
+   "noun": "potion",
+   "n_train": 0,
+   "n_noun": 148,
+   "distractors": [
+    "boot",
+    "tree",
+    "mouse",
+    "axe"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a purple crown",
+   "noun": "crown",
+   "n_train": 0,
+   "n_noun": 1289,
+   "distractors": [
+    "sword",
+    "bird",
+    "cat",
+    "lantern"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a white crown",
+   "noun": "crown",
+   "n_train": 2,
+   "n_noun": 1289,
+   "distractors": [
+    "fish",
+    "apple",
+    "cat",
+    "key"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a pink mushroom",
+   "noun": "mushroom",
+   "n_train": 0,
+   "n_noun": 673,
+   "distractors": [
+    "key",
+    "hat",
+    "fox",
+    "snake"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a orange mushroom",
+   "noun": "mushroom",
+   "n_train": 0,
+   "n_noun": 673,
+   "distractors": [
+    "hat",
+    "frog",
+    "snail",
+    "house"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a black fish",
+   "noun": "fish",
+   "n_train": 5,
+   "n_noun": 766,
+   "distractors": [
+    "key",
+    "potion",
+    "helmet",
+    "sword"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a golden fish",
+   "noun": "fish",
+   "n_train": 1,
+   "n_noun": 766,
+   "distractors": [
+    "apple",
+    "hat",
+    "wolf",
+    "frog"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a white car",
+   "noun": "car",
+   "n_train": 0,
+   "n_noun": 213,
+   "distractors": [
+    "crown",
+    "bird",
+    "robot",
+    "boat"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a red car",
+   "noun": "car",
+   "n_train": 0,
+   "n_noun": 213,
+   "distractors": [
+    "bat",
+    "fish",
+    "pizza",
+    "octopus"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a orange bird",
+   "noun": "bird",
+   "n_train": 0,
+   "n_noun": 626,
+   "distractors": [
+    "dragon",
+    "ghost",
+    "anchor",
+    "gem"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a blue bird",
+   "noun": "bird",
+   "n_train": 2,
+   "n_noun": 626,
+   "distractors": [
+    "apple",
+    "slime",
+    "boot",
+    "key"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a golden key",
+   "noun": "key",
+   "n_train": 7,
+   "n_noun": 700,
+   "distractors": [
+    "bird",
+    "slime",
+    "crab",
+    "horse"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a green key",
+   "noun": "key",
+   "n_train": 0,
+   "n_noun": 700,
+   "distractors": [
+    "fish",
+    "hat",
+    "boat",
+    "penguin"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a red tree",
+   "noun": "tree",
+   "n_train": 0,
+   "n_noun": 1342,
+   "distractors": [
+    "dragon",
+    "key",
+    "pizza",
+    "clock"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a yellow tree",
+   "noun": "tree",
+   "n_train": 0,
+   "n_noun": 1342,
+   "distractors": [
+    "key",
+    "crown",
+    "apple",
+    "mouse"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a blue ghost",
+   "noun": "ghost",
+   "n_train": 0,
+   "n_noun": 780,
+   "distractors": [
+    "bird",
+    "boot",
+    "potion",
+    "snail"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a purple ghost",
+   "noun": "ghost",
+   "n_train": 0,
+   "n_noun": 780,
+   "distractors": [
+    "fish",
+    "bat",
+    "pig",
+    "book"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a green dragon",
+   "noun": "dragon",
+   "n_train": 4,
+   "n_noun": 742,
+   "distractors": [
+    "house",
+    "slime",
+    "helmet",
+    "shield"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a pink dragon",
+   "noun": "dragon",
+   "n_train": 0,
+   "n_noun": 742,
+   "distractors": [
+    "cat",
+    "fish",
+    "skeleton",
+    "turtle"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a yellow boot",
+   "noun": "boot",
+   "n_train": 0,
+   "n_noun": 221,
+   "distractors": [
+    "key",
+    "cat",
+    "frog",
+    "apple"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a black boot",
+   "noun": "boot",
+   "n_train": 0,
+   "n_noun": 221,
+   "distractors": [
+    "house",
+    "car",
+    "castle",
+    "dog"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a purple apple",
+   "noun": "apple",
+   "n_train": 0,
+   "n_noun": 276,
+   "distractors": [
+    "car",
+    "dragon",
+    "frog",
+    "fish"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a white apple",
+   "noun": "apple",
+   "n_train": 0,
+   "n_noun": 276,
+   "distractors": [
+    "key",
+    "boot",
+    "potion",
+    "bell"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a pink slime",
+   "noun": "slime",
+   "n_train": 5,
+   "n_noun": 1057,
+   "distractors": [
+    "bat",
+    "boot",
+    "hat",
+    "bell"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a orange slime",
+   "noun": "slime",
+   "n_train": 0,
+   "n_noun": 1057,
+   "distractors": [
+    "cat",
+    "potion",
+    "robot",
+    "book"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a black hat",
+   "noun": "hat",
+   "n_train": 4,
+   "n_noun": 1137,
+   "distractors": [
+    "mushroom",
+    "frog",
+    "tree",
+    "bow"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a golden hat",
+   "noun": "hat",
+   "n_train": 0,
+   "n_noun": 1137,
+   "distractors": [
+    "potion",
+    "ghost",
+    "slime",
+    "wolf"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a white flower",
+   "noun": "flower",
+   "n_train": 4,
+   "n_noun": 1188,
+   "distractors": [
+    "mushroom",
+    "bird",
+    "horse",
+    "snake"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a red flower",
+   "noun": "flower",
+   "n_train": 6,
+   "n_noun": 1188,
+   "distractors": [
+    "slime",
+    "dragon",
+    "tree",
+    "wand"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a orange bat",
+   "noun": "bat",
+   "n_train": 0,
+   "n_noun": 522,
+   "distractors": [
+    "dragon",
+    "mushroom",
+    "mouse",
+    "bird"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a blue bat",
+   "noun": "bat",
+   "n_train": 0,
+   "n_noun": 522,
+   "distractors": [
+    "ghost",
+    "apple",
+    "helmet",
+    "cat"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a golden house",
+   "noun": "house",
+   "n_train": 0,
+   "n_noun": 310,
+   "distractors": [
+    "bird",
+    "cat",
+    "bow",
+    "barrel"
+   ]
+  },
+  {
+   "group": "colour",
+   "prompt": "a green house",
+   "noun": "house",
+   "n_train": 0,
+   "n_noun": 310,
+   "distractors": [
+    "cat",
+    "key",
+    "hat",
+    "turtle"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny cat",
+   "noun": "cat",
+   "n_train": 0,
+   "n_noun": 611,
+   "distractors": [
+    "sword",
+    "tree",
+    "candle",
+    "potion"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant cat",
+   "noun": "cat",
+   "n_train": 2,
+   "n_noun": 611,
+   "distractors": [
+    "house",
+    "tree",
+    "spider",
+    "boat"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny dog",
+   "noun": "dog",
+   "n_train": 0,
+   "n_noun": 402,
+   "distractors": [
+    "fish",
+    "cat",
+    "mouse",
+    "slime"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant dog",
+   "noun": "dog",
+   "n_train": 0,
+   "n_noun": 402,
+   "distractors": [
+    "fish",
+    "tree",
+    "potion",
+    "bee"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny tree",
+   "noun": "tree",
+   "n_train": 1,
+   "n_noun": 1342,
+   "distractors": [
+    "mushroom",
+    "sword",
+    "clock",
+    "axe"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant tree",
+   "noun": "tree",
+   "n_train": 4,
+   "n_noun": 1342,
+   "distractors": [
+    "mushroom",
+    "house",
+    "clock",
+    "spider"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny sword",
+   "noun": "sword",
+   "n_train": 1,
+   "n_noun": 471,
+   "distractors": [
+    "dog",
+    "house",
+    "lantern",
+    "key"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant sword",
+   "noun": "sword",
+   "n_train": 6,
+   "n_noun": 471,
+   "distractors": [
+    "cat",
+    "dog",
+    "pig",
+    "snake"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny potion",
+   "noun": "potion",
+   "n_train": 3,
+   "n_noun": 148,
+   "distractors": [
+    "mushroom",
+    "cat",
+    "tree",
+    "wizard"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant potion",
+   "noun": "potion",
+   "n_train": 0,
+   "n_noun": 148,
+   "distractors": [
+    "house",
+    "sword",
+    "turtle",
+    "shield"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny mushroom",
+   "noun": "mushroom",
+   "n_train": 15,
+   "n_noun": 673,
+   "distractors": [
+    "sword",
+    "dog",
+    "bell",
+    "dragon"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant mushroom",
+   "noun": "mushroom",
+   "n_train": 1,
+   "n_noun": 673,
+   "distractors": [
+    "house",
+    "tree",
+    "sword",
+    "scroll"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny house",
+   "noun": "house",
+   "n_train": 4,
+   "n_noun": 310,
+   "distractors": [
+    "fish",
+    "cat",
+    "book",
+    "bow"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant house",
+   "noun": "house",
+   "n_train": 0,
+   "n_noun": 310,
+   "distractors": [
+    "fish",
+    "potion",
+    "horse",
+    "cake"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a tiny fish",
+   "noun": "fish",
+   "n_train": 0,
+   "n_noun": 766,
+   "distractors": [
+    "dog",
+    "potion",
+    "ghost",
+    "turtle"
+   ]
+  },
+  {
+   "group": "size",
+   "prompt": "a giant fish",
+   "noun": "fish",
+   "n_train": 1,
+   "n_noun": 766,
+   "distractors": [
+    "sword",
+    "potion",
+    "boat",
+    "pizza"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a cat facing left",
+   "noun": "cat",
+   "n_train": 0,
+   "n_noun": 611,
+   "distractors": [
+    "horse",
+    "rabbit",
+    "fish",
+    "pig"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a cat facing right",
+   "noun": "cat",
+   "n_train": 0,
+   "n_noun": 611,
+   "distractors": [
+    "bird",
+    "duck",
+    "scroll",
+    "boat"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a dog facing left",
+   "noun": "dog",
+   "n_train": 0,
+   "n_noun": 402,
+   "distractors": [
+    "fish",
+    "fox",
+    "apple",
+    "mushroom"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a dog facing right",
+   "noun": "dog",
+   "n_train": 0,
+   "n_noun": 402,
+   "distractors": [
+    "bird",
+    "cat",
+    "knight",
+    "octopus"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a fox facing left",
+   "noun": "fox",
+   "n_train": 0,
+   "n_noun": 404,
+   "distractors": [
+    "horse",
+    "duck",
+    "cat",
+    "penguin"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a fox facing right",
+   "noun": "fox",
+   "n_train": 0,
+   "n_noun": 404,
+   "distractors": [
+    "dog",
+    "bird",
+    "pig",
+    "book"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a bird facing left",
+   "noun": "bird",
+   "n_train": 0,
+   "n_noun": 626,
+   "distractors": [
+    "duck",
+    "rabbit",
+    "house",
+    "gem"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a bird facing right",
+   "noun": "bird",
+   "n_train": 0,
+   "n_noun": 626,
+   "distractors": [
+    "horse",
+    "dog",
+    "turtle",
+    "bat"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a fish facing left",
+   "noun": "fish",
+   "n_train": 0,
+   "n_noun": 766,
+   "distractors": [
+    "dog",
+    "rabbit",
+    "fox",
+    "horse"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a fish facing right",
+   "noun": "fish",
+   "n_train": 0,
+   "n_noun": 766,
+   "distractors": [
+    "dog",
+    "horse",
+    "mouse",
+    "bear"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a horse facing left",
+   "noun": "horse",
+   "n_train": 0,
+   "n_noun": 428,
+   "distractors": [
+    "dog",
+    "rabbit",
+    "fox",
+    "owl"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a horse facing right",
+   "noun": "horse",
+   "n_train": 0,
+   "n_noun": 428,
+   "distractors": [
+    "dog",
+    "fish",
+    "bee",
+    "anchor"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a duck facing left",
+   "noun": "duck",
+   "n_train": 0,
+   "n_noun": 182,
+   "distractors": [
+    "rabbit",
+    "horse",
+    "sword",
+    "bear"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a duck facing right",
+   "noun": "duck",
+   "n_train": 0,
+   "n_noun": 182,
+   "distractors": [
+    "horse",
+    "fish",
+    "frog",
+    "bird"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a rabbit facing left",
+   "noun": "rabbit",
+   "n_train": 0,
+   "n_noun": 306,
+   "distractors": [
+    "fish",
+    "cat",
+    "spider",
+    "car"
+   ]
+  },
+  {
+   "group": "facing",
+   "prompt": "a rabbit facing right",
+   "noun": "rabbit",
+   "n_train": 0,
+   "n_noun": 306,
+   "distractors": [
+    "bird",
+    "fox",
+    "candle",
+    "robot"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a sleeping cat",
+   "noun": "cat",
+   "n_train": 9,
+   "n_noun": 611,
+   "distractors": [
+    "fox",
+    "dog",
+    "boat",
+    "robot"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a flying bird",
+   "noun": "bird",
+   "n_train": 10,
+   "n_noun": 626,
+   "distractors": [
+    "dog",
+    "cat",
+    "wizard",
+    "fox"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a running dog",
+   "noun": "dog",
+   "n_train": 0,
+   "n_noun": 402,
+   "distractors": [
+    "bird",
+    "fish",
+    "octopus",
+    "fox"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a sitting frog",
+   "noun": "frog",
+   "n_train": 1,
+   "n_noun": 583,
+   "distractors": [
+    "cat",
+    "fox",
+    "helmet",
+    "pizza"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a jumping rabbit",
+   "noun": "rabbit",
+   "n_train": 0,
+   "n_noun": 306,
+   "distractors": [
+    "frog",
+    "fish",
+    "spider",
+    "flower"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a swimming fish",
+   "noun": "fish",
+   "n_train": 8,
+   "n_noun": 766,
+   "distractors": [
+    "fox",
+    "rabbit",
+    "mouse",
+    "mushroom"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a flying dragon",
+   "noun": "dragon",
+   "n_train": 3,
+   "n_noun": 742,
+   "distractors": [
+    "frog",
+    "rabbit",
+    "wizard",
+    "tree"
+   ]
+  },
+  {
+   "group": "pose",
+   "prompt": "a sleeping fox",
+   "noun": "fox",
+   "n_train": 2,
+   "n_noun": 404,
+   "distractors": [
+    "rabbit",
+    "dragon",
+    "horse",
+    "boot"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "voodoo priestess rattle",
+   "noun": "rattle",
+   "n_train": 3,
+   "test_index": 84401,
+   "distractors": [
+    "cairn",
+    "post",
+    "snake",
+    "bow"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "pinecone scale moth",
+   "noun": "moth",
+   "n_train": 1,
+   "test_index": 71779,
+   "distractors": [
+    "cylinder",
+    "unit",
+    "flower",
+    "bell"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "driftwood centipede",
+   "noun": "centipede",
+   "n_train": 0,
+   "test_index": 7429,
+   "distractors": [
+    "crossed",
+    "unit",
+    "house",
+    "owl"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "popping bubble wrap ghost",
+   "noun": "ghost",
+   "n_train": 0,
+   "test_index": 72396,
+   "distractors": [
+    "unit",
+    "guide",
+    "scroll",
+    "mushroom"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "buttress dam wall",
+   "noun": "wall",
+   "n_train": 1,
+   "test_index": 12779,
+   "distractors": [
+    "clear",
+    "point",
+    "turtle",
+    "axe"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "coral branch knobby",
+   "noun": "knobby",
+   "n_train": 1,
+   "test_index": 111725,
+   "distractors": [
+    "hallowed",
+    "fruit",
+    "boat",
+    "fish"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "revenant with sword",
+   "noun": "revenant",
+   "n_train": 2,
+   "test_index": 179981,
+   "distractors": [
+    "octopus",
+    "golem",
+    "owl",
+    "slime"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "dented copper mold for gelatin",
+   "noun": "mold",
+   "n_train": 0,
+   "test_index": 140037,
+   "distractors": [
+    "centipede",
+    "wall",
+    "candle",
+    "bird"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "void snake fang poison",
+   "noun": "poison",
+   "n_train": 2,
+   "test_index": 172100,
+   "distractors": [
+    "round",
+    "nail",
+    "lantern",
+    "clock"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "elegant crow butler",
+   "noun": "butler",
+   "n_train": 1,
+   "test_index": 96714,
+   "distractors": [
+    "rattle",
+    "mistletoe",
+    "fox",
+    "clock"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "hovering anvil with bellows",
+   "noun": "anvil",
+   "n_train": 5,
+   "test_index": 66566,
+   "distractors": [
+    "octopus",
+    "clear",
+    "car",
+    "book"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "metal oven rack",
+   "noun": "rack",
+   "n_train": 1,
+   "test_index": 126985,
+   "distractors": [
+    "mistletoe",
+    "cluster",
+    "anchor",
+    "skeleton"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "rusted nail in wood",
+   "noun": "nail",
+   "n_train": 1,
+   "test_index": 139949,
+   "distractors": [
+    "guide",
+    "cut",
+    "slime",
+    "cat"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "rope tow cable guide",
+   "noun": "guide",
+   "n_train": 0,
+   "test_index": 151425,
+   "distractors": [
+    "hallowed",
+    "cairn",
+    "penguin",
+    "pig"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "light bulb clear",
+   "noun": "clear",
+   "n_train": 3,
+   "test_index": 196214,
+   "distractors": [
+    "cluster",
+    "climbing",
+    "scroll",
+    "flower"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "wrapped dried fruit",
+   "noun": "fruit",
+   "n_train": 2,
+   "test_index": 201801,
+   "distractors": [
+    "bowl",
+    "wall",
+    "pizza",
+    "coin"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "stone boundary cairn",
+   "noun": "cairn",
+   "n_train": 1,
+   "test_index": 197806,
+   "distractors": [
+    "point",
+    "crossed",
+    "crab",
+    "octopus"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "broken hammer head",
+   "noun": "head",
+   "n_train": 1,
+   "test_index": 57641,
+   "distractors": [
+    "nail",
+    "golem",
+    "gem",
+    "bell"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "infiltrator with crowbar",
+   "noun": "infiltrator",
+   "n_train": 2,
+   "test_index": 182656,
+   "distractors": [
+    "cut",
+    "revenant",
+    "gem",
+    "owl"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "street lamp post",
+   "noun": "post",
+   "n_train": 2,
+   "test_index": 108719,
+   "distractors": [
+    "halves",
+    "centipede",
+    "anchor",
+    "tree"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "bog wraith with mud-clogged essence",
+   "noun": "wraith",
+   "n_train": 0,
+   "test_index": 186587,
+   "distractors": [
+    "octopus",
+    "clear",
+    "pizza",
+    "owl"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "cross focal point",
+   "noun": "point",
+   "n_train": 0,
+   "test_index": 8563,
+   "distractors": [
+    "infiltrator",
+    "wall",
+    "bee",
+    "sword"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "dromeosaurus climbing",
+   "noun": "climbing",
+   "n_train": 3,
+   "test_index": 65172,
+   "distractors": [
+    "mold",
+    "rug",
+    "spider",
+    "chest"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "capodimonte fruit bowl",
+   "noun": "bowl",
+   "n_train": 2,
+   "test_index": 64455,
+   "distractors": [
+    "fruit",
+    "point",
+    "bee",
+    "duck"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "sandblasting resist stencil cut",
+   "noun": "cut",
+   "n_train": 0,
+   "test_index": 21646,
+   "distractors": [
+    "infiltrator",
+    "butler",
+    "ghost",
+    "turtle"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "boiling pasta pot",
+   "noun": "pot",
+   "n_train": 0,
+   "test_index": 138886,
+   "distractors": [
+    "cluster",
+    "bar",
+    "wand",
+    "tree"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "repeat sign double bar",
+   "noun": "bar",
+   "n_train": 0,
+   "test_index": 1522,
+   "distractors": [
+    "anvil",
+    "rack",
+    "book",
+    "crab"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "steam engine boiler cylinder",
+   "noun": "cylinder",
+   "n_train": 2,
+   "test_index": 24598,
+   "distractors": [
+    "round",
+    "butler",
+    "crab",
+    "flower"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "tree ring slice count",
+   "noun": "count",
+   "n_train": 2,
+   "test_index": 8003,
+   "distractors": [
+    "bar",
+    "cairn",
+    "dog",
+    "book"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "wind swirl path",
+   "noun": "path",
+   "n_train": 0,
+   "test_index": 101877,
+   "distractors": [
+    "mistletoe",
+    "moth",
+    "wand",
+    "scroll"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "geyser water steam burst",
+   "noun": "burst",
+   "n_train": 0,
+   "test_index": 346,
+   "distractors": [
+    "waterfall",
+    "paint",
+    "rabbit",
+    "robot"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "arceuthobium dwarf mistletoe",
+   "noun": "mistletoe",
+   "n_train": 2,
+   "test_index": 172643,
+   "distractors": [
+    "mold",
+    "wall",
+    "wizard",
+    "lantern"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "cybernetic octopus with data tentacles",
+   "noun": "octopus",
+   "n_train": 5,
+   "test_index": 189317,
+   "distractors": [
+    "round",
+    "burst",
+    "bird",
+    "lantern"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "alchemical prima materia cluster",
+   "noun": "cluster",
+   "n_train": 3,
+   "test_index": 167475,
+   "distractors": [
+    "top",
+    "path",
+    "knight",
+    "mushroom"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "tied apricot halves",
+   "noun": "halves",
+   "n_train": 0,
+   "test_index": 137355,
+   "distractors": [
+    "knobby",
+    "fruit",
+    "bee",
+    "wizard"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "drum head round",
+   "noun": "round",
+   "n_train": 0,
+   "test_index": 139699,
+   "distractors": [
+    "fruit",
+    "halves",
+    "fox",
+    "shield"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "cloud-shaped rug",
+   "noun": "rug",
+   "n_train": 0,
+   "test_index": 107186,
+   "distractors": [
+    "round",
+    "path",
+    "candle",
+    "cat"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "screen across view",
+   "noun": "view",
+   "n_train": 1,
+   "test_index": 12397,
+   "distractors": [
+    "rattle",
+    "clear",
+    "cake",
+    "house"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "witchs hanging herb basket hallowed",
+   "noun": "hallowed",
+   "n_train": 3,
+   "test_index": 174090,
+   "distractors": [
+    "octopus",
+    "clear",
+    "flower",
+    "skeleton"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "golem of fused lead weights",
+   "noun": "golem",
+   "n_train": 3,
+   "test_index": 61820,
+   "distractors": [
+    "wraith",
+    "round",
+    "helmet",
+    "fish"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "party streamer curl",
+   "noun": "curl",
+   "n_train": 1,
+   "test_index": 38326,
+   "distractors": [
+    "cairn",
+    "golem",
+    "shield",
+    "dog"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "skyfall waterfall",
+   "noun": "waterfall",
+   "n_train": 2,
+   "test_index": 67884,
+   "distractors": [
+    "guide",
+    "hallowed",
+    "gem",
+    "book"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "royal scarab beetle face paint",
+   "noun": "paint",
+   "n_train": 2,
+   "test_index": 159820,
+   "distractors": [
+    "revenant",
+    "mistletoe",
+    "ghost",
+    "helmet"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "alliance banner crossed",
+   "noun": "crossed",
+   "n_train": 1,
+   "test_index": 6531,
+   "distractors": [
+    "golem",
+    "rattle",
+    "wand",
+    "tree"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "horizontal blind strips",
+   "noun": "strips",
+   "n_train": 1,
+   "test_index": 10846,
+   "distractors": [
+    "wall",
+    "halves",
+    "barrel",
+    "mouse"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "stone fence post top",
+   "noun": "top",
+   "n_train": 2,
+   "test_index": 137872,
+   "distractors": [
+    "round",
+    "revenant",
+    "wolf",
+    "fox"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "hvac rooftop unit with louvers",
+   "noun": "unit",
+   "n_train": 3,
+   "test_index": 170331,
+   "distractors": [
+    "post",
+    "rug",
+    "robot",
+    "snail"
+   ]
+  },
+  {
+   "group": "test",
+   "prompt": "overturned bookshelf scattered spine",
+   "noun": "spine",
+   "n_train": 1,
+   "test_index": 161128,
+   "distractors": [
+    "rack",
+    "post",
+    "castle",
+    "fox"
+   ]
+  }
+ ]
+}

@@ -133,14 +133,17 @@ def pick(lg, noise, tau=1.0, trunc=None, bg=0):
 
 
 @torch.no_grad()
-def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None):
-    """Gumbel-max sampling with classifier-free guidance: l = (1+g) l_c - g l_u (as reference_p.forward)."""
+def sample_guided(net, unet, ids, noise, guidance=0.0, tau=1.0, trunc=None, allow=None):
+    """Gumbel-max sampling with classifier-free guidance: l = (1+g) l_c - g l_u (as reference_p.forward).
+    allow [T, K] bool (slot models): tokens a position may pick (others get -1e30 before the pick)."""
     B, T = ids.shape[0], noise.shape[1]
     codes = torch.zeros(B, T, dtype=torch.long, device=ids.device)
     for t in range(T):
         lg = net.logits(ids, codes[:, : t + 1])[:, t]
         if guidance and unet is not None:
             lg = (1 + guidance) * lg - guidance * unet.logits(codes[:, : t + 1])[:, t]
+        if allow is not None:
+            lg = lg.masked_fill(~allow[t], -1e30)
         codes[:, t] = pick(lg, noise[:, t], tau, trunc)
     return codes
 

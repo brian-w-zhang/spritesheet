@@ -76,3 +76,29 @@ Append-only. Format: `D-NN · date · decision · why · alternatives rejected`.
     - U dm96 L3: 611,612 (the r13 prior)
 
     The smallest chain that keeps the r13 quality by eye is used. Uploads above 250k use the inert path (D-48); the causal Score tab is activated row by row (D-53).
+- **D-56 · 2026-11-21 · A fixed evaluation (E1) judges every model from now on: same prompts, same seeds, no picking.**
+  - *Why:* the MP2 critiques (11 reviewers) agreed that best-of-8 examples and CLIP-only scoring overstated quality. Brian also wants every change confirmed by eye.
+  - *Set:* `eval/prompts_e1.json` (`scripts/make_eval_set.py`), 187 prompts × seeds 1–8. Groups: creatures 29, objects 30, colour 40, size 16, facing 16, pose 8, and 48 verbatim held-out PixelGPT test captions. Each prompt records how many training captions contain the phrase. The file is never edited in place.
+  - *Scores* (`scripts/evalkit.py`; every number is a mean over all seeds):
+    - CLIP R@5 against the 187 prompts;
+    - colour-word hue accuracy;
+    - size (giant/tiny area ratio);
+    - distinct sprites per 8 seeds;
+    - near-duplicates of training sprites;
+    - a blind local VLM judge (`tools/vlm/vlm_judge.py`, Qwen3-VL-8B 4-bit, Apache-2.0, own env). The judge never sees the prompt. It does 5-way noun multiple choice, clear-vs-blob, eyes visible (creatures) and facing left/right, on seeds 1–4.
+    - Real sprites are judged the same way as a ceiling (local only).
+  - *By eye:* `evalkit.py sheet` puts models in rows and seeds 1–8 in columns per prompt.
+  - *Memory:* the laptop has 16 GB of shared memory, and parallel GPU jobs crashed it twice. All GPU work goes through one serial queue (`scripts/jobq.sh`), with PyTorch and MLX memory caps.
+- **D-57 · 2026-11-21 · v4 tokens = per-sprite palette + colour-free shape patches ("slots").**
+  - *Why:* every PixelGPT sprite has at most 4 colours (60k training sprites: mean 3.51, max 4). A sprite is therefore exactly a palette of 4 class ids (sorted dark → light) plus a 24×24 slot map over 5 symbols (`spritesheet/slots.py`, split/join exact).
+  - *The gain:* v3's 3×3 dictionary stores colour inside each patch, so an "eye on black fur" and an "eye on orange fur" compete for separate entries. Validation reconstruction (foreground pixels):
+
+    | Dictionary | Tokens | Recon fg |
+    |---|---|---|
+    | v3: 1024 × 3×3 colour patches | 64 | 0.799 |
+    | 1024 × 2×2 colour patches | 144 | 0.913 |
+    | **1024 × 3×3 slot patches + 4 palette tokens** | **68** | **0.921** |
+    | 625 × 2×2 slot patches (every pattern) | 148 | 1.000 (lossless) |
+
+  - *Sequence:* 4 palette tokens (class ids, offset by Ks), then 64 shape tokens. A fixed [T, V] mask lets each position pick only its own kind. In the sheet that is a constant added to the logits, and the grid stays one causal grid.
+  - *Fair test:* `v4s_a` uses the same transformer size and steps as `v3p_a` (dm128 L4, 60k).
