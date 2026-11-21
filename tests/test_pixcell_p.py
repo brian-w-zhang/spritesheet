@@ -61,3 +61,43 @@ def test_parity_v3pg(guidance, sizes):
     for eng, e in r["engines"].items():
         assert e["n_fail"] == 0 and e["error_cells"] == 0, (eng, e["failures"][:2])
     assert r["lint_violations"] == 0 and r["pass"]
+
+
+def _slot_model(guidance, seed=3):
+    """small random v4 slot model (4 palette tokens + 16 2x2 shape tokens) with an optional U chain."""
+    import torch
+    from spritesheet.patchgpt import PatchGPT, UPatchGPT
+    from spritesheet.slots import NS
+    torch.manual_seed(seed)
+    r = np.random.default_rng(seed)
+    Ks, nc, Tsh = 40, 6, 16
+    T, K = NS + Tsh, Ks + nc
+    cfg = {"model": "v3p", "N": 8, "L": 12, "T": T, "Kp": K, "P": 2, "K": nc - 1, "d": 16, "dm": 32, "H": 4, "mlp": 48,
+           "layers": 2, "slots": NS, "Ks": Ks}
+    net = PatchGPT(cfg, r.normal(0, 1, (50, 16))).double()
+    unet = UPatchGPT({"dm": 24, "H": 2, "mlp": 32, "layers": 1, "T": T, "Kp": K}).double() if guidance else None
+    with torch.no_grad():
+        for m in (net, unet) if unet is not None else (net,):
+            for n_, p in m.named_parameters():
+                p.copy_(torch.randn_like(p) * 0.4 + (1.0 if n_.endswith(".g") else 0.0))
+    D = r.integers(0, NS + 1, (Ks, 4))
+    w, rc = RP.export(net.eval(), D, unet=None if unet is None else unet.eval())
+    rc["guidance"] = guidance
+    return w, rc, F.vocab_words(w["wordvec"].shape[0], seed), F.palette(rc["K"], seed)
+
+
+@pytest.mark.parametrize("guidance", [0.0, 1.0])
+def test_parity_v4_slots(guidance):
+    if not os.path.exists(os.path.join(ROOT, "tools", "node_modules", "hyperformula")):
+        pytest.skip("HyperFormula not installed (npm ci --prefix tools)")
+    w, cfg, vocab, pal = _slot_model(guidance)
+    wb = emit_p.compile_p(w, cfg, vocab, pal)
+    r = G.parity(wb, w, cfg, vocab, CASES, G.ENGINES)
+    out = os.path.join(ROOT, "artifacts", "metrics", "parity_ops_v3p.json")
+    prev = json.load(open(out)) if os.path.exists(out) else {}
+    prev[f"slots,guidance={guidance:g}"] = {k: v for k, v in r.items()}
+    json.dump(prev, open(out, "w"), indent=1, default=G.np_default)
+    for eng, e in r["engines"].items():
+        assert e["n_fail"] == 0 and e["error_cells"] == 0, (eng, e["failures"][:2], e["per_block"])
+        assert "Pal" in e["per_block"] and "Pixels" in e["per_block"], e["per_block"].keys()
+    assert r["lint_violations"] == 0 and r["pass"]

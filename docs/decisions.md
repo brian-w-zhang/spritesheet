@@ -102,3 +102,4 @@ Append-only. Format: `D-NN · date · decision · why · alternatives rejected`.
 
   - *Sequence:* 4 palette tokens (class ids, offset by Ks), then 64 shape tokens. A fixed [T, V] mask lets each position pick only its own kind. In the sheet that is a constant added to the logits, and the grid stays one causal grid.
   - *Fair test:* `v4s_a` uses the same transformer size and steps as `v3p_a` (dm128 L4, 60k).
+  - *In Pixcell* (`emit_p.compile_p`, cfg `slots`/`Ks`): a disallowed Score cell is the literal −10^30 (no logit formula, so the mask costs nothing). The palette block is `Out!E1:E5` = [0, code₀−Ks, …, code₃−Ks], and each pixel is one `INDEX(Pal, D[shape code, offset] + 1)`. Gate A2 passes on HyperFormula and LibreOffice, with and without guidance [metrics/parity_ops_v3p.json "slots,…"]. Note: HyperFormula does not parse `1E+30`, so the literal is written out in full.

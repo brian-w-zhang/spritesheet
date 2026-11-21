@@ -1,0 +1,42 @@
+{
+ "name": "v3g0",
+ "set": "e1",
+ "n_prompts": 187,
+ "seeds": 8,
+ "clip_R@5": {
+  "creatures": 0.2026,
+  "objects": 0.3458,
+  "colour": 0.7312,
+  "size": 0.2344,
+  "facing": 0.2344,
+  "pose": 0.1719,
+  "test": 0.1667,
+  "all": 0.3336
+ },
+ "clip_score": 0.3168,
+ "colour_acc": 0.9688,
+ "size_giant_over_tiny_area": 1.238,
+ "size_giant_bigger_share": 1.0,
+ "empty_share": 0.0,
+ "fg_frac": 0.3204,
+ "colours_per_sprite": 1.81,
+ "seed_diversity": 0.3828,
+ "distinct_per_8": 8.0,
+ "neardup_share_lt5pct": 0.002,
+ "neardup_min_diff_median": 0.1597,
+ "vlm": {
+  "naming_acc": {
+   "creatures": 0.3793,
+   "objects": 0.4833,
+   "colour": 0.4813,
+   "size": 0.5156,
+   "facing": 0.2812,
+   "pose": 0.3438,
+   "test": 0.3854,
+   "all": 0.4211
+  },
+  "clear_share": 0.143,
+  "eyes_visible": 0.0142,
+  "facing_acc": 0.5156
+ }
+}

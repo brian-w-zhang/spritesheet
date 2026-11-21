@@ -439,3 +439,31 @@ Batched twins against the float64 specs: 24/24 pixel-exact for each model. Speed
   - CLIP ranks v3 above the real sprites. It rewards a clean coloured silhouette, so it is not a quality judge for pixel art.
   - Colour accuracy and facing on "real" are meaningless: few real captions contain those phrases, so those real rows are noun-only matches. Facing is at chance for both.
 - **Near-copies:** v3 does not copy training sprites (0.1% of its sprites are within 5% of one).
+
+### E1 sampling ablations on v3 [metrics/e1_v3g0.json, e1_v3t1.json]
+v3 with the sheet settings (g 0.75, t 0.8) against no guidance (g 0) and t = 1.0:
+
+| metric | v3 | v3 g=0 | v3 t=1.0 |
+|---|---|---|---|
+| VLM naming, all | 0.539 | 0.421 | 0.505 |
+| naming, creatures | 0.578 | 0.379 | 0.672 |
+| VLM clear | 0.223 | 0.143 | 0.112 |
+| VLM eyes | 0.047 | 0.014 | 0.038 |
+| colours per sprite | 2.74 | 1.81 | 4.02 |
+
+- **Guidance helps:** without it, naming drops by 0.12 and the sprites are one-colour blobs (`sheets/v3_vs_v3g0_vs_v3t1_creatures.png`).
+- **t = 1.0** names creatures better (more texture cues) but is judged blob far more often. By eye it is speckled and fragmented.
+- **Neither setting** gives eyes. Detail needs a better token space or model, not a sampling knob.
+
+### Training speed on the M4 [runs/logs/bench_train_speed.txt]
+Batch 256, T 64, step time in seconds:
+
+| model | params | fp32 | bf16 |
+|---|---|---|---|
+| dm128 L4 | 0.81M | 0.140 | 0.131 |
+| dm256 L6 | 5.3M | 0.531 | 0.483 |
+| dm384 L8 | 15.0M | 1.097 | 0.974 |
+
+- bf16 autocast saves only about 10%.
+- dm256 L6 at T = 144 (2×2 tokens) ran out of memory under the 0.45 MPS cap at B = 256, so 2×2 models need a smaller batch.
+- **Teacher budget:** a 5M teacher at 60k steps takes about 8 h. That is feasible overnight, but only one at a time.

@@ -103,7 +103,8 @@ def _guidance_cell(wb, g):
 def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", default_seed=1, render=False) -> Workbook:
     L, T, Kp, dm, P = T_L(cfg), cfg["T"], cfg["Kp"], cfg["dm"], cfg["P"]
     N = L + T - 1
-    Gd = int(round(T ** 0.5))
+    S, Ks = int(cfg.get("slots", 0)), int(cfg.get("Ks", Kp))   # v4 slot models (D-57): S palette tokens first
+    Gd = int(round((T - S) ** 0.5))
     NPX = Gd * P
     g = float(cfg.get("guidance", 0.0))
     inv_tau = 1.0 / float(cfg.get("tau", 1.0))
@@ -172,6 +173,8 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
     Sc = wb.add_block("Score", "Score", 1, 1, T, Kp)
 
     def score(t, k):
+        if S and ((k >= Ks) != (t < S)):      # token kind not allowed at this position (spec: score = -1e30)
+            return "=-1" + "0" * 30          # -1e30 as a plain literal (HyperFormula rejects 1E+30)
         lc = _lin(Wout, k, xr(t), dm, rf.ref(t, 0, "Out"))
         lg = f"((1+{GC})*({lc})-{GC}*({LU(t, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
@@ -182,7 +185,15 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
     # ---- pixels = patch lookup
     DR = Db.range("W_D", absolute=True)
     px = wb.add_block("Pixels", "Pixels", 1, 1, NPX, NPX)
-    wb.fill(px, lambda y, x: f"=INDEX({DR},{CODES.ref((y // P) * Gd + x // P, 0, 'Out')}+1,{(y % P) * P + x % P + 1})")
+    shape = lambda y, x: f"INDEX({DR},{CODES.ref(S + (y // P) * Gd + x // P, 0, 'Out')}+1,{(y % P) * P + x % P + 1})"
+    if S:
+        # slot model: Pal = [0, code_0 - Ks, ..., code_{S-1} - Ks]; pixel = Pal[slot] (slot 0 = transparent)
+        PAL = wb.add_block("Pal", "Out", 1, 5, S + 1, 1)
+        wb.fill(PAL, lambda t, _: "=0" if t == 0 else f"={CODES.ref(t - 1, 0, 'Out')}-{Ks}")
+        PR = PAL.range("Out", absolute=True)
+        wb.fill(px, lambda y, x: f"=INDEX({PR},{shape(y, x)}+1,1)")
+    else:
+        wb.fill(px, lambda y, x: "=" + shape(y, x))
     emit_output(wb, px, palette_hex, render, tk["PROMPT"])
     emit_about(wb, w, cfg, vocab_words, palette_hex, spec="src/spritesheet/reference_p.py")
     return wb

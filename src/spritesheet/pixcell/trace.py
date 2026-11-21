@@ -149,7 +149,7 @@ def trace_mdm(prompt, seed, w, cfg, vocab_index) -> dict:
     return {"ids": ids, "expected": E, "forward": fwd}
 
 
-DISCRETE = {"Tokens.ids", "Tokens.mask", "Tokens.denom", "s0", "s1", "style", "Pixels", "Codes", "seed.s0", "seed.s1"}
+DISCRETE = {"Tokens.ids", "Tokens.mask", "Tokens.denom", "s0", "s1", "style", "Pixels", "Codes", "Pal", "seed.s0", "seed.s1"}
 
 
 def is_discrete(name: str) -> bool:
@@ -254,6 +254,8 @@ def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
     E["Score"] = out["scores"]
     E["Codes"] = out["codes"].astype(float)[:, None]
     E["Pixels"] = out["pixels"].astype(float)
+    if cfg.get("slots"):
+        E["Pal"] = np.concatenate([[0], out["codes"][:cfg["slots"]] - cfg["Ks"]]).astype(float)[:, None]
     if cfg.get("guidance"):
         ur = [rows[L - 1 + t] for t in range(Tn)]
         E["U.X0"] = np.array([r["ux0"] for r in ur])
