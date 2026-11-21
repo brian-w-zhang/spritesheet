@@ -17,6 +17,10 @@ Optional guidance (cfg "guidance" w > 0, needs an unconditional prior "U*" weigh
 Sampling: score = logit * inv_tau + (-LN(-LN(u))),  u = seeded uniform (same exact integer hash as v2);
   code_t = MATCH(MAX(score_row), score_row, 0) - 1.
 Pixels: pixel[y, x] = D[code_{(y//P)*G + x//P}, (y%P)*P + x%P].
+Slot models (v4, cfg "slots" = S > 0, "Ks" shape entries; spritesheet/slots.py): tokens 0..S-1 are palette tokens
+(Ks + class id) and may only pick k >= Ks; tokens S.. are shape tokens and may only pick k < Ks. A disallowed score is
+-1e30 (sheet: IF(allowed, score, -1E+30)). pal[s] = code_s - Ks; slot = D[shape code, offset]; pixel = 0 if slot = 0
+else pal[slot-1].
 """
 import math
 
@@ -103,6 +107,7 @@ def forward(ids, seed, w, cfg, keep=True):
     codes = np.zeros(T, np.int64)
     rows, logits, scores, ulogits = [], np.zeros((T, K)), np.zeros((T, K)), np.zeros((T, K))
     margins = []
+    S, Ks = int(cfg.get("slots", 0)), int(cfg.get("Ks", K))
     for n in range(L + T - 1):
         if n < L:
             wv = w["wordvec"][ids[n] - 1]
@@ -128,6 +133,9 @@ def forward(ids, seed, w, cfg, keep=True):
                 lg = (1.0 + g) * lc - g * lu
                 row.update({"ux0": ux0, "uparts": uparts, "ux": ux, "urf": urf, "lu": lu})
             s = lg * inv_tau + G[t]
+            if S:
+                ok = (np.arange(K) >= Ks) if t < S else (np.arange(K) < Ks)
+                s = np.where(ok, s, -1e30)
             c = int(np.argmax(s))                     # first max, like MATCH(MAX(r), r, 0)
             codes[t] = c
             top2 = np.sort(s)[-2:]
@@ -137,9 +145,12 @@ def forward(ids, seed, w, cfg, keep=True):
         if keep:
             rows.append(row)
     P = cfg["P"]
-    Gd = int(round(T ** 0.5))
+    Gd = int(round((T - S) ** 0.5))
     D = w["D"].astype(np.int64)
-    pix = D[codes].reshape(Gd, Gd, P, P).transpose(0, 2, 1, 3).reshape(Gd * P, Gd * P)
+    pix = D[codes[S:]].reshape(Gd, Gd, P, P).transpose(0, 2, 1, 3).reshape(Gd * P, Gd * P)
+    if S:
+        pal = np.concatenate([[0], codes[:S] - Ks])
+        pix = pal[pix]
     return {"codes": codes, "pixels": pix, "logits": logits, "scores": scores, "ulogits": ulogits,
             "min_margin": min(margins), "rows": rows, "keyok": keyok, "gumbel": G}
 
@@ -156,6 +167,8 @@ def export(net, D, extra_cfg=None, unet=None):
     w["Wout"], w["bout"] = sd["nf.g"][:, None] * sd["out.weight"].T, sd["out.bias"]
     cfg = {k: c[k] for k in ("dm", "H", "mlp", "layers", "L", "T", "Kp", "P", "K", "N", "d")}
     cfg.update(model="v3p", tau=1.0, guidance=0.0)
+    if c.get("slots"):
+        cfg.update(slots=int(c["slots"]), Ks=int(c["Ks"]))
     if unet is not None:
         su = {k: v.detach().double().cpu().numpy() for k, v in unet.state_dict().items()}
         cu = unet.cfg

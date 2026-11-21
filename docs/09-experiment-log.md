@@ -413,3 +413,29 @@ Batched twins against the float64 specs: 24/24 pixel-exact for each model. Speed
 - v2 and v1 almost never show an adjective, and usually draw the same sprite for every seed.
 
 **Sheets galleries:** each demo sheet now has a "Gallery" tab right after Prompt (v3: 800 sprites, v1: 136, v2: 160 including "ok"), drawn as cells with prompt/seed/verdict labels. The first version painted cells with 49 conditional-format rules. That was slow to render at 800 sprites, so the tabs now use static fills: about 13 min to upload for v3, but they open instantly.
+
+## MP3 push: E1 evaluation, then a better model (from 2026-11-21)
+
+### E1 baseline: deployed v3 vs real sprites [metrics/e1_v3.json, e1_real.json (local only: real sprites); D-56]
+- **Setup:** 187 fixed prompts × seeds 1–8, all scored (no picking). The VLM judge (Qwen3-VL-8B, blind to the prompt) sees seeds 1–4. Chance on 5-way naming is 0.20. "real" = real PixelGPT sprites: the test sprite for test captions, otherwise training sprites whose caption contains the phrase (or the noun).
+
+  | metric | real | v3 (sheet: g 0.75, t 0.8) |
+  |---|---|---|
+  | VLM naming, all | 0.662 | 0.539 |
+  | naming, creatures | 0.733 | 0.578 |
+  | naming, objects | 0.625 | 0.708 |
+  | naming, test captions | 0.542 | 0.396 |
+  | VLM "clear, not blob" | 0.424 | 0.223 |
+  | VLM eyes visible (creatures) | 0.259 | 0.047 |
+  | CLIP R@5 (all) | 0.396 | 0.443 |
+  | colours per sprite | 3.55 | 2.74 |
+  | distinct sprites per 8 seeds | 5.55 | 8.00 |
+  | near-duplicate of a training sprite (< 5% pixels differ) | — | 0.001 |
+
+- **By eye** (`artifacts/eval/e1/sheets/real_vs_v3_creatures_local.png`, local only): real sprites have outlines, eyes, shading and 3–4 colours. v3's cats and dogs are white silhouettes, owls are flat shapes, and birds are often a yellow stick.
+- **Temperature** (`v3_vs_v3t1_vs_v3g0_creatures.png`): at t = 1.0, some owls and frogs get eyes and inner detail, but shapes fall apart. At 0.8 they hold together but are flat. The model is not confident enough to be both detailed and coherent.
+- **Learned about the judges:**
+  - The VLM numbers separate real from generated sprites the same way the eye does (eyes 0.26 vs 0.05, clear 0.42 vs 0.22).
+  - CLIP ranks v3 above the real sprites. It rewards a clean coloured silhouette, so it is not a quality judge for pixel art.
+  - Colour accuracy and facing on "real" are meaningless: few real captions contain those phrases, so those real rows are noun-only matches. Facing is at chance for both.
+- **Near-copies:** v3 does not copy training sprites (0.1% of its sprites are within 5% of one).

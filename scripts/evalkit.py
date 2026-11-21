@@ -161,15 +161,15 @@ def near_dup(flat, thresh=0.05):
     from spritesheet.data.v3 import OUT as V3
     z = np.load(os.path.join(V3, "imgs_24.npz"))
     tr = torch.as_tensor(z["imgs"][z["split"] == 0].reshape(-1, 576))
-    dev = "mps" if torch.backends.mps.is_available() else "cpu"
+    dev = "cpu"   # the GPU is usually busy with the serial queue; CPU takes ~1-2 min
     tr = tr.to(dev)
     x = torch.as_tensor(flat.reshape(-1, 576)).to(dev)
     best = torch.full((len(x),), 576, dtype=torch.int32, device=dev)
     for i in range(0, len(x), 64):
         xb = x[i:i + 64]
         m = torch.full((len(xb),), 576, dtype=torch.int32, device=dev)
-        for j in range(0, len(tr), 20000):
-            d = (xb[:, None] != tr[None, j:j + 20000]).sum(-1, dtype=torch.int32)
+        for j in range(0, len(tr), 8000):
+            d = (xb[:, None] != tr[None, j:j + 8000]).sum(-1, dtype=torch.int32)
             m = torch.minimum(m, d.min(1).values)
         best[i:i + 64] = m
     b = best.float().cpu().numpy() / 576
@@ -181,10 +181,11 @@ def summarize_vlm(J, P, S, gi):
     out = {}
     mc = np.array(J["mc"], dtype=float)                               # [n, S]
     out["naming_acc"] = {g: round(float(mc[gi[g]].mean()), 4) for g in gi} | {"all": round(float(mc.mean()), 4)}
-    if "eyes" in J:
-        e = np.array(J["eyes"], dtype=float)                          # [n_creatures, S]
-        out["eyes_visible"] = round(float(e.mean()), 4)
-    if "facing" in J:
+    if J.get("blob"):
+        out["clear_share"] = round(float(np.mean([x for r in J["blob"] for x in r])), 4)
+    if J.get("eyes"):
+        out["eyes_visible"] = round(float(np.mean([x for r in J["eyes"] for x in r])), 4)
+    if J.get("facing"):
         out["facing_acc"] = round(float(np.mean(J["facing"])), 4)
     if "quality" in J:
         out["quality_1to5"] = round(float(np.mean(J["quality"])), 3)

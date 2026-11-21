@@ -44,6 +44,35 @@ def _check(guidance):
         assert ref["pixels"].shape == (8, 8)
 
 
+def test_slot_twin_matches_spec():
+    """v4 slot model: 2 palette tokens (k >= Ks) then 16 shape tokens (k < Ks); twin (masked) == spec, pixels decode
+    through the palette."""
+    from spritesheet.slots import NS
+    torch.manual_seed(3)
+    r = np.random.default_rng(3)
+    Ks, nc, Tsh = 40, 6, 16
+    T, K = NS + Tsh, Ks + nc
+    cfg = {"model": "v3p", "N": 8, "L": 12, "T": T, "Kp": K, "P": 2, "K": nc - 1, "d": 16, "dm": 32, "H": 4, "mlp": 48,
+           "layers": 2, "slots": NS, "Ks": Ks}
+    net = PatchGPT(cfg, r.normal(0, 1, (50, 16))).double()
+    with torch.no_grad():
+        for n_, p in net.named_parameters():
+            p.copy_(torch.randn_like(p) * 0.4 + (1.0 if n_.endswith(".g") else 0.0))
+    D = r.integers(0, NS + 1, (Ks, 4))
+    w, rc = RP.export(net.eval(), D)
+    allow = torch.zeros(T, K, dtype=torch.bool)
+    allow[:NS, Ks:] = True
+    allow[NS:, :Ks] = True
+    for ids, seed in (([3, 7, 9] + [1] * 9, 1), ([5] * 12, 42)):
+        ref = RP.forward(ids, seed, w, rc)
+        noise = torch.tensor(RP.gumbel(seed, T, K))[None]
+        codes = sample_guided(net, None, torch.tensor([ids]), noise, 0.0, allow=allow)[0].numpy()
+        assert (codes == ref["codes"]).all()
+        assert (codes[:NS] >= Ks).all() and (codes[NS:] < Ks).all()
+        pal = np.concatenate([[0], codes[:NS] - Ks])
+        assert (ref["pixels"] == pal[D[codes[NS:]].reshape(4, 4, 2, 2).transpose(0, 2, 1, 3).reshape(8, 8)]).all()
+
+
 def test_twin_matches_spec():
     _check(0.0)
 
