@@ -540,3 +540,24 @@ Batch 256, T 64, step time in seconds:
   Low temperature favours the commonest patches (solid fills of the main slot), and those are exactly the minority slots: eyes, shading, outlines.
 - **By eye** (`sheets/v4s_vs_v4s_t09_vs_v4s_t1_creatures.png`): unlike v3, v4s at t 1.0 mostly keeps the shape and adds detail: fox chests, fish eyes and fins, frog spots. A few seeds get noisier (two owls, one dog). t 0.9 looks like the middle ground.
 - **Next:** judge t 0.9 / 1.0 / g 0.5 t 1.0 (queued after the teacher; the judge never runs alongside training). Temperature is a live cell in neither sheet yet; the sheet bakes 1/τ into Score.
+
+### Teacher v4s_b (dm256 L6, 5.3M params): val NLL overfits, samples get much better [runs/v4s_b/train_log.jsonl; metrics/e1_neardup_teacher.json]
+- **Training:** 50k steps, 8.0 h on the M4 (0.58 s/step). Train loss 1.94. **Val NLL is lowest at 12.5k (2.456)** and then rises to 2.635, worse than the 0.8M `v4s_a` (2.475). By that number it overfits from step ~12k.
+- **By eye it is the biggest jump of the project** (`sheets/v4s_vs_v4sb_vs_v4sb_t1_creatures.png`; same sampling, g 0.75, t 0.8):
+  - every frog is front-facing with two eyes and a pale belly;
+  - foxes are classic side-view foxes with white chests and tails;
+  - owls have eyes and feather detail;
+  - birds have beaks and wings, and snakes have patterns and tongues.
+
+  Test captions (`v4sb12k_vs_v4sb_test.png`): moths, coral, copper moulds and crow butlers are all recognisable. The 50k checkpoint has more detail and variety but more stray pixels. The 12.5k one is a bit cleaner.
+- **Not memorising** (seeds 1–4 × 187 prompts, nearest training sprite by pixel difference):
+
+  | | < 5% | < 10% | < 20% | median |
+  |---|---|---|---|---|
+  | v4s_a | 0.13% | 1.7% | 35% | 0.233 |
+  | v4s_b 12.5k | 0 | 0.9% | 30% | 0.242 |
+  | v4s_b 50k | 0 | 0.9% | 24% | 0.267 |
+
+  The teacher's samples are *further* from the training set than the small model's.
+- **Lesson:** rising val NLL here is overconfidence on held-out sprites (a wrong guess costs more), not copying and not worse samples. **Val NLL is not a model-selection metric for sampling quality.** Use E1 plus the eye.
+- **Problem:** a 5.3M model in the sheet would take roughly 6× the compute per prompt change (~15 min), so it needs distilling into the dm128 L4 sheet size. That is next, after the judge picks the teacher checkpoint.
