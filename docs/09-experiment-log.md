@@ -561,3 +561,65 @@ Batch 256, T 64, step time in seconds:
   The teacher's samples are *further* from the training set than the small model's.
 - **Lesson:** rising val NLL here is overconfidence on held-out sprites (a wrong guess costs more), not copying and not worse samples. **Val NLL is not a model-selection metric for sampling quality.** Use E1 plus the eye.
 - **Problem:** a 5.3M model in the sheet would take roughly 6× the compute per prompt change (~15 min), so it needs distilling into the dm128 L4 sheet size. That is next, after the judge picks the teacher checkpoint.
+
+### How prompt-change time was measured, and why the "2–3 min" number is suspect (2026-11-21)
+- **Where every latency number so far came from:** `sheets.set_prompt_and_read`. It writes Prompt!B2:B3 through the **Sheets API**, then polls Pixels through the API (1 s sleep, plus each read's own latency) until two reads agree. That is server-side recalculation as the API sees it, not what a person sees typing in the browser. MP2's "2–3 min" slide figure came from this, and so did v4's 103–167 s on the probe sheet.
+- **Brian reports** that typing a prompt on the v3 sheet in the browser is much faster than that.
+- **Browser attempt (probe sheet, v4s_a):** typed "a red potion" in Chrome and watched the sprite with an in-page canvas poller. **Inconclusive:** the laptop was saturated (load ~50, 3% idle) by bank generation, scoring and the GPU queue all at once. The server had the new pixels (read via API), but the browser still showed the old sprite after 7 min.
+- **Rule from now on:**
+  - Time prompt changes in the browser on an idle machine.
+  - Report median and slowest over several prompts.
+  - Compare builds side by side under the same conditions.
+  - Never quote the API polling time as user latency.
+- **Peer feedback on speed** (MP2 critiques, all 11 reviewers mention it):
+  - profile which tabs dominate recalculation;
+  - measure prompt change separately from load;
+  - try array formulas (`MMULT`, `LAMBDA`/`REDUCE`) instead of many `SUMPRODUCT` cells;
+  - a smaller teaching build that recalculates in seconds.
+
+  MP3 tracks these as experiments below.
+
+### Speed experiment 1: MMULT vs SUMPRODUCT, timed in the browser [metrics/bench_mmult_browser.json; scripts/bench_mmult_sheets.py]
+- **Setup:** the same 6-layer dm128 linear chain over 64 rows, built 3 ways on tabs of the probe sheet:
+  - A: one SUMPRODUCT per cell (how Pixcell emits linear layers today), 49,152 formulas;
+  - B: one MMULT per row (works for the causal model), 384 formulas;
+  - C: one MMULT per layer block (upper bound; would be circular in the causal model), 6 formulas.
+
+  Timed in Chrome from Enter on the input cell until a checksum flag turns green, using an in-page canvas poller. A trial only counts if the flag was seen red first; 2 trials were rejected for a stale green.
+
+  | | formulas | first change after page load | warm change |
+  |---|---|---|---|
+  | A SUMPRODUCT per cell | 49,152 | 12.9, 19.3 s | 6.0 s |
+  | B MMULT per row | 384 | 14.3 s | 2.5, 3.3 s |
+  | C MMULT per block | 6 | 15.9, 17.4 s | 0.6 s |
+
+- **Learned:**
+  1. Sheets recalculates **in the browser**. The first edit after opening a sheet costs a fixed ~13–19 s warm-up, whatever the formula count.
+  2. After that, fewer and larger array formulas are much faster: per-row MMULT is about 2× faster than per-cell SUMPRODUCT, and whole-block MMULT about 10×.
+  3. API polling is useless for timing on this spreadsheet: a one-cell API read takes 15–21 s.
+- **Caveat:** the laptop was partly loaded (GPU queue running, ~35% CPU idle). These are single trials. Treat them as direction, not final numbers.
+
+### Real prompt change on the v4s probe build, in the browser (inconclusive)
+- Typed "a frog" (seed 5) right after opening the probe sheet. The **server** had the correct pixels (read via API: equal to the spec), but the **browser** had still not redrawn the sprite after 8 min (canvas poller, laptop loaded). Not a usable number.
+- **Lesson:** the browser computes the 500k-formula model itself, and on a busy laptop that is very slow. Prompt-change time has to be measured on an idle machine, and ideally by a person with a stopwatch on the v3 and v4 sheets.
+
+### E1 for the temperature variants and the teacher checkpoints [metrics/e1_v4s_t09.json, e1_v4s_t1.json, e1_v4s_g5t1.json, e1_v4sb12k.json, e1_v4sb.json, e1_v4sb_t1.json]
+
+| metric | real | v3 | v4s | v4s t0.9 | v4s t1 | v4sb 12.5k | **v4sb 50k** | v4sb t1 |
+|---|---|---|---|---|---|---|---|---|
+| naming, all | 0.662 | 0.539 | 0.596 | 0.595 | 0.556 | 0.678 | **0.702** | 0.695 |
+| naming, creatures | 0.733 | 0.578 | 0.638 | 0.664 | 0.741 | 0.776 | 0.828 | 0.871 |
+| naming, objects | 0.625 | 0.708 | 0.750 | 0.708 | 0.725 | 0.783 | 0.833 | 0.825 |
+| naming, test captions | 0.542 | 0.396 | 0.458 | 0.453 | 0.391 | **0.505** | 0.422 | 0.427 |
+| clear | 0.424 | 0.223 | 0.316 | 0.271 | 0.204 | 0.409 | 0.404 | 0.290 |
+| eyes | 0.259 | 0.047 | 0.146 | 0.193 | 0.170 | 0.207 | 0.212 | 0.222 |
+| CLIP R@5 | 0.396 | 0.443 | 0.473 | 0.459 | 0.423 | 0.564 | 0.625 | 0.561 |
+| colours/sprite | 3.55 | 2.74 | 2.56 | 2.79 | 2.93 | 2.71 | 2.87 | 2.99 |
+
+- **Teacher, 50k vs 12.5k steps:**
+  - On common nouns, 50k is best: creatures 0.83, objects 0.83, above real sprites.
+  - On held-out test captions, 12.5k is better: 0.505 vs 0.422.
+
+  The rising val NLL was real overfitting, but only for unseen captions. For the next teacher, use a checkpoint in between or more regularisation (dropout, caption augmentation).
+- **Temperature:** t = 0.8 keeps the best clarity on both models. Higher t buys colours and eyes at the cost of blobs. It is not a free win.
+- Paired v4s → v4sb (50k): naming +0.106, CI [0.063, 0.148]; clear +0.088, CI [0.040, 0.136]; eyes +0.066, CI [0.005, 0.127] (`e1_paired_v4s__v4sb.json`).

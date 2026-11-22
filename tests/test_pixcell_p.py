@@ -101,3 +101,22 @@ def test_parity_v4_slots(guidance):
         assert e["n_fail"] == 0 and e["error_cells"] == 0, (eng, e["failures"][:2], e["per_block"])
         assert "Pal" in e["per_block"] and "Pixels" in e["per_block"], e["per_block"].keys()
     assert r["lint_violations"] == 0 and r["pass"]
+
+
+@pytest.mark.parametrize("kind,guidance", [("v3p", 0.0), ("v3p", 2.0), ("slots", 0.0), ("slots", 1.0)])
+def test_parity_mmult(kind, guidance):
+    """D-59: the MMULT build (per-row array formulas) matches the spec on both engines, block by block."""
+    if not os.path.exists(os.path.join(ROOT, "tools", "node_modules", "hyperformula")):
+        pytest.skip("HyperFormula not installed (npm ci --prefix tools)")
+    w, cfg, vocab, pal = _model(guidance, 3) if kind == "v3p" else _slot_model(guidance)
+    wb = emit_p.compile_p(w, cfg, vocab, pal, mmult=True)
+    r = G.parity(wb, w, cfg, vocab, CASES, G.ENGINES)
+    out = os.path.join(ROOT, "artifacts", "metrics", "parity_ops_v3p.json")
+    prev = json.load(open(out)) if os.path.exists(out) else {}
+    prev[f"mmult,{kind},guidance={guidance:g}"] = {k: v for k, v in r.items()}
+    json.dump(prev, open(out, "w"), indent=1, default=G.np_default)
+    for eng, e in r["engines"].items():
+        assert e["n_fail"] == 0 and e["error_cells"] == 0, (eng, e["failures"][:2])
+        for blk in ("b0.Q", "b0.V", "b0.E0", "b0.ctx", "b0.hid", "b0.x2", "Gum", "Score", "Codes", "Pixels"):
+            assert blk in e["per_block"], (eng, blk)
+    assert r["lint_violations"] == 0 and r["pass"]

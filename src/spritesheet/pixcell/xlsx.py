@@ -2,7 +2,7 @@
 from openpyxl import Workbook as XWorkbook
 from openpyxl.cell import WriteOnlyCell
 
-from .workbook import Text, Workbook, col_letter, is_formula, rng
+from .workbook import Spill, Text, Workbook, col_letter, is_formula, rng
 
 PIXEL_COL_WIDTH = 1.71   # Excel width units (max digit width 7 px): 12 px / 7 = 1.71
 PIXEL_ROW_PT = 9.0       # 12 px
@@ -61,6 +61,12 @@ def to_xlsx(wb: Workbook, path: str, overrides: dict | None = None) -> str:
                     cell = WriteOnlyCell(ws, value=v)
                     cell.number_format = ";;;"
                     out.append(cell)
+                elif isinstance(v, Spill):
+                    from openpyxl.worksheet.formula import ArrayFormula
+                    t = str(v)
+                    if t.startswith("=ARRAYFORMULA(") and t.endswith(")"):   # Sheets-only wrapper; xlsx array formulas
+                        t = "=" + t[len("=ARRAYFORMULA("):-1]                 # are array-aware already
+                    out.append(ArrayFormula(rng(ri, c, ri + v.rows - 1, c + v.cols - 1), t))
                 elif is_formula(v):
                     out.append(v)
                 elif isinstance(v, str):

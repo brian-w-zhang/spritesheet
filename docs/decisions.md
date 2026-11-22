@@ -111,3 +111,14 @@ Append-only. Format: `D-NN · date · decision · why · alternatives rejected`.
     - It runs after the recolour and before the background fill, so "tiny blue frog on a black background" stays consistent.
   - *Cost:* the 3×3 slot dictionary reconstructs shrunk sprites at 0.882 fg, against 0.919 full-size.
   - With p_tiny = 0 the sample stream is unchanged.
+- **D-59 · 2026-11-21 · MMULT build: per-row array formulas (opt-in, `compile_p(..., mmult=True)` / cfg `mmult`).**
+  - *Why:* Sheets recalculates in the browser, and fewer, larger formulas recalculate faster. In a browser test, a 6-layer dm128 chain took 6.0 s warm as per-cell SUMPRODUCT and 2.5–3.3 s as per-row MMULT (docs/09 speed experiment 1). Peer reviewers asked for exactly this test.
+  - *What* (`pixcell/emit_pm.py`; same block names, shapes and maths as `emit_stack`):
+    - **Linear layers:** each row of Q, K, V, x1, hpre and x2 is one `=ARRAYFORMULA(MMULT(x_row, W)*r + b)` spill. Weight tabs are in-by-out with the bias as the last row.
+    - **Attention:** each (row, head) is one `EXP(MMULT(q, TRANSPOSE(K[<n])))*scale` spill times the key-mask column (prompt pads), plus a single diagonal cell (a row always sees itself, as in the spec). Each (row, head) context is one `MMULT(e, V)/Z` spill.
+    - **ReLU** is `IF(h>0,h,0)` over the pre-activation row. That is exact, and MAX is not elementwise.
+    - **Score:** Gumbel noise is its own seed-only block (`Gum`), so a prompt change does not recompute 73k noise formulas. Each Score row is one spill. Slot models add a constant mask row: s + (−10^30) rounds to exactly −10^30, the spec's value.
+    - **Rows stay separate formulas:** row t's input is the code picked at row t−1, so one whole-block MMULT would be circular.
+  - *Engines:* MMULT spills natively in Google Sheets and HyperFormula (array arithmetic on). The xlsx writer emits `Spill` cells as array formulas over their range and drops the Sheets-only `ARRAYFORMULA(...)` wrapper. LibreOffice 26.8 evaluates them.
+  - *Gate A2* passes on both engines for v3-P with and without guidance, and for slot models with and without guidance (`tests/test_pixcell_p.py::test_parity_mmult`). Lint allows MMULT/TRANSPOSE/ARRAYFORMULA only in MMULT builds.
+  - *Formulas* on the small random test models: 3.7k–4.7k, against 18.6k–26.1k for per-cell builds.

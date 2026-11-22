@@ -12,7 +12,7 @@ from .. import tokenizer as T
 from ..reference import M31, LCG_A
 from ..reference_p import HASH_B, EPS
 from .emit import _wtab, emit_tokens, emit_output, emit_about
-from .workbook import Block, Text, Workbook, rng
+from .workbook import Spill, Block, Text, Workbook, rng
 
 
 def _lin(Wb: Block, j: int, xrow: str, n: int, scale_ref=None) -> str:
@@ -100,8 +100,13 @@ def _guidance_cell(wb, g):
     return "Prompt!$B$4"
 
 
-def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", default_seed=1, render=False) -> Workbook:
+def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", default_seed=1, render=False,
+              mmult=None) -> Workbook:
+    """mmult (default cfg["mmult"]): per-row array formulas (emit_pm, D-59) instead of per-cell SUMPRODUCT."""
     L, T, Kp, dm, P = T_L(cfg), cfg["T"], cfg["Kp"], cfg["dm"], cfg["P"]
+    mmult = bool(cfg.get("mmult", False)) if mmult is None else bool(mmult)
+    from .emit_pm import emit_stack_mm, wtab_io
+    stack = emit_stack_mm if mmult else emit_stack
     N = L + T - 1
     S, Ks = int(cfg.get("slots", 0)), int(cfg.get("Ks", Kp))   # v4 slot models (D-57): S palette tokens first
     Gd = int(round((T - S) ** 0.5))
@@ -110,7 +115,7 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
     inv_tau = 1.0 / float(cfg.get("tau", 1.0))
     assert len(palette_hex) == cfg["K"] and vocab_words[0] == "<pad>"
     wb = Workbook()
-    wb.meta.update({"config": dict(cfg), "model": "v3p", "render": render, "N": NPX, "V": len(vocab_words)})
+    wb.meta.update({"config": dict(cfg), "model": "v3p", "render": render, "N": NPX, "V": len(vocab_words), "mmult": mmult})
     tk = emit_tokens(wb, w, cfg, vocab_words, default_prompt, default_seed, show_style=False)
     SEED = tk["SEED"]
 
@@ -143,7 +148,7 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
         return f"=INDEX({ER},{CODES.ref(t, 0, 'Out')}+1,{j + 1})+{Pi.ref(t, j, 'W_posimg')}"
     wb.fill(X0, x0cell)
     keymask = lambda m: f"Tokens!$E${1 + m}" if m < L else None
-    xf = emit_stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask)
+    xf = stack(wb, w, "", X0, N, dm, cfg["H"], cfg["mlp"], cfg["layers"], keymask)
 
     # ---- optional unconditional chain (classifier-free guidance); its weight g is a live input cell (Prompt!B4)
     LU = None
@@ -156,17 +161,17 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
         UER = UE.range("U_W_E", absolute=True)
         wb.fill(U0, lambda t, j: f"={US.ref(0, j, 'U_W_start')}" if t == 0 else
                 f"=INDEX({UER},{CODES.ref(t - 1, 0, 'Out')}+1,{j + 1})+{UP.ref(t - 1, j, 'U_W_pos')}")
-        ux = emit_stack(wb, w, "U", U0, T, cfg["U_dm"], cfg["U_H"], cfg["U_mlp"], cfg["U_layers"],
-                        tab=lambda l, part: f"U{l + 1}_{part}")
-        UWo = _wtab(wb, "U_W_out", w["U_Wout"].T, w["U_bout"])
+        ux = stack(wb, w, "U", U0, T, cfg["U_dm"], cfg["U_H"], cfg["U_mlp"], cfg["U_layers"],
+                   tab=lambda l, part: f"U{l + 1}_{part}")
+        UWo = wtab_io(wb, "U_W_out", w["U_Wout"], w["U_bout"]) if mmult else _wtab(wb, "U_W_out", w["U_Wout"].T, w["U_bout"])
         urf = wb.add_block("U.rf", "U_Out", 1, 1, T, 1)
         uxr = lambda t: ux.row_range(t, sheet=ux.sheet)
         wb.fill(urf, lambda t, _: f"=1/SQRT(SUMPRODUCT({uxr(t)},{uxr(t)})/{cfg['U_dm']}+{EPS!r})")
         # the unconditional logit is inlined in each Score cell (D-55): no separate 64 x Kp logit tab
-        LU = lambda t, k: _lin(UWo, k, uxr(t), cfg["U_dm"], urf.ref(t, 0, "U_Out"))
+        LU = None if mmult else (lambda t, k: _lin(UWo, k, uxr(t), cfg["U_dm"], urf.ref(t, 0, "U_Out")))
 
     # ---- logits → Gumbel score → code (one MATCH(MAX) per step)
-    Wout = _wtab(wb, "W_out", w["Wout"].T, w["bout"])
+    Wout = wtab_io(wb, "W_out", w["Wout"], w["bout"]) if mmult else _wtab(wb, "W_out", w["Wout"].T, w["bout"])
     xr = lambda t: xf.row_range(L - 1 + t, sheet=xf.sheet)
     rf = wb.add_block("rf", "Out", 1, 3, T, 1)
     wb.fill(rf, lambda t, _: f"=1/SQRT(SUMPRODUCT({xr(t)},{xr(t)})/{dm}+{EPS!r})")
@@ -179,7 +184,28 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
         lg = f"((1+{GC})*({lc})-{GC}*({LU(t, k)}))" if g else f"({lc})"
         u = f"(MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}"
         return f"={lg}*{inv_tau!r}+(-LN(-LN({u})))"
-    wb.fill(Sc, score)
+    if not mmult:
+        wb.fill(Sc, score)
+    else:
+        # Gumbel noise depends on the seed only: its own block, so a prompt change does not recompute it
+        Gm = wb.add_block("Gum", "Score", T + 2, 1, T, Kp)
+        wb.fill(Gm, lambda t, k: f"=-LN(-LN((MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}))")
+        MK = None
+        if S:   # slot models: constant mask rows (0 = allowed, -1e30 = not); s + (-1e30) rounds to exactly -1e30
+            MK = wb.add_block("SMask", "Score", 2 * T + 3, 1, 2, Kp)
+            big = -1e30
+            wb.fill(MK, lambda i, k: (0.0 if k >= Ks else big) if i == 0 else (0.0 if k < Ks else big))
+        for t in range(T):
+            lc = f"(MMULT({xr(t)},{Wout[0]})*{rf.ref(t, 0, 'Out')}+{Wout[1]})"
+            if g:
+                lu = f"(MMULT({uxr(t)},{UWo[0]})*{urf.ref(t, 0, 'U_Out')}+{UWo[1]})"
+                lg = f"((1+{GC})*{lc}-{GC}*{lu})"
+            else:
+                lg = lc
+            body = f"{lg}*{inv_tau!r}+{Gm.row_range(t)}"
+            if MK is not None:
+                body += f"+{MK.row_range(0 if t < S else 1)}"
+            wb.set("Score", Sc.r0 + t, Sc.c0, Spill(f"=ARRAYFORMULA({body})", 1, Kp))
     wb.fill(CODES, lambda t, _: f"=MATCH(MAX({Sc.row_range(t, sheet='Score')}),{Sc.row_range(t, sheet='Score')},0)-1")
 
     # ---- pixels = patch lookup

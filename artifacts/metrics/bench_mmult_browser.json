@@ -1,0 +1,9 @@
+{
+ "what": "Same 6-layer chain of dm128 linear layers over 64 rows, built three ways on the probe sheet (scripts/bench_mmult_sheets.py), timed in Chrome: Enter on the input cell -> flag cell G1 turns green (checksum == numpy). In-page canvas poller (50-100 ms); a trial only counts if the flag was seen red after Enter.",
+ "conditions": "2026-11-21, MacBook M4 16 GB, Chrome; laptop partly loaded (GPU queue generating teacher samples, ~35% CPU idle); probe spreadsheet also holds the 500k-formula v4s model (not recalculated by these edits).",
+ "formulas": {"A_sumproduct_per_cell": 49152, "B_mmult_per_row": 384, "C_mmult_per_block": 6},
+ "first_change_after_page_load_s": {"A": [12.86, 19.30], "B": [14.27], "C": [15.86, 17.44]},
+ "warm_change_s": {"A": [6.00], "B": [2.52, 3.33], "C": [0.62]},
+ "invalid_trials": "two early warm trials (C 0.76 s, B 0.13 s) were rejected: the flag was still green from the previous trial, so the poller saw stale green",
+ "api_polling_same_tabs": "not usable: a trivial one-cell API read took 15-21 s on this spreadsheet"
+}

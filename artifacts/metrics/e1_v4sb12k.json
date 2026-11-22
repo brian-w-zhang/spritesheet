@@ -1,0 +1,42 @@
+{
+ "name": "v4sb12k",
+ "set": "e1",
+ "n_prompts": 187,
+ "seeds": 8,
+ "clip_R@5": {
+  "creatures": 0.5345,
+  "objects": 0.625,
+  "colour": 0.9062,
+  "size": 0.5469,
+  "facing": 0.3516,
+  "pose": 0.3281,
+  "test": 0.375,
+  "all": 0.5642
+ },
+ "clip_score": 0.3382,
+ "colour_acc": 0.9688,
+ "size_giant_over_tiny_area": 1.215,
+ "size_giant_bigger_share": 0.875,
+ "empty_share": 0.0,
+ "fg_frac": 0.381,
+ "colours_per_sprite": 2.71,
+ "seed_diversity": 0.4419,
+ "distinct_per_8": 8.0,
+ "neardup_share_lt5pct": 0.0013,
+ "neardup_min_diff_median": 0.2344,
+ "vlm": {
+  "naming_acc": {
+   "creatures": 0.7759,
+   "objects": 0.7833,
+   "colour": 0.75,
+   "size": 0.75,
+   "facing": 0.5938,
+   "pose": 0.625,
+   "test": 0.5052,
+   "all": 0.6778
+  },
+  "clear_share": 0.4091,
+  "eyes_visible": 0.2075,
+  "facing_acc": 0.6094
+ }
+}

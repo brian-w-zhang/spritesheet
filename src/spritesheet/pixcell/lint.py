@@ -9,6 +9,7 @@ TOKENIZER = {"LOWER", "SUBSTITUTE", "TRIM", "MID", "REPT"}
 RENDER = {"SPARKLINE"}
 SAMPLING = {"LN"}                     # v2 Gumbel noise, only in S{t}_Score tabs (cfg temp > 0; parity D-43)
 _SCORE_TAB = re.compile(r"^(S[0-9]+_)?Score$")   # v2 S{t}_Score, v3-P Score (D-52)
+ARRAY = {"MMULT", "TRANSPOSE", "ARRAYFORMULA"}   # MMULT build only (emit_pm, D-59)
 NORM = {"SQRT"}                       # v3-P RMSNorm 1/SQRT(mean(x^2)+eps) (D-52)
 _STR = re.compile(r'"(?:[^"]|"")*"')
 _FN = re.compile(r"([A-Za-z_][A-Za-z0-9_.]*)\(")
@@ -48,7 +49,7 @@ def lint(wb) -> dict:
             in_disp = any(sheet == b.sheet and b.r0 <= r < b.r0 + b.nrows and b.c0 <= c < b.c0 + b.ncols
                           for b in render_blocks)
             body = _STR.sub('""', v)
-            allowed = CORE | TOKENIZER | (NORM if wb.meta.get("model") in ("v3p", "v3pg") else set()) | (RENDER if in_disp else set()) | (SAMPLING if _SCORE_TAB.match(sheet) else set())
+            allowed = CORE | TOKENIZER | (NORM if wb.meta.get("model") in ("v3p", "v3pg") else set()) | (RENDER if in_disp else set()) | (SAMPLING if _SCORE_TAB.match(sheet) else set()) | (ARRAY if wb.meta.get("mmult") else set())
             if "{" in body and not in_disp:
                 bad.append((sheet, (r, c), "array literal"))
             for m in _FN.finditer(body):

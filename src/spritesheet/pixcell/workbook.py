@@ -13,6 +13,17 @@ class Text(str):
     """A literal string cell. Written RAW / as a shared string / with a leading apostrophe in HyperFormula."""
 
 
+class Spill(str):
+    """An array formula ("=MMULT(...)") whose result spills into rows x cols cells starting at its own cell.
+    The spilled cells stay empty in the Workbook. Google Sheets and HyperFormula spill it natively; the xlsx
+    writer emits it as an array formula over the spill range (LibreOffice)."""
+
+    def __new__(cls, text, rows=1, cols=1):
+        o = super().__new__(cls, text)
+        o.rows, o.cols = int(rows), int(cols)
+        return o
+
+
 def col_letter(c: int) -> str:
     s = ""
     while c > 0:
@@ -106,7 +117,8 @@ class Workbook:
         cells = self.sheets[sheet]
         if not cells:
             return 1, 1
-        return max(r for r, _ in cells), max(c for _, c in cells)
+        sp = [(r + v.rows - 1, c + v.cols - 1) for (r, c), v in cells.items() if isinstance(v, Spill)]
+        return (max([r for r, _ in cells] + [r for r, _ in sp]), max([c for _, c in cells] + [c for _, c in sp]))
 
     def grid(self, sheet: str):
         """Dense row-major list of lists (None for empty), for writers."""

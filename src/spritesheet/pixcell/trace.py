@@ -216,6 +216,7 @@ def _stack_expected(E, pre, parts_rows, N, H, dh, is_q=None):
         get = lambda key: np.array([parts_rows[n][l][key] for n in range(N)])
         E[p + "r"] = get("r")[:, None]
         E[p + "Q"], E[p + "K"], E[p + "VT"] = get("q"), get("k"), get("v").T
+        E[p + "V"] = get("v")                       # MMULT build (emit_pm) keeps V in row layout
         for h in range(H):
             M = np.zeros((N, N))
             for n in range(N):
@@ -252,6 +253,7 @@ def trace_p(prompt, seed, w, cfg, vocab_index) -> dict:
     _stack_expected(E, "", [r["parts"] for r in rows], N, H, dm // H)
     E["rf"] = np.array([[rows[L - 1 + t]["rf"]] for t in range(Tn)])
     E["Score"] = out["scores"]
+    E["Gum"] = out["gumbel"]                        # MMULT build: seed-only noise block
     E["Codes"] = out["codes"].astype(float)[:, None]
     E["Pixels"] = out["pixels"].astype(float)
     if cfg.get("slots"):

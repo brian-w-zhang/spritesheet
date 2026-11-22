@@ -1,0 +1,924 @@
+{
+ "gate": "A2-v3",
+ "models": [
+  {
+   "cases": 6,
+   "engines": {
+    "hyperformula": {
+     "version": "HyperFormula 3.5.0",
+     "max_rel": 3.3306690738754696e-15,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 2.220446049250313e-16,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 3.76939169175733e-16,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 2.7755575615628914e-16,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 1.1102230246251565e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 2.2898349882893854e-16,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 3.899775658602184e-16,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 4.3986836454744996e-16,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 1.0269562977782698e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 1.5543122344752192e-15,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 1.1102230246251565e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 5.886085986784421e-16,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 8.437952075699524e-16,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 2.7755575615628914e-16,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 3.3306690738754696e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 9.992007221626409e-16,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 1.1102230246251565e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 9.992007221626409e-16,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 8.881784197001252e-16,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 2.6645352591003757e-15,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 3.3306690738754696e-15,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "build_s": 4.149,
+      "node_s": 11.660905122756958,
+      "per_run_eval_s": [
+       0.006,
+       1.162,
+       1.174,
+       1.854,
+       0.955,
+       0.716
+      ],
+      "wall_s": 11.810527086257935,
+      "batches": 1,
+      "runs": 6
+     }
+    },
+    "libreoffice": {
+     "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+     "max_rel": 6.267137120559048e-15,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 4.793370497808696e-15,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 5.100840905102543e-15,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 4.098543243750068e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 4.2548952767389096e-15,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 5.093044245646529e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 5.551115123125783e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 1.0913901311738445e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 4.4249839842815746e-15,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.2514250071703494e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 5.09918804779835e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 5.02227388385104e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 5.1433786759477444e-15,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 4.698090736626459e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 4.135316132443334e-15,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 4.473892129959874e-16,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 1.884394114390219e-15,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 5.551115123125783e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 4.996003610813204e-16,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 4.996003610813204e-16,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 4.698090736626459e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 4.26517149420683e-15,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 3.796945143843e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 4.26517149420683e-15,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 4.9779843865127004e-15,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 3.4372992648067052e-15,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 4.9779843865127004e-15,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 5.458169809978242e-15,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 3.5182564605326672e-15,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 5.458169809978242e-15,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 5.366352635105464e-15,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 6.267137120559048e-15,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "xlsx_s": 1.8059518337249756,
+      "variants_s": 1.218461036682129,
+      "convert_s": 26.696568727493286,
+      "read_s": 6.500220060348511,
+      "wall_s": 36.26120591163635,
+      "batches": 1,
+      "runs": 6
+     }
+    }
+   },
+   "stats": {
+    "cells": 56078,
+    "formulas": 43909,
+    "formula_chars": 2002697,
+    "sheets": 45
+   },
+   "min_margin": 2.569833621479667e-05,
+   "styles": [
+    1,
+    5,
+    6
+   ],
+   "lint_violations": 0,
+   "functions": {
+    "INDEX": 773,
+    "SUBSTITUTE": 55,
+    "LOWER": 1,
+    "TRIM": 24,
+    "MID": 24,
+    "REPT": 12,
+    "IF": 24,
+    "IFERROR": 12,
+    "MATCH": 588,
+    "MAX": 7094,
+    "SUM": 14,
+    "SUMPRODUCT": 36081,
+    "EXP": 160,
+    "MOD": 3,
+    "INT": 1,
+    "ABS": 1,
+    "MIN": 1
+   },
+   "pass": true,
+   "weights_seed": 0,
+   "scale": 0.3,
+   "config": {
+    "N": 24,
+    "L": 12,
+    "V": 60,
+    "d": 16,
+    "h": 32,
+    "S": 16,
+    "e": 4,
+    "C0": 8,
+    "C1": 8,
+    "C2": 8,
+    "C3": 8,
+    "K": 48,
+    "attn_scale": 0.25,
+    "k1": 5,
+    "k2": 5,
+    "k3": 3,
+    "film_z": false
+   }
+  },
+  {
+   "cases": 6,
+   "engines": {
+    "hyperformula": {
+     "version": "HyperFormula 3.5.0",
+     "max_rel": 3.75921516138078e-13,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 8.881784197001252e-16,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 1.1102230246251565e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 7.216449660063518e-16,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 2.3314683517128287e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 7.771561172376096e-16,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 2.275957200481571e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 9.632821691665043e-16,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 1.5543122344752192e-15,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 3.222029635423295e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 4.716016798860705e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 8.132383655379272e-15,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 2.6761021757699458e-14,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 9.159339953157541e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 1.199040866595169e-14,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 4.404955259178827e-16,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 1.8599967401920029e-16,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 1.1102230246251565e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 2.7755575615628914e-17,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 9.159339953157541e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 1.6431300764452317e-14,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 6.2625709654378645e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 1.6431300764452317e-14,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 3.197442310920451e-14,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 2.143516209390334e-15,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 3.197442310920451e-14,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 1.7053025658242404e-13,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 1.63202784619898e-14,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 1.7053025658242404e-13,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 2.1316282072803006e-13,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 3.75921516138078e-13,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "build_s": 5.511,
+      "node_s": 26.560962915420532,
+      "per_run_eval_s": [
+       0.005,
+       7.267,
+       6.29,
+       2.041,
+       2.202,
+       1.4
+      ],
+      "wall_s": 26.77875804901123,
+      "batches": 1,
+      "runs": 6
+     }
+    },
+    "libreoffice": {
+     "version": "LibreOffice 26.8.0.3 bce0998afefdbc355585ca324285661a2170ba77",
+     "max_rel": 3.631678291426965e-13,
+     "per_block": {
+      "Tokens.clean": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.rest": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.word": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.ids": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.mask": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Tokens.denom": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "X": {
+       "max_rel": 4.736876949807267e-15,
+       "bad": 0
+      },
+      "Q": {
+       "max_rel": 4.733805719742792e-15,
+       "bad": 0
+      },
+      "K": {
+       "max_rel": 4.706622971288233e-15,
+       "bad": 0
+      },
+      "VT": {
+       "max_rel": 4.4439672916757614e-15,
+       "bad": 0
+      },
+      "Scores.scale": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "Scores": {
+       "max_rel": 6.2617778171846305e-15,
+       "bad": 0
+      },
+      "P": {
+       "max_rel": 1.887379141862766e-15,
+       "bad": 0
+      },
+      "Softmax.max": {
+       "max_rel": 4.913072441589631e-15,
+       "bad": 0
+      },
+      "Softmax.sum": {
+       "max_rel": 4.204358936263027e-15,
+       "bad": 0
+      },
+      "Softmax.exp": {
+       "max_rel": 2.55351295663786e-15,
+       "bad": 0
+      },
+      "Ctx": {
+       "max_rel": 7.105427357601002e-15,
+       "bad": 0
+      },
+      "A": {
+       "max_rel": 7.882583474838611e-15,
+       "bad": 0
+      },
+      "MLP": {
+       "max_rel": 1.1879386363489175e-14,
+       "bad": 0
+      },
+      "H": {
+       "max_rel": 2.4147350785597155e-14,
+       "bad": 0
+      },
+      "c": {
+       "max_rel": 7.216449660063518e-15,
+       "bad": 0
+      },
+      "style_logits": {
+       "max_rel": 1.1601830607332886e-14,
+       "bad": 0
+      },
+      "style.max": {
+       "max_rel": 1.9700893686198773e-15,
+       "bad": 0
+      },
+      "style.sum": {
+       "max_rel": 3.325487739764441e-15,
+       "bad": 0
+      },
+      "style.exp": {
+       "max_rel": 4.440892098500626e-16,
+       "bad": 0
+      },
+      "p_style": {
+       "max_rel": 6.661338147750939e-16,
+       "bad": 0
+      },
+      "cum": {
+       "max_rel": 5.551115123125783e-16,
+       "bad": 0
+      },
+      "s0": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "s1": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "u": {
+       "max_rel": 4.996003610813204e-16,
+       "bad": 0
+      },
+      "style": {
+       "max_rel": 0.0,
+       "bad": 0
+      },
+      "z": {
+       "max_rel": 7.216449660063518e-15,
+       "bad": 0
+      },
+      "G0": {
+       "max_rel": 5.995204332975845e-15,
+       "bad": 0
+      },
+      "FiLM1": {
+       "max_rel": 3.0612828153494175e-15,
+       "bad": 0
+      },
+      "Up_1": {
+       "max_rel": 5.995204332975845e-15,
+       "bad": 0
+      },
+      "G1": {
+       "max_rel": 2.839395385478838e-14,
+       "bad": 0
+      },
+      "FiLM2": {
+       "max_rel": 4.034817274037573e-15,
+       "bad": 0
+      },
+      "Up_2": {
+       "max_rel": 2.839395385478838e-14,
+       "bad": 0
+      },
+      "G2": {
+       "max_rel": 8.56259507742152e-14,
+       "bad": 0
+      },
+      "FiLM3": {
+       "max_rel": 1.4432899320127035e-14,
+       "bad": 0
+      },
+      "Up_3": {
+       "max_rel": 8.56259507742152e-14,
+       "bad": 0
+      },
+      "G3": {
+       "max_rel": 1.7064127888488656e-13,
+       "bad": 0
+      },
+      "Logits": {
+       "max_rel": 3.631678291426965e-13,
+       "bad": 0
+      },
+      "Pixels": {
+       "max_rel": 0.0,
+       "bad": 0
+      }
+     },
+     "failures": [],
+     "n_fail": 0,
+     "error_cells": 0,
+     "stale_cells": 0,
+     "style_mismatch": 0,
+     "pixels_mismatch": 0,
+     "timing": {
+      "xlsx_s": 1.2250220775604248,
+      "variants_s": 1.3645620346069336,
+      "convert_s": 39.78795576095581,
+      "read_s": 12.241457223892212,
+      "wall_s": 54.67880606651306,
+      "batches": 1,
+      "runs": 6
+     }
+    }
+   },
+   "stats": {
+    "cells": 56750,
+    "formulas": 43909,
+    "formula_chars": 2009117,
+    "sheets": 45
+   },
+   "min_margin": 0.0005387290428386926,
+   "styles": [
+    6,
+    7,
+    15
+   ],
+   "lint_violations": 0,
+   "functions": {
+    "INDEX": 773,
+    "SUBSTITUTE": 55,
+    "LOWER": 1,
+    "TRIM": 24,
+    "MID": 24,
+    "REPT": 12,
+    "IF": 24,
+    "IFERROR": 12,
+    "MATCH": 588,
+    "MAX": 7094,
+    "SUM": 14,
+    "SUMPRODUCT": 36081,
+    "EXP": 160,
+    "MOD": 3,
+    "INT": 1,
+    "ABS": 1,
+    "MIN": 1
+   },
+   "pass": true,
+   "weights_seed": 1,
+   "scale": 0.6,
+   "config": {
+    "N": 24,
+    "L": 12,
+    "V": 60,
+    "d": 16,
+    "h": 32,
+    "S": 16,
+    "e": 4,
+    "C0": 8,
+    "C1": 8,
+    "C2": 8,
+    "C3": 8,
+    "K": 48,
+    "attn_scale": 0.25,
+    "k1": 3,
+    "k2": 5,
+    "k3": 5,
+    "film_z": true
+   }
+  }
+ ],
+ "pass": true
+}
