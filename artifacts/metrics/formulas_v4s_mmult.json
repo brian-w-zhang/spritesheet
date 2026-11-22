@@ -1,0 +1,49 @@
+{
+ "model": "artifacts/model/v4s_a_sheet",
+ "per_cell": {
+  "cells": 2609693,
+  "formulas": 527289,
+  "formula_chars": 48278516,
+  "sheets": 84
+ },
+ "mmult": {
+  "cells": 2053755,
+  "formulas": 26473,
+  "formula_chars": 1567934,
+  "sheets": 84
+ },
+ "mmult_per_sheet_top": [
+  [
+   "Inputs",
+   10880
+  ],
+  [
+   "U_X0",
+   3264
+  ],
+  [
+   "Blk1_Att",
+   944
+  ],
+  [
+   "Blk2_Att",
+   944
+  ],
+  [
+   "Blk3_Att",
+   944
+  ],
+  [
+   "Blk4_Att",
+   944
+  ],
+  [
+   "Prompt",
+   576
+  ],
+  [
+   "Pixels",
+   576
+  ]
+ ]
+}

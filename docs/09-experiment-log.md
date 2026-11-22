@@ -623,3 +623,23 @@ Batch 256, T 64, step time in seconds:
   The rising val NLL was real overfitting, but only for unseen captions. For the next teacher, use a checkpoint in between or more regularisation (dropout, caption augmentation).
 - **Temperature:** t = 0.8 keeps the best clarity on both models. Higher t buys colours and eyes at the cost of blobs. It is not a free win.
 - Paired v4s → v4sb (50k): naming +0.106, CI [0.063, 0.148]; clear +0.088, CI [0.040, 0.136]; eyes +0.066, CI [0.005, 0.127] (`e1_paired_v4s__v4sb.json`).
+
+### Speed experiment 2: the MMULT build of the real v4 model (D-59) [metrics/formulas_v4s_mmult.json; tests/test_pixcell_p.py::test_parity_mmult]
+- **Compiler:** `compile_p(..., mmult=True)` emits each row of every linear layer as one `ARRAYFORMULA(MMULT(...))` spill. Attention is one spill per (row, head), Gumbel noise one spill per row over a constant 1..Kp index row, and Score one spill per row.
+- **Gate A2:** passes on HyperFormula and LibreOffice for v3-P (g 0 and 2) and slot models (g 0 and 1). Every block is compared to the spec (max rel error < 1e-13), and lint is clean.
+- **Formula count, v4s_a + u48** (same model and weights):
+
+  | build | formulas | formula text |
+  |---|---|---|
+  | per-cell SUMPRODUCT (deployed style) | 527,289 | 48.3 MB |
+  | MMULT, per-cell Gumbel | 99,369 | 8.0 MB |
+  | **MMULT, Gumbel per row** | **26,473** | **1.6 MB** |
+
+  What remains is mostly the image-token lookups on Inputs (10,880 single-cell INDEX).
+- **Engine quirks found:**
+  - HyperFormula returns #VALUE for `INDEX(range, r, 0)` (whole-row INDEX). `INDEX(range, r, colidx_row)` works in both local engines, but Google Sheets may not vectorise INDEX, so the Inputs lookups stay per cell for now.
+  - An earlier string replacement in the compiler also hit `compile_pg` (the grouped model). The full test suite caught it (3 failures) and it was fixed before commit.
+- **Next:**
+  1. push the MMULT build to the probe sheet;
+  2. A4 (8 prompts read back from Google Sheets must equal the spec);
+  3. time prompt changes in the browser against the v3 demo sheet, with the laptop idle.

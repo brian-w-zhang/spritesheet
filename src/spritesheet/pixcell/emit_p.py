@@ -188,8 +188,14 @@ def compile_p(w, cfg, vocab_words, palette_hex, default_prompt="a red frog", def
         wb.fill(Sc, score)
     else:
         # Gumbel noise depends on the seed only: its own block, so a prompt change does not recompute it
+        # one array formula per row over a constant column-index row 1..Kp (all integers stay < 2^53: exact)
+        KI = wb.add_block("KIdx", "Score", 2 * T + 6, 1, 1, Kp)
+        wb.fill(KI, lambda _, k: float(k + 1))
+        KIR = KI.row_range(0, absolute=True)
         Gm = wb.add_block("Gum", "Score", T + 2, 1, T, Kp)
-        wb.fill(Gm, lambda t, k: f"=-LN(-LN((MOD({LCG_A}*MOD({S1}+{HASH_B}*{t * Kp + k + 1},{M31}),{M31})+0.5)/{M31}))")
+        for t in range(T):
+            wb.set("Score", Gm.r0 + t, Gm.c0, Spill(
+                f"=ARRAYFORMULA(-LN(-LN((MOD({LCG_A}*MOD({S1}+{HASH_B}*({t * Kp}+{KIR}),{M31}),{M31})+0.5)/{M31})))", 1, Kp))
         MK = None
         if S:   # slot models: constant mask rows (0 = allowed, -1e30 = not); s + (-1e30) rounds to exactly -1e30
             MK = wb.add_block("SMask", "Score", 2 * T + 3, 1, 2, Kp)

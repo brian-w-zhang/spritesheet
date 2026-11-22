@@ -3611,19 +3611,19 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "build_s": 1.411,
-     "node_s": 6.055413007736206,
+     "build_s": 1.267,
+     "node_s": 7.691075801849365,
      "per_run_eval_s": [
-      0.269,
-      0.435,
-      0.348,
-      0.525,
-      0.836,
-      0.454,
-      0.351,
-      0.214
+      0.466,
+      0.303,
+      0.372,
+      0.472,
+      0.39,
+      0.687,
+      0.476,
+      0.464
      ],
-     "wall_s": 6.1331329345703125,
+     "wall_s": 7.8121960163116455,
      "batches": 1,
      "runs": 8
     }
@@ -3812,20 +3812,20 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "xlsx_s": 1.0535502433776855,
-     "variants_s": 1.1073229312896729,
-     "convert_s": 22.269938945770264,
-     "read_s": 3.4648630619049072,
-     "wall_s": 27.931648015975952,
+     "xlsx_s": 1.041975975036621,
+     "variants_s": 1.0298969745635986,
+     "convert_s": 23.25178599357605,
+     "read_s": 6.964117765426636,
+     "wall_s": 33.798200607299805,
      "batches": 1,
      "runs": 8
     }
    }
   },
   "stats": {
-   "cells": 25157,
-   "formulas": 3662,
-   "formula_chars": 244206,
+   "cells": 24213,
+   "formulas": 2654,
+   "formula_chars": 158062,
    "sheets": 38
   },
   "min_margin": 0.004499964461397887,
@@ -3844,17 +3844,17 @@
    "MATCH": 28,
    "MAX": 17,
    "SUM": 217,
-   "MOD": 2050,
+   "MOD": 34,
    "INT": 1,
    "ABS": 1,
    "INDEX": 800,
    "SUMPRODUCT": 724,
    "SQRT": 124,
-   "ARRAYFORMULA": 818,
+   "ARRAYFORMULA": 834,
    "MMULT": 764,
    "EXP": 424,
    "TRANSPOSE": 416,
-   "LN": 2048
+   "LN": 32
   },
   "pass": true
  },
@@ -4101,19 +4101,19 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "build_s": 1.207,
-     "node_s": 4.937773942947388,
+     "build_s": 2.659,
+     "node_s": 9.524624109268188,
      "per_run_eval_s": [
-      0.189,
-      0.19,
-      0.31,
-      0.347,
-      0.424,
-      0.379,
-      0.369,
-      0.393
+      0.612,
+      0.741,
+      0.793,
+      0.809,
+      0.617,
+      0.553,
+      0.666,
+      0.531
      ],
-     "wall_s": 5.0831239223480225,
+     "wall_s": 9.648633003234863,
      "batches": 1,
      "runs": 8
     }
@@ -4358,20 +4358,20 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "xlsx_s": 0.7820658683776855,
-     "variants_s": 0.816716194152832,
-     "convert_s": 31.64201784133911,
-     "read_s": 23.565244913101196,
-     "wall_s": 56.86664032936096,
+     "xlsx_s": 0.6640419960021973,
+     "variants_s": 0.8265819549560547,
+     "convert_s": 26.309736967086792,
+     "read_s": 5.35686182975769,
+     "wall_s": 33.19241189956665,
      "batches": 1,
      "runs": 8
     }
    }
   },
   "stats": {
-   "cells": 33341,
-   "formulas": 4332,
-   "formula_chars": 280740,
+   "cells": 32397,
+   "formulas": 3324,
+   "formula_chars": 194596,
    "sheets": 54
   },
   "min_margin": 0.02283859724173709,
@@ -4390,17 +4390,17 @@
    "MATCH": 28,
    "MAX": 17,
    "SUM": 249,
-   "MOD": 2050,
+   "MOD": 34,
    "INT": 1,
    "ABS": 1,
    "INDEX": 1160,
    "SUMPRODUCT": 804,
    "SQRT": 172,
-   "ARRAYFORMULA": 992,
+   "ARRAYFORMULA": 1008,
    "MMULT": 938,
    "EXP": 486,
    "TRANSPOSE": 446,
-   "LN": 2048
+   "LN": 32
   },
   "pass": true
  },
@@ -4595,19 +4595,19 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "build_s": 1.786,
-     "node_s": 8.10865306854248,
+     "build_s": 1.242,
+     "node_s": 9.669289112091064,
      "per_run_eval_s": [
-      0.599,
-      0.529,
-      0.461,
-      0.58,
-      0.782,
-      0.631,
-      0.797,
-      0.341
+      0.378,
+      0.368,
+      2.484,
+      0.523,
+      0.447,
+      0.446,
+      2.13,
+      0.419
      ],
-     "wall_s": 8.208730936050415,
+     "wall_s": 9.728034019470215,
      "batches": 1,
      "runs": 8
     }
@@ -4800,20 +4800,20 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "xlsx_s": 1.5080640316009521,
-     "variants_s": 1.4153027534484863,
-     "convert_s": 28.41347098350525,
-     "read_s": 9.154867887496948,
-     "wall_s": 40.54385018348694,
+     "xlsx_s": 1.2047269344329834,
+     "variants_s": 2.8306801319122314,
+     "convert_s": 42.859325885772705,
+     "read_s": 18.677617073059082,
+     "wall_s": 65.68793201446533,
      "batches": 1,
      "runs": 8
     }
    }
   },
   "stats": {
-   "cells": 24356,
-   "formulas": 3903,
-   "formula_chars": 258511,
+   "cells": 23502,
+   "formulas": 3003,
+   "formula_chars": 181795,
    "sheets": 38
   },
   "min_margin": 0.012765729920987567,
@@ -4832,17 +4832,17 @@
    "MATCH": 32,
    "MAX": 21,
    "SUM": 249,
-   "MOD": 1842,
+   "MOD": 42,
    "INT": 1,
    "ABS": 1,
    "INDEX": 992,
    "SUMPRODUCT": 776,
    "SQRT": 144,
-   "ARRAYFORMULA": 942,
+   "ARRAYFORMULA": 962,
    "MMULT": 880,
    "EXP": 488,
    "TRANSPOSE": 480,
-   "LN": 1840
+   "LN": 40
   },
   "pass": true
  },
@@ -5093,19 +5093,19 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "build_s": 1.77,
-     "node_s": 9.314170122146606,
+     "build_s": 3.283,
+     "node_s": 23.296879053115845,
      "per_run_eval_s": [
-      0.675,
-      0.714,
-      1.131,
-      0.798,
-      0.719,
-      0.541,
-      0.872,
-      0.595
+      4.074,
+      2.281,
+      1.769,
+      0.867,
+      4.292,
+      0.773,
+      1.548,
+      1.141
      ],
-     "wall_s": 9.4551260471344,
+     "wall_s": 23.427234172821045,
      "batches": 1,
      "runs": 8
     }
@@ -5354,20 +5354,20 @@
     "style_mismatch": 0,
     "pixels_mismatch": 0,
     "timing": {
-     "xlsx_s": 0.9256687164306641,
-     "variants_s": 1.2571589946746826,
-     "convert_s": 31.179553031921387,
-     "read_s": 7.559305906295776,
-     "wall_s": 41.01211190223694,
+     "xlsx_s": 1.7205331325531006,
+     "variants_s": 1.2756092548370361,
+     "convert_s": 33.05380296707153,
+     "read_s": 8.818489789962769,
+     "wall_s": 44.928845167160034,
      "batches": 1,
      "runs": 8
     }
    }
   },
   "stats": {
-   "cells": 31922,
-   "formulas": 4741,
-   "formula_chars": 304661,
+   "cells": 31068,
+   "formulas": 3841,
+   "formula_chars": 227945,
    "sheets": 54
   },
   "min_margin": 0.020713932054091444,
@@ -5386,17 +5386,17 @@
    "MATCH": 32,
    "MAX": 21,
    "SUM": 289,
-   "MOD": 1842,
+   "MOD": 42,
    "INT": 1,
    "ABS": 1,
    "INDEX": 1448,
    "SUMPRODUCT": 876,
    "SQRT": 204,
-   "ARRAYFORMULA": 1160,
+   "ARRAYFORMULA": 1180,
    "MMULT": 1098,
    "EXP": 566,
    "TRANSPOSE": 518,
-   "LN": 1840
+   "LN": 40
   },
   "pass": true
  }
