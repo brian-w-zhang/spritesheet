@@ -643,3 +643,24 @@ Batch 256, T 64, step time in seconds:
   1. push the MMULT build to the probe sheet;
   2. A4 (8 prompts read back from Google Sheets must equal the spec);
   3. time prompt changes in the browser against the v3 demo sheet, with the laptop idle.
+
+### Speed experiment 3: the MMULT build on Google Sheets [metrics/parity_sheets_probe.json, parity_sheets_probe_percell.json, latency_browser_v4mm_vs_v3.json; figures/probe_sheet_readback.png]
+- **Push:** `v4s_a_sheet_mm` (MMULT build, 26,473 formulas) to the probe sheet, 235 requests, 45.4 MB. Wall time was 64k s only because the laptop went into deep idle sleep overnight mid-push. `caffeinate -i` is now tied to the queue runner.
+- **A4:** 8/8 prompts read back from Google Sheets equal the spec pixel for pixel. **The MMULT build is exact on real Sheets.**
+- **API timing** (same method as the per-cell build on the same sheet; not user latency): first consistent read **33–51 s, median 39 s**, against 103–143 s for the per-cell v4s build. About 3× faster.
+- **Browser timing** (what a user sees; canvas poller, laptop mostly idle):
+
+  | build | formulas | first change after opening | warm changes |
+  |---|---|---|---|
+  | **v4s MMULT (probe)** | 26,473 | 37.5 s | **5.6, 5.7, 7.8 s** |
+  | v3 per-cell (demo sheet) | 493,532 | 378 s | NOT RUN (Chrome lost connection) |
+
+  The sprite appears in one step, with no visible intermediate frames.
+- **Learned:**
+  1. Formula count, not arithmetic, dominates browser recalculation. Cutting it 20× turned a multi-minute wait into seconds for repeated prompts. This answers the MP2 critiques' "where does the time go" with a before/after on the same model.
+  2. The first edit after opening still pays a ~35 s warm-up.
+  3. Single trials, one machine. Repeat with more prompts, and a stopwatch from a second person, before quoting on a slide.
+- **Next:**
+  - make MMULT the default Pixcell build for v3-P;
+  - try the remaining per-cell blocks (Inputs lookups, 10.9k);
+  - put the distilled v4 student on the demo sheet once it passes E1.

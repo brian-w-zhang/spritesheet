@@ -1,0 +1,11 @@
+{
+ "what": "Prompt change -> sprite redrawn, timed in Chrome with an in-page canvas poller (100 ms) on the Prompt tab display; seed and guidance unchanged. 'first change' = first edit after opening the sheet.",
+ "conditions": "2026-11-22 evening, MacBook M4 16 GB; bank generation paused (SIGSTOP), GPU queue generating teacher samples; CPU ~80% idle at start",
+ "v4s_mmult_probe": {"build": "artifacts/model/v4s_a_sheet_mm (D-59)", "formulas": 26473,
+                     "first_change_s": {"a frog": 37.5}, "warm_change_s": {"a fox": 5.6, "a golden crown": 5.7, "a treasure chest": 7.8}},
+ "v3_demo_sheet": {"build": "v3p_a + v3p_u48 per-cell (deployed)", "formulas": 493532,
+                   "first_change_s": {"a frog": 378.2}, "warm_change_s": "NOT RUN: Chrome lost its connection ('Trying to connect...') during the 'a fox' trial; the edit never registered",
+                   "restored_prompt": "sword (via API; read back)"},
+ "api_a4_same_method": {"v4s_percell_probe_first_consistent_s": "103-143 (parity_sheets_probe_percell.json)",
+                        "v4s_mmult_probe_first_consistent_s": "33.1-51.2, median 39.2 (parity_sheets_probe.json, 8/8 pixel-exact)"}
+}

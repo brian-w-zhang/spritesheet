@@ -8,60 +8,60 @@
    "prompt": "a red potion",
    "seed": 1,
    "match": true,
-   "first_consistent_s": 143.2,
-   "stable_s": 162.5
+   "first_consistent_s": 51.2,
+   "stable_s": 53.1
   },
   {
    "prompt": "a frog",
    "seed": 3,
    "match": true,
-   "first_consistent_s": 107.9,
-   "stable_s": 125.9
+   "first_consistent_s": 38.5,
+   "stable_s": 41.0
   },
   {
    "prompt": "a fox",
    "seed": 2,
    "match": true,
-   "first_consistent_s": 108.7,
-   "stable_s": 131.2
+   "first_consistent_s": 40.1,
+   "stable_s": 42.0
   },
   {
    "prompt": "a mushroom",
    "seed": 1,
    "match": true,
-   "first_consistent_s": 102.6,
-   "stable_s": 123.3
+   "first_consistent_s": 39.0,
+   "stable_s": 40.8
   },
   {
    "prompt": "a golden crown",
    "seed": 4,
    "match": true,
-   "first_consistent_s": 126.4,
-   "stable_s": 144.5
+   "first_consistent_s": 33.1,
+   "stable_s": 34.9
   },
   {
    "prompt": "an owl",
    "seed": 6,
    "match": true,
-   "first_consistent_s": 106.7,
-   "stable_s": 125.6
+   "first_consistent_s": 39.3,
+   "stable_s": 41.1
   },
   {
    "prompt": "a treasure chest",
    "seed": 1,
    "match": true,
-   "first_consistent_s": 130.0,
-   "stable_s": 166.9
+   "first_consistent_s": 36.3,
+   "stable_s": 38.7
   },
   {
    "prompt": "a blue slime",
    "seed": 5,
    "match": true,
-   "first_consistent_s": 110.1,
-   "stable_s": 128.8
+   "first_consistent_s": 42.4,
+   "stable_s": 44.2
   }
  ],
  "all_match": true,
  "n": 8,
- "time": "2026-11-21 11:09"
+ "time": "2026-11-22 17:30"
 }
